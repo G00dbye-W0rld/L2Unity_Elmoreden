@@ -1,0 +1,568 @@
+* {
+    cursor: resource('Data/UI/Assets/Cursor/Default');
+    -unity-font-definition: resource('Data/UI/Assets/Font/tahoma');
+    text-shadow: 0.5px 0.5px 3px rgb(0, 0, 0);
+    --unity-cursor-color: white;
+}
+
+.transparent-cursor {
+    --unity-cursor-color: rgba(0, 0, 0, 0);
+}
+
+.unity-text-element__selectable {
+    cursor: resource('Data/UI/Assets/Cursor/Default');
+}
+
+.unity-button {
+    background-color: transparent;
+}
+
+.unity-button:active:enabled {
+    background-color: transparent;
+}
+
+.unity-button:hover:enabled {
+    background-color: transparent;
+}
+
+.unity-button:hover:active:enabled {
+    background-color: transparent;
+}
+
+.unity-base-field:focus:enabled > .unity-base-field__label {
+    color: rgb(220, 220, 220);
+}
+
+.unity-base-slider__tracker:hover:enabled {
+    background-color: transparent;
+}
+
+.resize-hor {
+    cursor: resource('Data/UI/Assets/Cursor/Resize_Hor') 15 5;
+}
+
+.resize-vert {
+    cursor: resource('Data/UI/Assets/Cursor/Resize_Vert');
+}
+
+.resize-diag {
+    cursor: resource('Data/UI/Assets/Cursor/Resize_Diag') 12 12;
+}
+
+.ui-bg {
+    background-color: rgba(19, 19, 19, 0.83);
+}
+
+.ui-border {
+    border-width: 1px;
+    border-color: rgb(66, 59, 41);
+}
+
+.empty-drop-img {
+    height: 34px;
+    width: 34px;
+}
+
+.image-opacity {
+    position: absolute;
+}
+
+.hor-position {
+    rotate: 180deg;
+}
+
+.close-btn {
+    background-color: transparent;
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    width: 10px;
+    height: 10px;
+    border-width: 0;
+    background-image: resource('Data/UI/Assets/Frame/Frame_DF_Btn_Close/frames_df_btn_close');
+    margin: 0;
+    padding: 0;
+}
+
+.close-btn:active {
+    background-image: resource('Data/UI/Assets/Frame/Frame_DF_Btn_Close/frames_df_btn_close_Down');
+}
+
+.close-btn:active:hover {
+    background-image: resource('Data/UI/Assets/Frame/Frame_DF_Btn_Close/frames_df_btn_close_Down');
+}
+
+.close-btn:hover {
+    background-image: resource('Data/UI/Assets/Frame/Frame_DF_Btn_Close/frames_df_btn_close_Over');
+}
+
+.l2-button {
+    flex-grow: 0;
+    width: 92px;
+    height: 22px;
+    background-image: none;
+    -unity-slice-right: 15;
+    -unity-slice-left: 15;
+    -unity-slice-top: 15;
+    -unity-slice-bottom: 15;
+    -unity-slice-scale: 1px;
+    font-size: 12px;
+    background-color: transparent;
+}
+
+.l2-button:active .l2-button-bg {
+    background-image: resource('Data/UI/Assets/Button/Button_DF_Down');
+}
+
+.l2-button:active:hover .l2-button-bg {
+    background-image: resource('Data/UI/Assets/Button/Button_DF_Down');
+}
+
+.l2-button:hover .l2-button-bg {
+    background-image: resource('Data/UI/Assets/Button/Button_DF_Over');
+}
+
+.l2-button-bg {
+    flex-grow: 1;
+    background-image: resource('Data/UI/Assets/Button/Button_DF');
+    height: 22px;
+    min-height: 32px;
+    position: absolute;
+    -unity-slice-left: 15;
+    -unity-slice-top: 15;
+    -unity-slice-right: 15;
+    -unity-slice-bottom: 15;
+    width: 100%;
+}
+
+.l2-button-ele {
+    margin-top: auto;
+    margin-right: 5px;
+    margin-bottom: auto;
+    margin-left: auto;
+    padding-top: 10px;
+    padding-right: 5px;
+    padding-bottom: 5px;
+    padding-left: 0;
+    background-image: none;
+    -unity-slice-left: 0;
+    -unity-slice-right: 0;
+    -unity-slice-scale: 0;
+    -unity-background-scale-mode: scale-to-fit;
+    -unity-slice-top: 0;
+    -unity-slice-bottom: 0;
+    background-color: rgba(127, 127, 127, 0);
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    width: 100%;
+    height: 100%;
+    -unity-font: resource('Data/UI/Assets/Font/tahoma');
+    color: rgb(255, 255, 255);
+}
+
+.l2-button-ele {
+    padding-right: 0;
+    margin-right: 0;
+}
+
+.l2-button-bg {
+    width: 105%;
+}
+
+.l2-button-bg {
+    left: -2px;
+    top: -3px;
+    right: 0;
+    bottom: 0;
+    width: 108%;
+}
+
+.l2-button {
+    -unity-font-definition: resource('Data/UI/Assets/Font/tahoma Light');
+    letter-spacing: 2px;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    overflow: visible;
+    background-color: rgba(188, 188, 188, 0);
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+}
+
+.button-label {
+    -unity-font: resource('Data/UI/Assets/Font/tahoma');
+    -unity-font-definition: resource('Data/UI/Assets/Font/tahoma Light');
+}
+
+.button-label {
+    color: rgba(255, 249, 227, 0.96);
+    -unity-text-align: middle-center;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+}
+
+.login-input-bg {
+    flex-grow: 1;
+    position: absolute;
+    width: 100%;
+    height: 30px;
+    background-image: resource('Data/UI/Assets/Login/CharacterPassword_DF_EditBox');
+    flex-direction: column;
+}
+
+.login-input {
+    -unity-font: resource('Data/UI/Assets/Font/tahoma');
+    background-color: rgba(0, 0, 0, 0);
+    -unity-background-image-tint-color: rgb(12, 12, 12);
+    background-image: none;
+    -unity-font-definition: initial;
+    font-size: 12px;
+    margin-left: 6px;
+    letter-spacing: 0;
+    -unity-text-align: lower-left;
+    padding-top: 0;
+    margin-bottom: 2px;
+    margin-top: 2px;
+    overflow: hidden;
+}
+
+.login-input-container {
+    flex-grow: 1;
+    height: 18px;
+}
+
+.rotate_img90 {
+    rotate: -90deg;
+}
+
+.rotate_imgPlus90 {
+    rotate: 90deg;
+}
+
+.rotate_img180 {
+    rotate: 180deg;
+}
+
+.minimize-btn {
+    background-color: transparent;
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    width: 10px;
+    height: 10px;
+    border-width: 0;
+    background-image: resource('Data/UI/Assets/Frame/frames_df_btn_min');
+    margin: 0;
+    padding: 0;
+}
+
+.minimize-btn:active {
+    background-image: resource('Data/UI/Assets/Frame/frames_df_btn_min_down');
+}
+
+.minimize-btn:active:hover {
+    background-image: resource('Data/UI/Assets/Frame/frames_df_btn_min_down');
+}
+
+.minimize-btn:hover {
+    background-image: resource('Data/UI/Assets/Frame/frames_df_btn_min_Over');
+}
+
+.expand-btn {
+    background-color: transparent;
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    width: 10px;
+    height: 10px;
+    border-width: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.expand-btn #ButtonBg {
+    background-image: resource('Data/UI/Assets/Frame/frames_df_btn_Expand');
+}
+
+.expand-btn:active #ButtonBg {
+    background-image: resource('Data/UI/Assets/Frame/frames_df_btn_Expand_down');
+}
+
+.expand-btn:active:hover #ButtonBg {
+    background-image: resource('Data/UI/Assets/Frame/frames_df_btn_Expand_down');
+}
+
+.expand-btn:hover #ButtonBg {
+    background-image: resource('Data/UI/Assets/Frame/frames_df_btn_Expand_over');
+}
+
+.expand-btn.expanded #ButtonBg {
+    background-image: resource('Data/UI/Assets/Frame/frames_df_btn_Minimize');
+}
+
+.expand-btn.expanded:active #ButtonBg {
+    background-image: resource('Data/UI/Assets/Frame/frames_df_btn_Minimize_down');
+}
+
+.expand-btn.expanded:active:hover #ButtonBg {
+    background-image: resource('Data/UI/Assets/Frame/frames_df_btn_Minimize_down');
+}
+
+.expand-btn.expanded:hover #ButtonBg {
+    background-image: resource('Data/UI/Assets/Frame/frames_df_btn_Minimize_over');
+}
+
+.frame_df_ver {
+    height: auto;
+    width: 18px;
+    max-width: 18px;
+    margin-top: -1px;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    flex-grow: 1;
+}
+
+.button-expand {
+    position: absolute;
+    left: 4px;
+    top: 8px;
+}
+
+.button-minimize {
+    position: absolute;
+    left: 4px;
+    top: 8px;
+    display: none;
+}
+
+.frame_df_ver-vertical {
+    margin-top: 0;
+    height: 49px;
+    rotate: 90deg;
+    transform-origin: left top;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    scale: 1 -1;
+    max-height: 49px;
+    min-height: 49px;
+    right: 1px;
+}
+
+.button-expand-vertical {
+    -unity-slice-scale: -1px;
+    -unity-slice-right: 1;
+    -unity-slice-bottom: 1;
+    left: 6px;
+    top: 4px;
+    rotate: -90deg;
+}
+
+.button-minimize-vertical {
+    left: 3px;
+    -unity-slice-right: 1;
+    -unity-slice-bottom: 1;
+    -unity-slice-scale: -1px;
+    display: none;
+}
+
+.button-minimize-vertical {
+    display: flex;
+    left: 6px;
+    top: 4px;
+    rotate: -90deg;
+}
+
+.button-minimize-vertical {
+    display: none;
+}
+
+.window-template-header {
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    flex-shrink: 1;
+    height: 38px;
+    min-height: 38px;
+    max-height: 38px;
+    flex-direction: row;
+}
+
+.window-template {
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    flex-grow: 1;
+}
+
+.frame_df_hor_large_left {
+    flex-grow: 0;
+    background-image: resource('Data/UI/Assets/Frame/Frame_DF_Hor_Large/Frame_DF_Hor_Large_Left');
+    width: 32px;
+    min-width: 32px;
+    max-width: 32px;
+    height: 64px;
+    min-height: 64px;
+    max-height: 64px;
+    flex-shrink: 0;
+}
+
+.frame_df_hor_large_tile {
+    flex-grow: 1;
+    height: 64px;
+    min-height: 64px;
+    max-height: 64px;
+    background-image: resource('Data/UI/Assets/Frame/Frame_DF_Hor_Large/Frame_DF_Hor_Large_Tile');
+}
+
+.frame_df_hor_large_center {
+    flex-grow: 0;
+    background-image: resource('Data/UI/Assets/Frame/Frame_DF_Hor_Large/Frame_DF_Hor_Large_Center');
+    width: 128px;
+    height: 64px;
+    min-height: 64px;
+    max-height: 64px;
+    flex-shrink: 1;
+}
+
+.frame_df_hor_large_right {
+    flex-grow: 0;
+    background-image: resource('Data/UI/Assets/Frame/Frame_DF_Hor_Large/Frame_DF_Hor_Large_Right');
+    width: 32px;
+    min-width: 32px;
+    max-width: 32px;
+    height: 64px;
+    min-height: 64px;
+    max-height: 64px;
+    flex-shrink: 0;
+}
+
+.window-template-drag-area {
+    flex-grow: 1;
+    position: absolute;
+    width: 100%;
+    height: 37px;
+    margin-top: 2px;
+}
+
+.windows-name-label {
+    margin-top: -2px;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    top: 19px;
+    background-color: rgba(255, 255, 255, 0);
+    color: rgb(255, 255, 255);
+    opacity: 0.55;
+    left: 3px;
+    font-size: 12px;
+    -unity-text-align: upper-center;
+    -unity-font: resource('Data/UI/Assets/Font/tahoma');
+    -unity-text-outline-width: 0;
+}
+
+.windows-header-buttons {
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    align-self: flex-end;
+    min-width: auto;
+    flex-direction: row;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    position: absolute;
+    align-items: stretch;
+    right: 14px;
+    top: 16px;
+}
+
+.close-btn {
+    width: 16px;
+    height: 16px;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    top: 0;
+    background-color: rgba(188, 188, 188, 0);
+    border-left-color: rgba(149, 149, 149, 0);
+    border-right-color: rgba(149, 149, 149, 0);
+    border-top-color: rgba(149, 149, 149, 0);
+    border-bottom-color: rgba(149, 149, 149, 0);
+}
+
+.windows-template-content {
+    flex-grow: 1;
+    background-image: resource('Data/UI/Assets/Windows/Windows_DF_Large_Bg_Darker');
+    -unity-slice-left: 16;
+    -unity-slice-top: 16;
+    -unity-slice-right: 16;
+    -unity-slice-bottom: 30;
+}
+
+.frame_df_hor_large_tile {
+    background-image: none;
+}
+
+.frame_df_hor_large_tile_bg {
+    flex-grow: 1;
+    width: 108%;
+    margin-left: -4%;
+    background-image: resource('Data/UI/Assets/Frame/Frame_DF_Hor_Large/Frame_DF_Hor_Large_Tile');
+}
+
+.l2-color-1 {
+    color: rgb(175, 152, 120);
+}
+
+.l2-color-2 {
+    color: rgb(176, 155, 121);
+}
+
+.l2-color-3 {
+    color: rgb(170, 170, 170);
+}
+
+.l2-color-4 {
+    color: rgb(220, 220, 220);
+}
+
+.l2-color-5 {
+    color: rgb(255, 224, 80);
+}
+
+.l2-color-6 {
+    color: rgb(180, 190, 210);
+}
+
+.window-content-margin {
+    margin: 46px 15px 0 14px;
+}
+
+.hidden {
+    display: none;
+}
