@@ -44,6 +44,15 @@ public class GameServerPacketHandler : ServerPacketHandler
             case GameServerPacketType.NpcInfo:
                 OnNpcInfoReceive(data);
                 break;
+            case GameServerPacketType.SpawnItem:
+                OnSpawnItemReceive(data);
+                break;
+            case GameServerPacketType.DropItem:
+                OnDropItemReceive(data);
+                break;
+            case GameServerPacketType.GetItem:
+                OnGetItemReceive(data);
+                break;
             case GameServerPacketType.ObjectMoveTo:
                 OnObjectMoveTo(data);
                 break;
@@ -473,6 +482,24 @@ public class GameServerPacketHandler : ServerPacketHandler
     {
         NpcInfoPacket packet = new NpcInfoPacket(data);
         _eventProcessor.QueueEvent(() => WorldSpawner.Instance.OnReceiveNpcInfo(packet.Identity, packet.Status, packet.Stats, packet.Appearance, packet.EntityActionInfo));
+    }
+
+    private void OnSpawnItemReceive(byte[] data)
+    {
+        SpawnItemPacket packet = new SpawnItemPacket(data);
+        _eventProcessor.QueueEvent(() => WorldSpawner.Instance.OnReceiveSpawnItem(packet.ObjectId, packet.ItemTemplateId, packet.Position, packet.IsStackable, packet.Count));
+    }
+
+    private void OnDropItemReceive(byte[] data)
+    {
+        DropItemPacket packet = new DropItemPacket(data);
+        _eventProcessor.QueueEvent(() => WorldSpawner.Instance.OnReceiveDropItem(packet.ItemObjectId, packet.ItemTemplateId, packet.Position, packet.IsStackable, packet.Count));
+    }
+
+    private void OnGetItemReceive(byte[] data)
+    {
+        GetItemPacket packet = new GetItemPacket(data);
+        _eventProcessor.QueueEvent(() => WorldSpawner.Instance.OnReceiveGetItem(packet.PickerObjectId, packet.ItemObjectId));
     }
 
     private void OnObjectMoveTo(byte[] data)

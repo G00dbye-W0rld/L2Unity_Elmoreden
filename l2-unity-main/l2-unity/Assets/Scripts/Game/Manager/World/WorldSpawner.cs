@@ -11,6 +11,10 @@ public class WorldSpawner : MonoBehaviour
     [SerializeField] private GameObject _monstersContainer;
     [SerializeField] private GameObject _npcsContainer;
     [SerializeField] private GameObject _usersContainer;
+    [SerializeField] private GameObject _itemsContainer;
+
+    [Tooltip("Echelle appliquee aux vrais meshes 'dropitems' importes (pas au placeholder). 1 = taille brute de l'import FBX. Reglable ici sans avoir a regenerer les prefabs.")]
+    [SerializeField] private float _itemWorldScale = 1.75f;
 
     private EventProcessor _eventProcessor;
 
@@ -22,6 +26,7 @@ public class WorldSpawner : MonoBehaviour
     private NpcSpawner _npcSpawner;
     private PlayerSpawner _playerSpawner;
     private UserSpawner _userSpawner;
+    private ItemSpawner _itemSpawner;
 
     private static WorldSpawner _instance;
     public static WorldSpawner Instance { get { return _instance; } }
@@ -42,9 +47,19 @@ public class WorldSpawner : MonoBehaviour
         _monstersContainer = GameObject.Find("Monsters");
         _usersContainer = GameObject.Find("Users");
 
+        // Pas de conteneur "Items" pre-existant attendu dans la scene (contrairement
+        // a Npcs/Monsters/Users) : on le cree a la volee pour eviter toute
+        // manipulation manuelle de scene.
+        _itemsContainer = GameObject.Find("Items");
+        if (_itemsContainer == null)
+        {
+            _itemsContainer = new GameObject("Items");
+        }
+
         _playerSpawner = new PlayerSpawner(_eventProcessor);
         _npcSpawner = new NpcSpawner(_eventProcessor, _npcsContainer.transform, _monstersContainer.transform);
         _userSpawner = new UserSpawner(_eventProcessor, _usersContainer.transform);
+        _itemSpawner = new ItemSpawner(_itemsContainer.transform, _itemWorldScale);
     }
 
     void OnDestroy()
@@ -106,6 +121,12 @@ public class WorldSpawner : MonoBehaviour
 
     public Task RemoveObject(int id)
     {
+        if (_itemSpawner.HasItem(id))
+        {
+            _itemSpawner.RemoveItem(id);
+            return Task.CompletedTask;
+        }
+
         if (IsEntityPresent(id, true))
         {
             return ExecuteWithEntityAsync(id, e =>
@@ -266,5 +287,25 @@ public class WorldSpawner : MonoBehaviour
     public void OnReceiveUserInfo(NetworkIdentity identity, PlayerStatus status, Stats stats, PlayerAppearance appearance, EntityActionInfo actionInfo)
     {
         _userSpawner.OnReceiveEntityInfo(identity, status, stats, appearance, actionInfo);
+    }
+
+    public void OnReceiveSpawnItem(int objectId, int itemTemplateId, Vector3 position, bool isStackable, int count)
+    {
+        _itemSpawner.OnReceiveSpawnItem(objectId, itemTemplateId, position, isStackable, count);
+    }
+
+    public void OnReceiveDropItem(int itemObjectId, int itemTemplateId, Vector3 position, bool isStackable, int count)
+    {
+        _itemSpawner.OnReceiveDropItem(itemObjectId, itemTemplateId, position, isStackable, count);
+    }
+
+    public void OnReceiveGetItem(int pickerObjectId, int itemObjectId)
+    {
+        _itemSpawner.OnReceiveGetItem(pickerObjectId, itemObjectId);
+    }
+
+    public WorldItem GetNearestItem(Vector3 position, float maxRadius)
+    {
+        return _itemSpawner.GetNearestItem(position, maxRadius);
     }
 }

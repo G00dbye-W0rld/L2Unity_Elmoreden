@@ -466,6 +466,18 @@ public class NewHumanoidAnimationController : NewBaseAnimationController
         }
     }
 
+    public override void PickupItem()
+    {
+        _lastAnimationType = HumanoidWeaponAnimType.other;
+        if (PlayAnimation((int)HumanoidAnimationDefaultEvent.pickup))
+        {
+            if (!_animancerState.HasEvents)
+            {
+                _animancerState.Events.OnEnd = Wait;
+            }
+        }
+    }
+
     public override bool PlaySkillCastAnimation()
     {
         if (base.PlaySkillCastAnimation())

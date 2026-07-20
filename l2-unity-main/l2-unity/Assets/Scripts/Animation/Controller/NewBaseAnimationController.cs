@@ -127,6 +127,10 @@ public abstract class NewBaseAnimationController : MonoBehaviour
 
     public abstract void Jump();
 
+    // No-op par defaut (les monstres ne ramassent pas d'objets) - seul
+    // NewHumanoidAnimationController fournit une vraie implementation.
+    public virtual void PickupItem() { }
+
     public virtual bool AtkWait()
     {
         if (_entityReferenceHolder.Combat == null)

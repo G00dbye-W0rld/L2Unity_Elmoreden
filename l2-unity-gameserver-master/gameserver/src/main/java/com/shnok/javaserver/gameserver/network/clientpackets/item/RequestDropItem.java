@@ -2,7 +2,6 @@ package com.shnok.javaserver.gameserver.network.clientpackets.item;
 
 import com.shnok.javaserver.Config;
 import com.shnok.javaserver.gameserver.enums.FloodProtector;
-import com.shnok.javaserver.gameserver.model.actor.Npc;
 import com.shnok.javaserver.gameserver.model.actor.Player;
 import com.shnok.javaserver.gameserver.model.item.instance.ItemInstance;
 import com.shnok.javaserver.gameserver.model.item.kind.Item;
@@ -11,6 +10,14 @@ import com.shnok.javaserver.gameserver.network.clientpackets.L2GameClientPacket;
 
 public final class RequestDropItem extends L2GameClientPacket
 {
+	// Rayon autorise pour choisir ou lacher l'objet (le client laisse le
+	// joueur viser a la souris autour de lui). Verifie en 2D (horizontal)
+	// uniquement : sur cette carte, la hauteur (Z) geodata peut differer de
+	// ~0.5m de la position reelle du joueur/terrain cote client, ce qui
+	// grignotait deja presque tout le budget d'un check 3D pour le
+	// ramassage (cf. PlayableAI.thinkPickUp) - meme correctif applique ici.
+	private static final int DROP_RADIUS = 130;
+
 	private int _objectId;
 	private int _count;
 	private int _x;
@@ -89,7 +96,7 @@ public final class RequestDropItem extends L2GameClientPacket
 			return;
 		}
 		
-		if (!player.isIn3DRadius(_x, _y, _z, Npc.INTERACTION_DISTANCE))
+		if (!player.isIn2DRadius(_x, _y, DROP_RADIUS))
 		{
 			player.sendPacket(SystemMessageId.CANNOT_DISCARD_DISTANCE_TOO_FAR);
 			return;

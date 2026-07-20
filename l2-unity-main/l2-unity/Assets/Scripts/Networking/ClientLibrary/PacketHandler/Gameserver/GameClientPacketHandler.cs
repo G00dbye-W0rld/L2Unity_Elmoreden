@@ -154,9 +154,9 @@ public class GameClientPacketHandler : ClientPacketHandler
         SendPacket(packet);
     }
 
-    public void DropItem(int objectId, int quantity)
+    public void DropItem(int objectId, int quantity, Vector3 position)
     {
-        RequestDropItemPacket packet = new RequestDropItemPacket(objectId, quantity);
+        RequestDropItemPacket packet = new RequestDropItemPacket(objectId, quantity, position);
         SendPacket(packet);
     }
 

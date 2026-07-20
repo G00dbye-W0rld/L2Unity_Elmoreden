@@ -17,6 +17,8 @@ public class ClickManager : MonoBehaviour
     [SerializeField] private LayerMask _clickThroughMask;
     private Camera _mainCamera;
 
+    private WorldItem _highlightedItem;
+
     private static ClickManager _instance;
     public static ClickManager Instance { get { return _instance; } }
 
@@ -80,7 +82,15 @@ public class ClickManager : MonoBehaviour
             {
                 _targetObjectData = _hoverObjectData;
 
-                if (_entityMask == (_entityMask | (1 << hitLayer)) && _targetObjectData.ObjectTag != "Player")
+                // Le tag "Pickup" doit primer sur le test de layer d'entite,
+                // sinon un objet au sol dont le collider tombe sur un layer
+                // inclus dans _entityMask est route vers OnClickOnEntity()
+                // (-> tentative d'attaque cote serveur) au lieu du ramassage.
+                if (_targetObjectData.ObjectTag == "Pickup")
+                {
+                    OnClickOnPickupItem();
+                }
+                else if (_entityMask == (_entityMask | (1 << hitLayer)) && _targetObjectData.ObjectTag != "Player")
                 {
                     OnClickOnEntity();
                 }
@@ -93,9 +103,12 @@ public class ClickManager : MonoBehaviour
             if (_hoverObjectData.ObjectTransform != null && _hoverObjectData.ObjectTag == "Pickup")
             {
                 CursorManager.Instance.ChangeCursor(CursorManager.CursorType.Pickup);
+                UpdateItemHighlight(_hoverObjectData.ObjectTransform.GetComponent<WorldItem>());
             }
             else if (_hoverObjectData.ObjectTransform != null && _targetObjectData.ObjectTransform != null && _targetObjectData.ObjectTransform == _hoverObjectData.ObjectTransform)
             {
+                UpdateItemHighlight(null);
+
                 if (_hoverObjectData.ObjectTag == "Monster" && !_hoverObjectData.Entity.Status.IsDead)
                 {
                     CursorManager.Instance.ChangeCursor(CursorManager.CursorType.Attack);
@@ -111,11 +124,13 @@ public class ClickManager : MonoBehaviour
             }
             else
             {
+                UpdateItemHighlight(null);
                 CursorManager.Instance.ChangeCursor(CursorManager.CursorType.Default);
             }
         }
         else
         {
+            UpdateItemHighlight(null);
             CursorManager.Instance.ChangeCursor(CursorManager.CursorType.Default);
         }
 
@@ -123,6 +138,23 @@ public class ClickManager : MonoBehaviour
         {
             HideLocator(false);
         }
+    }
+
+    // Utilise pour le drop d'item au sol : ou pointe la souris actuellement,
+    // en reutilisant le meme raycast que le clic-pour-se-deplacer (ignore le
+    // meme masque "click through"). Pas de hit -> false, l'appelant retombe
+    // sur la position du joueur.
+    public bool TryGetMouseWorldPosition(out Vector3 worldPosition)
+    {
+        Ray ray = _mainCamera.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out RaycastHit hit, 1000f, ~_clickThroughMask))
+        {
+            worldPosition = hit.point;
+            return true;
+        }
+
+        worldPosition = Vector3.zero;
+        return false;
     }
 
     public void OnClickToMove(RaycastHit hit)
@@ -165,6 +197,56 @@ public class ClickManager : MonoBehaviour
         {
             TargetManager.Instance.SetTarget(_targetObjectData);
         }
+    }
+
+    private void UpdateItemHighlight(WorldItem item)
+    {
+        if (_highlightedItem != item)
+        {
+            if (_highlightedItem != null)
+            {
+                _highlightedItem.SetHighlighted(false);
+            }
+
+            _highlightedItem = item;
+
+            if (_highlightedItem != null)
+            {
+                _highlightedItem.SetHighlighted(true);
+            }
+        }
+
+        // Repositionne chaque frame (pas seulement au changement de cible) :
+        // l'objet survole peut bouger legerement (rebond), la tooltip doit
+        // suivre.
+        if (_highlightedItem != null)
+        {
+            WorldItemTooltip.Instance.Show(_highlightedItem, _mainCamera);
+        }
+        else
+        {
+            WorldItemTooltip.Instance.Hide();
+        }
+    }
+
+    // Suit exactement le meme flux que OnClickOnEntity()/InteractIntention
+    // pour les NPC : on passe par le PlayerStateMachine (PickupIntention)
+    // plutot que de gerer le deplacement nous-memes, pour que l'animation de
+    // marche/course se joue normalement (elle est pilotee par MovingState,
+    // pas par un simple appel a PathFinderController).
+    public void OnClickOnPickupItem()
+    {
+        WorldItem worldItem = _targetObjectData.ObjectTransform != null
+            ? _targetObjectData.ObjectTransform.GetComponent<WorldItem>()
+            : null;
+
+        if (worldItem == null)
+        {
+            return;
+        }
+
+        PickupIntention.Target = worldItem;
+        PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_PICKUP);
     }
 
     private IEnumerator PlaceLocator(Vector3 position, Vector3 normal)

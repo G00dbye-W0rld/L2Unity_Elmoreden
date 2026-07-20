@@ -89,6 +89,10 @@ public class MovingState : StateBase
                 {
                     _stateMachine.ChangeIntention(Intention.INTENTION_SKILL);
                 }
+                else if (_moveReason == MoveReason.PICKUP)
+                {
+                    _stateMachine.ChangeIntention(Intention.INTENTION_PICKUP);
+                }
                 else
                 {
                     _stateMachine.ChangeIntention(Intention.INTENTION_IDLE);

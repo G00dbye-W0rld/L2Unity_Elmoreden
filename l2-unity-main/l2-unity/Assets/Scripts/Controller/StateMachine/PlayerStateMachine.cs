@@ -134,6 +134,7 @@ public class PlayerStateMachine : MonoBehaviour
             Intention.INTENTION_MOVE_TO => new MoveToIntention(this),
             Intention.INTENTION_ATTACK => new AttackIntention(this),
             Intention.INTENTION_INTERACT => new InteractIntention(this),
+            Intention.INTENTION_PICKUP => new PickupIntention(this),
             Intention.INTENTION_FOLLOW => new FollowIntention(this),
             Intention.INTENTION_SIT => new SitIntention(this),
             Intention.INTENTION_STAND => new StandIntention(this),

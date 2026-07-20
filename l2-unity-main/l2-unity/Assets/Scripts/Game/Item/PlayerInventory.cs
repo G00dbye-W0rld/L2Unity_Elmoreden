@@ -178,6 +178,16 @@ public class PlayerInventory : MonoBehaviour
         GameClient.Instance.ClientPacketHandler.DestroyItem(objectId, quantity);
     }
 
+    public void DropItem(int objectId, int quantity)
+    {
+        DropItem(objectId, quantity, PlayerEntity.Instance.transform.position);
+    }
+
+    public void DropItem(int objectId, int quantity, Vector3 position)
+    {
+        GameClient.Instance.ClientPacketHandler.DropItem(objectId, quantity, position);
+    }
+
     public void SetInventorySize(int inventorySpace)
     {
         InventorySize = inventorySpace;

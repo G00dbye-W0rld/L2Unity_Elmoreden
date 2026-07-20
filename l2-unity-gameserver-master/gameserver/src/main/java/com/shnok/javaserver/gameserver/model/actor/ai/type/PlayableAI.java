@@ -1,5 +1,6 @@
 package com.shnok.javaserver.gameserver.model.actor.ai.type;
 
+import com.shnok.javaserver.commons.logging.CLogger;
 import com.shnok.javaserver.gameserver.data.SkillTable;
 import com.shnok.javaserver.gameserver.enums.AiEventType;
 import com.shnok.javaserver.gameserver.enums.IntentionType;
@@ -21,6 +22,8 @@ import com.shnok.javaserver.gameserver.skills.L2Skill;
 
 public abstract class PlayableAI<T extends Playable> extends CreatureAI<T>
 {
+	private static final CLogger LOGGER = new CLogger(PlayableAI.class.getName());
+
 	protected Intention _previousIntention = new Intention();
 	
 	protected PlayableAI(T actor)
@@ -200,37 +203,66 @@ public abstract class PlayableAI<T extends Playable> extends CreatureAI<T>
 	protected ItemInstance thinkPickUp()
 	{
 		clientActionFailed();
-		
+
+		LOGGER.info("[thinkPickUp] DEBUG start, itemObjectId=" + _currentIntention.getItemObjectId());
+
 		if (_actor.denyAiAction() || _actor.isSitting())
 		{
+			LOGGER.info("[thinkPickUp] DEBUG rejected: denyAiAction=" + _actor.denyAiAction() + " isSitting=" + _actor.isSitting());
 			doIdleIntention();
 			return null;
 		}
-		
+
 		final WorldObject target = World.getInstance().getObject(_currentIntention.getItemObjectId());
-		if (!(target instanceof ItemInstance item) || isTargetLost(target))
+		if (target == null)
 		{
+			LOGGER.info("[thinkPickUp] DEBUG rejected: target not found in World for itemObjectId=" + _currentIntention.getItemObjectId());
 			doIdleIntention();
 			return null;
 		}
-		
+		if (!(target instanceof ItemInstance item))
+		{
+			LOGGER.info("[thinkPickUp] DEBUG rejected: target is not an ItemInstance, class=" + target.getClass().getSimpleName());
+			doIdleIntention();
+			return null;
+		}
+		if (isTargetLost(target))
+		{
+			LOGGER.info("[thinkPickUp] DEBUG rejected: isTargetLost=true (knows=" + _actor.knows(target) + ", worldLookup=" + (World.getInstance().getObject(target.getObjectId()) != null) + ")");
+			doIdleIntention();
+			return null;
+		}
+
 		if (item.getLocation() != ItemLocation.VOID)
 		{
+			LOGGER.info("[thinkPickUp] DEBUG rejected: item.getLocation()=" + item.getLocation() + " (expected VOID)");
 			doIdleIntention();
 			return null;
 		}
-		
+
 		final boolean isShiftPressed = _currentIntention.isShiftPressed();
-		if (_actor.getMove().maybeMoveToLocation(target.getPosition(), 36, false, isShiftPressed))
+		LOGGER.info("[thinkPickUp] DEBUG actorPos=" + _actor.getPosition() + " itemPos=" + target.getPosition());
+
+		// Ground items are picked up on a flat plane: gate on horizontal (2D)
+		// distance only. maybeMoveToLocation()'s "position reached?" check is
+		// full 3D (isIn3DRadius), and on this map the geodata height under a
+		// dropped item can sit ~0.5m away from the player's own tracked Z even
+		// when standing right on top of it, which ate almost the entire 36-unit
+		// budget and made pickup succeed only by horizontal-jitter luck. If
+		// we're already close enough horizontally there's nothing to walk
+		// towards, so skip the 3D-gated move check entirely.
+		if (!_actor.isIn2DRadius(target, 36) && _actor.getMove().maybeMoveToLocation(target.getPosition(), 36, false, isShiftPressed))
 		{
+			LOGGER.info("[thinkPickUp] DEBUG rejected: maybeMoveToLocation returned true (still moving toward item)");
 			if (isShiftPressed)
 				doIdleIntention();
-			
+
 			return null;
 		}
-		
+
+		LOGGER.info("[thinkPickUp] DEBUG SUCCESS - picking up item " + item.getObjectId());
 		doIdleIntention();
-		
+
 		return item;
 	}
 	
@@ -419,20 +451,26 @@ public abstract class PlayableAI<T extends Playable> extends CreatureAI<T>
 
 	public synchronized void tryToPickUp(int itemObjectId, boolean isShiftPressed)
 	{
+		LOGGER.info("[tryToPickUp] DEBUG start, itemObjectId=" + itemObjectId + " currentIntentionType=" + _currentIntention.getType());
+
 		if (_actor.denyAiAction())
 		{
+			LOGGER.info("[tryToPickUp] DEBUG rejected: denyAiAction=true");
 			clientActionFailed();
 			return;
 		}
-		
+
 		// These situations are waited out regardless. Any Intention that is added is scheduled as nextIntention.
 		if (_actor.getAttack().isAttackingNow() || _actor.getCast().isCastingNow() || _actor.isSittingNow() || _actor.isStandingNow() || canScheduleAfter(_currentIntention.getType(), IntentionType.PICK_UP))
 		{
+			LOGGER.info("[tryToPickUp] DEBUG queued as nextIntention instead of processed now: isAttackingNow=" + _actor.getAttack().isAttackingNow()
+				+ " isCastingNow=" + _actor.getCast().isCastingNow() + " isSittingNow=" + _actor.isSittingNow()
+				+ " isStandingNow=" + _actor.isStandingNow() + " canScheduleAfter=" + canScheduleAfter(_currentIntention.getType(), IntentionType.PICK_UP));
 			getNextIntention().updateAsPickUp(itemObjectId, isShiftPressed);
 			clientActionFailed();
 			return;
 		}
-		
+
 		doPickUpIntention(itemObjectId, isShiftPressed);
 	}
 	

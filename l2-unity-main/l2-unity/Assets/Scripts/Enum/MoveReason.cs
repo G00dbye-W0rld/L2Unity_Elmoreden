@@ -4,5 +4,6 @@ public enum MoveReason
     ATTACK,
     SKILL,
     INTERACT,
-    CLICK_TO_MOVE
+    CLICK_TO_MOVE,
+    PICKUP
 }

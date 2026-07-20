@@ -310,30 +310,64 @@ public class L2SlotManager : L2PopupWindow
         slot.UseItem();
     }
 
+    // Rayon max (unites Unity) autour du joueur pour un drop pointe a la
+    // souris. Doit rester coherent avec DROP_RADIUS cote serveur
+    // (RequestDropItem.java), qui valide desormais la distance en 2D
+    // (horizontale) plutot qu'en 3D complet - cf. le meme probleme de
+    // decalage de hauteur geodata/terrain deja rencontre et corrige pour le
+    // ramassage (PlayableAI.thinkPickUp).
+    private const float DropRadius = 130f / 52.5f;
+
+    // Position de drop : la ou pointe la souris au moment du lacher,
+    // ramenee dans un rayon autour du joueur si trop loin, avec la hauteur
+    // du terrain recalculee a cet endroit precis (pas celle du point de
+    // raycast avant clamp, qui peut etre a une hauteur differente).
+    private Vector3 ComputeDropPosition()
+    {
+        Vector3 playerPos = PlayerEntity.Instance.transform.position;
+
+        if (!ClickManager.Instance.TryGetMouseWorldPosition(out Vector3 mouseWorldPos))
+        {
+            return playerPos;
+        }
+
+        Vector3 offset = mouseWorldPos - playerPos;
+        offset.y = 0f;
+
+        if (offset.magnitude > DropRadius)
+        {
+            offset = offset.normalized * DropRadius;
+        }
+
+        Vector3 dropPos = playerPos + offset;
+        dropPos.y = World.Instance.GetGroundHeight(dropPos);
+        return dropPos;
+    }
+
     private void DropItem()
     {
-        Debug.LogWarning("TODO: Item drops. For now dropping an item destroys it.");
-
-        // Drop item logic
+        // Objet lache au sol (RequestDropItem, deja implemente cote serveur -
+        // le packet client manquait les champs x/y/z, corrige dans
+        // RequestDropItemPacket.cs).
         InventorySlot slot = (InventorySlot)_draggedSlot;
-        SMParam[] smParams = new SMParam[1];
-        smParams[0] = new SMParam(SMParam.SMParamType.TYPE_ITEM_NAME, slot.Id);
+        Vector3 dropPosition = ComputeDropPosition();
 
         if (slot.Count <= 1)
         {
-            SystemMessage systemMessage = new SystemMessage(smParams, SystemMessageTable.Instance.SystemMessages[400]);
-            L2ConfirmWindow.Instance.ShowWindow(systemMessage, () =>
-            {
-                PlayerInventory.Instance.DestroyItem(slot.ObjectId, 1);
-            }, () => { });
+            AudioManager.Instance.PlayEquipSound("itemequip_etc_money");
+            PlayerInventory.Instance.DropItem(slot.ObjectId, 1, dropPosition);
         }
         else
         {
+            SMParam[] smParams = new SMParam[1];
+            smParams[0] = new SMParam(SMParam.SMParamType.TYPE_ITEM_NAME, slot.Id);
+
             //Discard amount systemMessageId => 71
             SystemMessage systemMessage = new SystemMessage(smParams, SystemMessageTable.Instance.SystemMessages[71]);
             L2InputAmountWindow.Instance.ShowWindow(systemMessage, slot.Count, (amount) =>
             {
-                PlayerInventory.Instance.DestroyItem(slot.ObjectId, amount);
+                AudioManager.Instance.PlayEquipSound("itemequip_etc_money");
+                PlayerInventory.Instance.DropItem(slot.ObjectId, amount, dropPosition);
             }, () => { });
         }
 

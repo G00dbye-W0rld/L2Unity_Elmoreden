@@ -97,6 +97,10 @@ public class AudioManager : MonoBehaviour
         {
             PlaySound(er, position);
         }
+        else
+        {
+            Debug.LogWarning($"FMOD event not found: event:/{referenceName} (present in the FMOD Studio project but missing from the exported banks?).");
+        }
     }
 
     public void PlayMonsterSound(EntitySoundEvent monsterSoundEvent, string npcClassName, Vector3 position)

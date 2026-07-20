@@ -55,6 +55,20 @@ public class IdleState : StateBase
                 // Wait for server reply?
                 GameClient.Instance.ClientPacketHandler.SendRequestAction(TargetManager.Instance.Target.Identity.Id);
                 break;
+            case Event.READY_TO_PICKUP:
+                PathFinderController.Instance.ClearPath();
+                PlayerController.Instance.ResetDestination(false);
+                NetworkTransformShare.Instance.SharePosition();
+                NetworkCharacterControllerShare.Instance.ShareMoveDirection(Vector3.zero, 0.0f, Vector3.zero);
+
+                if (PickupIntention.Target != null)
+                {
+                    // DEBUG TEMPORAIRE
+                    Debug.Log($"[IdleState] READY_TO_PICKUP -> SendRequestAction({PickupIntention.Target.ObjectId}) playerPos={PlayerEntity.Instance.transform.position}");
+                    GameClient.Instance.ClientPacketHandler.SendRequestAction(PickupIntention.Target.ObjectId);
+                }
+                PickupIntention.Target = null;
+                break;
             case Event.READY_TO_ATTACK:
                 if (!_stateMachine.WaitingForServerReply)
                 {
