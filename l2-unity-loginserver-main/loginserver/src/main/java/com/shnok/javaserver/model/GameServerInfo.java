@@ -2,7 +2,6 @@ package com.shnok.javaserver.model;
 
 import com.shnok.javaserver.enums.ServerStatus;
 import com.shnok.javaserver.thread.GameServerThread;
-import com.shnok.javaserver.util.ServerNameDAO;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
@@ -19,6 +18,8 @@ public class GameServerInfo {
     private int id;
     private final byte[] hexId;
     private boolean isAuthed;
+    // display - DB-backed (gameservers.name), see GameServerController
+    private String name;
     // status
     private GameServerThread gameServerThread;
     private int status;
@@ -49,10 +50,6 @@ public class GameServerInfo {
      */
     public GameServerInfo(int id, byte[] hexId) {
         this(id, hexId, null);
-    }
-
-    public String getName() {
-        return ServerNameDAO.getServer(id);
     }
 
     public void setStatus(int value) {

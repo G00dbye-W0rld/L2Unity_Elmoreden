@@ -42,6 +42,7 @@ public class ServerListPacket extends SendablePacket {
             writeI(server.currentPlayers);
             writeI(server.maxPlayers);
             writeB((byte) server.status);
+            writeS(server.name);
         }
 
         if (charsOnServers != null) {
@@ -90,6 +91,7 @@ public class ServerListPacket extends SendablePacket {
         protected boolean clock;
         protected final int status;
         protected final int serverId;
+        protected final String name;
 
         ServerData(LoginClientThread client, GameServerInfo gsi) {
             try {
@@ -108,6 +110,7 @@ public class ServerListPacket extends SendablePacket {
             maxPlayers = gsi.getMaxPlayers();
             status = gsi.getStatus();
             serverId = gsi.getId();
+            name = gsi.getName();
         }
     }
 }

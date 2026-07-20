@@ -99,7 +99,7 @@ public class ServerSelectWindow : L2Window
         {
             charsOnServers.TryGetValue(serverData[i].serverId, out int charCount);
 
-            AddServerRow(i, ParseServerName(serverData[i].serverId), ParseServerStatus(serverData[i].status), charCount);
+            AddServerRow(i, ParseServerName(serverData[i]), ParseServerStatus(serverData[i].status), charCount);
 
             if (serverData[i].serverId == lastServer)
             {
@@ -151,9 +151,12 @@ public class ServerSelectWindow : L2Window
         }
     }
 
-    private string ParseServerName(int serverId)
+    // Le serveur transmet desormais son propre nom (piloté par la table DB
+    // gameservers.name) dans le paquet ServerList. La table figee locale
+    // ServerNameDAO ne sert plus que de repli si jamais le nom recu est vide.
+    private string ParseServerName(ServerData data)
     {
-        return ServerNameDAO.GetServer(serverId);
+        return string.IsNullOrEmpty(data.name) ? ServerNameDAO.GetServer(data.serverId) : data.name;
     }
 
     private string ParseServerStatus(int status)

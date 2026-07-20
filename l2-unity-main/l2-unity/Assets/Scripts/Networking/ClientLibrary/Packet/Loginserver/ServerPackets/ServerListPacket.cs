@@ -20,6 +20,7 @@ public class ServerListPacket : LoginServerPacket
         public int maxPlayers;
         public int status;
         public int serverId;
+        public string name;
 
         public ServerData()
         {
@@ -53,8 +54,9 @@ public class ServerListPacket : LoginServerPacket
             serverData.currentPlayers = ReadI();
             serverData.maxPlayers = ReadI();
             serverData.status = ReadB();
+            serverData.name = ReadS();
 
-            Debug.Log($"Server data received: Id:{serverData.serverId} Ip:{StringUtils.ByteArrayToString(serverData.ip)} Port:{serverData.port} OnlineCount:{serverData.currentPlayers} MaxPlayers:{serverData.maxPlayers} Status:{serverData.status}");
+            Debug.Log($"Server data received: Id:{serverData.serverId} Name:{serverData.name} Ip:{StringUtils.ByteArrayToString(serverData.ip)} Port:{serverData.port} OnlineCount:{serverData.currentPlayers} MaxPlayers:{serverData.maxPlayers} Status:{serverData.status}");
             _serverData.Add(serverData);
         }
 

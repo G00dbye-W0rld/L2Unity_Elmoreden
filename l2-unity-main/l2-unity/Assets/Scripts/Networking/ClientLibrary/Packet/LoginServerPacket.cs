@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Text;
-using UnityEngine;
 
 public abstract class LoginServerPacket : ServerPacket
 {
@@ -8,29 +6,14 @@ public abstract class LoginServerPacket : ServerPacket
     {
     }
 
-    protected override string ReadS()
-    {
-        int start = _iterator;
-
-        // Find the null terminator in UTF-16LE encoding.
-        int end = start;
-        while (end < _packetData.Length - 1 && (_packetData[end] != 0 || _packetData[end + 1] != 0))
-            end += 2;
-
-        // Move the offset past the string and the null terminator.
-        int strLen = end - start;
-
-        _iterator += strLen + 2;
-
-        // Create a string from the bytes between start and end.
-        byte[] data = new byte[strLen];
-        Array.Copy(_packetData, _iterator, data, 0, strLen);
-
-        string s = Encoding.GetEncoding("UTF-8").GetString(data);
-
-        Debug.Log("Read string: " + s + " : [" + strLen + "]: " + StringUtils.ByteArrayToString(data));
-        return s;
-    }
+    // ReadS() is intentionally not overridden here anymore - the base
+    // ServerPacket.ReadS() (UTF-16LE, char-by-char until null terminator,
+    // matching the Java side's writeS()) is correct and already proven
+    // working for the gameserver protocol. This class's own override had a
+    // dual bug (copied from the post-advance iterator instead of the
+    // string's actual start, and decoded as UTF-8 instead of UTF-16) that
+    // went unnoticed because no loginserver packet ever called ReadS()
+    // until ServerListPacket's new per-server name field.
 
     protected override int ReadI()
     {

@@ -20,6 +20,7 @@ public class DBGameServer {
      *   `server_id` int(11) NOT NULL DEFAULT '0',
      *   `hexid` varchar(50) NOT NULL DEFAULT '',
      *   `host` varchar(50) NOT NULL DEFAULT '',
+     *   `name` varchar(50) NOT NULL DEFAULT '',
      *   PRIMARY KEY (`server_id`)
      * );
      */
@@ -31,4 +32,6 @@ public class DBGameServer {
     private String hexId;
     @Column(name = "host")
     private String host;
+    @Column(name = "name")
+    private String name;
 }

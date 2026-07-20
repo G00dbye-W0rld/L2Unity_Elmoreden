@@ -12,7 +12,6 @@ import com.shnok.javaserver.security.NewCrypt;
 import com.shnok.javaserver.service.GameServerController;
 import com.shnok.javaserver.service.GameServerListenerService;
 import com.shnok.javaserver.service.ThreadPoolManagerService;
-import com.shnok.javaserver.util.ServerNameDAO;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
@@ -159,7 +158,7 @@ public class GameServerThread extends Thread {
             if (gameServerInfo.isAuthed()) {
                 gameServerInfo.setDown();
 
-                log.info("Server {}[{}] is now disconnected.", ServerNameDAO.getServer(gameServerInfo.getId()),
+                log.info("Server {}[{}] is now disconnected.", gameServerInfo.getName(),
                         gameServerInfo.getId());
             }
 

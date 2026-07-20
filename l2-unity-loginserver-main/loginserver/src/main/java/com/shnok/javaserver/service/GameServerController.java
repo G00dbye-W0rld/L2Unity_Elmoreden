@@ -5,6 +5,7 @@ import com.shnok.javaserver.db.repository.GameServerRepository;
 import com.shnok.javaserver.model.GameServerInfo;
 import com.shnok.javaserver.security.Rnd;
 import com.shnok.javaserver.util.HexUtils;
+import com.shnok.javaserver.util.ServerNameDAO;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
@@ -56,8 +57,9 @@ public class GameServerController {
     private void loadRegisteredGameServers() {
         List<DBGameServer> gameServerList = GameServerRepository.getInstance().getAllGameServers();
         gameServerList.forEach(gameServer -> {
-            GAME_SERVER_TABLE.put(gameServer.getServerId(), new GameServerInfo(gameServer.getServerId(),
-                    HexUtils.stringToHex(gameServer.getHexId())));
+            GameServerInfo gsi = new GameServerInfo(gameServer.getServerId(), HexUtils.stringToHex(gameServer.getHexId()));
+            gsi.setName(gameServer.getName());
+            GAME_SERVER_TABLE.put(gameServer.getServerId(), gsi);
         });
 
         log.info("Loaded {} registered gameserver(s) from DB.", gameServerList.size());
@@ -142,10 +144,23 @@ public class GameServerController {
     public void registerServerOnDB(byte[] hexId, int id, String externalHost) {
         register(id, new GameServerInfo(id, hexId));
 
+        // Seed the display name from the classic Chronicle name table on
+        // first registration only - loadRegisteredGameServers() reads it
+        // back from the DB afterwards, so an admin-edited name in the
+        // gameservers.name column survives future restarts/reconnects
+        // (this method isn't called again for a normal matching-hexid
+        // reattach, see GameServerPacketHandler.handleRegProcess).
+        String name = ServerNameDAO.getServer(id);
+        GameServerInfo gsi = getRegisteredGameServerById(id);
+        if (gsi != null) {
+            gsi.setName(name);
+        }
+
         DBGameServer gameServer = new DBGameServer();
         gameServer.setHexId(HexUtils.hexToString(hexId));
         gameServer.setServerId(id);
         gameServer.setHost(externalHost);
+        gameServer.setName(name);
 
         GameServerRepository.getInstance().addGameServer(gameServer);
     }

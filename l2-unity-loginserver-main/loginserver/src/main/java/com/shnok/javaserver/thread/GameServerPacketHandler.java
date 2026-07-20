@@ -110,7 +110,8 @@ public class GameServerPacketHandler extends Thread {
         log.info("Auth request received.");
 
         if (handleRegProcess(packet)) {
-            gameserver.sendPacket(new AuthResponsePacket(gameserver.getGameServerInfo().getId()));
+            gameserver.sendPacket(new AuthResponsePacket(gameserver.getGameServerInfo().getId(),
+                    gameserver.getGameServerInfo().getName()));
             gameserver.setLoginConnectionState(GameServerState.AUTHED);
 
             log.info("Game Server {} enabled.", gameserver.getGameServerInfo().getId());
