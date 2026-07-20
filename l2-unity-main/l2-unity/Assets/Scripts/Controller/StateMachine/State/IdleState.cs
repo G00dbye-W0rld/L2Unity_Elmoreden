@@ -63,8 +63,6 @@ public class IdleState : StateBase
 
                 if (PickupIntention.Target != null)
                 {
-                    // DEBUG TEMPORAIRE
-                    Debug.Log($"[IdleState] READY_TO_PICKUP -> SendRequestAction({PickupIntention.Target.ObjectId}) playerPos={PlayerEntity.Instance.transform.position}");
                     GameClient.Instance.ClientPacketHandler.SendRequestAction(PickupIntention.Target.ObjectId);
                 }
                 PickupIntention.Target = null;

@@ -38,11 +38,6 @@ public class PickupIntention : IntentionBase
         // deplacement laisse un ecart qui fait echouer la demande.
         const float safetyMargin = 0.7f;
 
-        // DEBUG TEMPORAIRE: pour diagnostiquer pourquoi le ramassage
-        // n'aboutit jamais - a retirer une fois le probleme identifie.
-        Debug.Log($"[PickupIntention] distance2D={distance:F3} seuil={PickupRange * safetyMargin:F3} " +
-            $"playerPos={PlayerEntity.Instance.transform.position} itemPos={targetPos}");
-
         if (distance <= PickupRange * safetyMargin)
         {
             _stateMachine.ChangeState(PlayerState.IDLE);
