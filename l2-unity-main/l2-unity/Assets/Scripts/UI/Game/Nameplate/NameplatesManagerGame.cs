@@ -5,6 +5,15 @@ public class NameplatesManagerGame : NameplatesManagerBase
 {
     private PlayerNameplate playerNameplate;
 
+    // Interrupteur ancien/nouveau systeme de nameplates - false par defaut
+    // pour ne rien changer au comportement existant. Voir le plan de
+    // remplacement des nameplates : filet de securite explicitement demande
+    // apres qu'un correctif plus leger ait du etre integralement annule.
+    [Header("Nameplates world-space (interrupteur)")]
+    [SerializeField] private bool useWorldSpaceNameplates;
+    [SerializeField] private WorldNameplateRenderer worldRenderer;
+    private bool _worldRendererInitialized;
+
     private static NameplatesManagerGame instance;
     public static NameplatesManagerGame Instance => instance;
 
@@ -28,6 +37,16 @@ public class NameplatesManagerGame : NameplatesManagerBase
 
         ScanForEntities();
         ProcessNameplateVisibility();
+
+        // ProcessNameplateVisibility() ne culle que le dictionnaire
+        // "nameplates" (systeme UI Toolkit) - les entites gerees par le
+        // renderer world-space n'y rejoignent jamais, donc un passage
+        // separe est necessaire pour elles.
+        if (useWorldSpaceNameplates)
+        {
+            worldRenderer.CullOutOfRange(t => IsNameplateVisible(t));
+        }
+
         HandlePlayerNameplate();
     }
 
@@ -51,6 +70,9 @@ public class NameplatesManagerGame : NameplatesManagerBase
             }
 
             mainCamera = cameraComponent;
+            // Initialize du renderer world-space deplace plus bas : il a besoin
+            // du playerTransform (fondu par distance, meme referentiel que le
+            // cull) qui n'est resolu qu'apres ce bloc.
         }
 
         if (rootElement == null)
@@ -64,7 +86,15 @@ public class NameplatesManagerGame : NameplatesManagerBase
             playerTransform = PlayerEntity.Instance.transform;
         }
 
-        return playerTransform != null;
+        if (playerTransform == null) return false;
+
+        if (useWorldSpaceNameplates && !_worldRendererInitialized)
+        {
+            worldRenderer?.Initialize(mainCamera, playerTransform, nameplateViewDistance);
+            _worldRendererInitialized = true;
+        }
+
+        return true;
     }
 
     protected override void ScanForEntities()
@@ -81,6 +111,7 @@ public class NameplatesManagerGame : NameplatesManagerBase
         if (ShouldCreateNameplateForEntity(hoveredObject))
         {
             var entity = hoveredObject.ObjectTransform.GetComponent<Entity>();
+            if (TryHandleEntityExternally(entity.Identity.Id, entity)) return;
             nameplates.GetOrAdd(entity.Identity.Id, _ => CreateNameplate(entity));
         }
     }
@@ -93,7 +124,76 @@ public class NameplatesManagerGame : NameplatesManagerBase
         if (targetTransform.TryGetComponent<Entity>(out var entity) &&
             entity.Identity.Id != GameClient.Instance.CurrentPlayerId)
         {
+            if (TryHandleEntityExternally(entity.Identity.Id, entity)) return;
             nameplates.GetOrAdd(entity.Identity.Id, _ => CreateNameplate(entity));
+        }
+    }
+
+    protected override bool TryHandleEntityExternally(int id, Entity entity)
+    {
+        if (!useWorldSpaceNameplates) return false;
+
+        if (!worldRenderer.HasNameplate(id))
+        {
+            worldRenderer.CreateNameplate(id, entity);
+        }
+
+        return true;
+    }
+
+    protected override void TickExternalRenderer()
+    {
+        if (!useWorldSpaceNameplates) return;
+
+        worldRenderer.Tick();
+        UpdateWorldBubbleStates();
+    }
+
+    // Mirroir de UpdateNameplateStyle/UpdateTargetedNameplateStyle/
+    // UpdateHoveredNameplateStyle pour le systeme world-space : cible/attaque
+    // decidees en premier, survol applique ensuite (donc visuellement
+    // prioritaire), meme ordre que l'existant.
+    private void UpdateWorldBubbleStates()
+    {
+        var target = TargetManager.Instance;
+
+        foreach (var kvp in worldRenderer.ActiveTargets())
+        {
+            Transform entityTransform = kvp.Value;
+            if (entityTransform == null) continue;
+
+            WorldNameplate.BubbleState state = WorldNameplate.BubbleState.None;
+
+            bool isCurrentTarget = target.HasTarget() && target.Target.transform == entityTransform;
+            if (isCurrentTarget)
+            {
+                // IsAttackTargetSet() compare par Identity.Id - la comparaison de
+                // references (AttackTarget == Target) echoue quand cible et cible
+                // d'attaque sont deux instances Entity distinctes de la meme unite,
+                // ce qui empechait la bulle rouge d'apparaitre.
+                bool isAttackTarget = target.IsAttackTargetSet() && !target.AttackTarget.Status.IsDead;
+                state = isAttackTarget ? WorldNameplate.BubbleState.Attack : WorldNameplate.BubbleState.Target;
+            }
+
+            bool isHovered = ClickManager.Instance.HoverObjectData?.ObjectTransform == entityTransform;
+            if (isHovered)
+            {
+                state = WorldNameplate.BubbleState.Hover;
+            }
+
+            worldRenderer.SetBubbleState(kvp.Key, state);
+        }
+    }
+
+    public override void RemoveNameplate(int id)
+    {
+        if (useWorldSpaceNameplates)
+        {
+            worldRenderer.RemoveNameplate(id);
+        }
+        else
+        {
+            base.RemoveNameplate(id);
         }
     }
 
@@ -117,8 +217,34 @@ public class NameplatesManagerGame : NameplatesManagerBase
 
     private void HandlePlayerNameplate()
     {
+        if (useWorldSpaceNameplates)
+        {
+            UpdateWorldPlayerNameplate();
+            return;
+        }
+
         playerNameplate ??= CreatePlayerNameplate(PlayerEntity.Instance);
         UpdatePlayerNameplate();
+    }
+
+    private void UpdateWorldPlayerNameplate()
+    {
+        WorldPlayerNameplate wpn = worldRenderer.GetOrCreatePlayerNameplate(PlayerEntity.Instance);
+        bool visible = IsNameplateVisible(wpn.Target);
+        wpn.Root.SetActive(visible);
+
+        if (!visible) return;
+
+        worldRenderer.TickPlayerNameplate();
+
+        if (wpn.GaugeEndTime - Time.time > 0)
+        {
+            wpn.UpdateGauge(Time.time);
+        }
+        else
+        {
+            wpn.HideGauge();
+        }
     }
 
     private void UpdatePlayerNameplate()
@@ -201,11 +327,23 @@ public class NameplatesManagerGame : NameplatesManagerBase
 
     public void StartCasting(SetupGaugePacket.GaugeColor color, int durationMs)
     {
+        if (useWorldSpaceNameplates)
+        {
+            worldRenderer.GetOrCreatePlayerNameplate(PlayerEntity.Instance).ShowGauge(color, Time.time, durationMs);
+            return;
+        }
+
         playerNameplate?.ShowGauge(color, Time.time, durationMs);
     }
 
     public void StopCasting()
     {
+        if (useWorldSpaceNameplates)
+        {
+            worldRenderer.GetOrCreatePlayerNameplate(PlayerEntity.Instance).HideGauge();
+            return;
+        }
+
         playerNameplate?.HideGauge();
     }
 
@@ -226,6 +364,8 @@ public class NameplatesManagerGame : NameplatesManagerBase
     private void OnDestroy()
     {
         nameplates.Clear();
+        worldRenderer?.RemoveAll();
+        worldRenderer?.RemovePlayerNameplate();
         instance = null;
     }
 
@@ -241,6 +381,15 @@ public class NameplatesManagerGame : NameplatesManagerBase
             }
 
             playerNameplate = null;
+        }
+
+        // Nettoyage des deux systemes systematiquement (pas seulement celui
+        // actif) - evite des objets poolés orphelins si l'interrupteur
+        // change entre deux appels.
+        if (worldRenderer != null)
+        {
+            worldRenderer.RemoveAll();
+            worldRenderer.RemovePlayerNameplate();
         }
     }
 }

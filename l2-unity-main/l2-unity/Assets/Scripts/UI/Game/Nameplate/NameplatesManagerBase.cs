@@ -38,6 +38,10 @@ public class NameplatesManagerBase : MonoBehaviour
     {
         if (!IsSystemReady()) return;
 
+        // No-op par defaut - point d'extension pour un renderer externe
+        // (systeme world-space alternatif), voir NameplatesManagerGame.
+        TickExternalRenderer();
+
         accumulatedTime += Time.deltaTime;
         while (accumulatedTime >= updateInterval)
         {
@@ -45,6 +49,8 @@ public class NameplatesManagerBase : MonoBehaviour
             accumulatedTime -= updateInterval;
         }
     }
+
+    protected virtual void TickExternalRenderer() { }
 
     protected virtual bool IsSystemReady()
     {
@@ -72,10 +78,17 @@ public class NameplatesManagerBase : MonoBehaviour
                 CheckIfNotPlayer(entity) &&
                 IsNameplateVisible(entity.transform))
             {
+                if (TryHandleEntityExternally(entity.Identity.Id, entity)) continue;
                 nameplates.GetOrAdd(entity.Identity.Id, _ => CreateNameplate(entity));
             }
         }
     }
+
+    // Retourne false par defaut (comportement UI Toolkit inchange) - un
+    // renderer externe (systeme world-space) peut se substituer ici pour
+    // gerer l'entite lui-meme, sans que celle-ci ne rejoigne jamais le
+    // dictionnaire "nameplates" de cette classe.
+    protected virtual bool TryHandleEntityExternally(int id, Entity entity) => false;
 
     protected virtual bool CheckIfNotPlayer(Entity entity)
     {
@@ -177,7 +190,7 @@ public class NameplatesManagerBase : MonoBehaviour
         return nameplate;
     }
 
-    public void RemoveNameplate(int id)
+    public virtual void RemoveNameplate(int id)
     {
         if (nameplates.TryRemove(id, out Nameplate removed))
         {

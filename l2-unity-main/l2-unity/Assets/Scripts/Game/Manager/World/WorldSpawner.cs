@@ -69,6 +69,12 @@ public class WorldSpawner : MonoBehaviour
 
     public void DestroyEntities()
     {
+        // Contrairement a TeleportingState.cs qui appelle deja ClearNameplates()
+        // lors d'un changement de zone, ce nettoyage en masse ne le faisait pas -
+        // fuite preexistante (nameplates orphelines) pour les deux systemes de
+        // nameplates (UI Toolkit et world-space).
+        NameplatesManagerGame.Instance.ClearNameplates();
+
         foreach (Entity entity in _objects.Values)
         {
             if (entity != null && entity.gameObject != null)

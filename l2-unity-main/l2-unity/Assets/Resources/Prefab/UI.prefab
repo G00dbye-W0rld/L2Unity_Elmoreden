@@ -33,6 +33,7 @@ GameObject:
   - component: {fileID: 1811256597443578308}
   - component: {fileID: 5396724109866029305}
   - component: {fileID: 1258522509192723278}
+  - component: {fileID: 6375402496107040887}
   m_Layer: 0
   m_Name: UI
   m_TagString: Untagged
@@ -147,9 +148,11 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   updatesPerSecond: 200
-  nameplateHeightMultiplier: 1.95
+  nameplateHeightMultiplier: 2
   playerTransform: {fileID: 0}
   mainCamera: {fileID: 0}
+  useWorldSpaceNameplates: 1
+  worldRenderer: {fileID: 6375402496107040887}
 --- !u!114 &8375159366462154550
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -295,6 +298,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _defaultSkillbarCount: 2
   _expandedSkillbarCount: 0
+  _skillsSlotsOnCooldown: []
 --- !u!114 &5356274184999564455
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -420,11 +424,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44881a1e3be34265957be789bbeef805, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  normalBuffsCount: 24
-  specialBuffsCount: 12
-  toggleBuffsCount: 10
-  debuffBuffsCount: 10
-  maxRowNormalBuffs: 12
 --- !u!114 &5396724109866029305
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -449,3 +448,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce1dfd555a127904cbf71b45ade09bf4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &6375402496107040887
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8310766140472177322}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be2b3362457ac814ab6d27a18c45e37c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  nameplatePrefab: {fileID: 148316939659066616, guid: 2b6e85b4695026a4c95a50b2e96d050d, type: 3}
+  poolParent: {fileID: 0}
+  nameplateHeightMultiplier: 2.25
+  distanceScaleFactor: 0.06
+  minScale: 0.6
+  maxScale: 10
+  farBoostPerMeter: 0.01
+  gaugeScreenFactor: 0.075
+  fadeStartFraction: 0.7
