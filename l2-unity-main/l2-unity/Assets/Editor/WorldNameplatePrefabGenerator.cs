@@ -9,11 +9,13 @@ using TMPro;
 // nameplates). Construit via l'API Unity plutot qu'en ecrivant le YAML du
 // prefab a la main, meme esprit que DropItemAssetGenerator.cs.
 //
-// Nom/titre : TextMeshPro. Bulles/jauge : Quad natif + MeshRenderer (pas de
+// Nom/titre : TextMeshPro. Icone/jauge : Quad natif + MeshRenderer (pas de
 // SpriteRenderer - constate invisible en jeu dans ce projet, cf.
-// BuildTransparentQuadMaterial). Les textures de bulles/jauge sont
-// dupliquees (pas modifiees sur place) dans un dossier dedie, pour ne
-// jamais toucher aux textures partagees utilisees ailleurs.
+// BuildTransparentQuadMaterial). Les textures de jauge sont dupliquees (pas
+// modifiees sur place) dans un dossier dedie, pour ne jamais toucher aux
+// textures partagees utilisees ailleurs. L'icone (etoile+joyau) est
+// reference directement depuis son propre dossier (deja dediee, generee
+// par NameplateBubbleIconGenerator).
 //
 // A relancer regenere entierement le prefab - toute retouche manuelle faite
 // directement dans l'Inspector du prefab genere sera perdue si on relance
@@ -22,9 +24,17 @@ public class WorldNameplatePrefabGenerator
 {
     const string FontPath = "Assets/Resources/Data/UI/Assets/Font/tahoma SDF.asset";
 
-    const string BubbleNormalSrc = "Assets/Resources/Data/UI/Assets/Target/HeadDisplay_DF_Target_Normal.png";
-    const string BubbleTargetSrc = "Assets/Resources/Data/UI/Assets/Target/HeadDisplay_DF_Target_Target.png";
-    const string BubbleAttackSrc = "Assets/Resources/Data/UI/Assets/Target/HeadDisplay_DF_Target_Attack.png";
+    // Icone unique (etoile+joyau+branche separatrice, remplace les deux
+    // bulles gauche/droite d'origine) - un PNG PAR ETAT prepare a la main,
+    // depose directement a chacun de ces 3 chemins. Tant qu'un fichier
+    // d'etat specifique n'existe pas encore, on retombe sur le brouillon
+    // procedural unique (BubbleIconDraftSrc, genere par
+    // NameplateBubbleIconGenerator) pour ne rien casser en attendant.
+    const string IconDir = "Assets/Resources/Data/UI/Assets/NameplateIcon";
+    const string IconHoverSrc = IconDir + "/IconHover.png";
+    const string IconTargetSrc = IconDir + "/IconTarget.png";
+    const string IconAttackSrc = IconDir + "/IconAttack.png";
+    const string BubbleIconDraftSrc = IconDir + "/BubbleIcon.png";
 
     // Le systeme UI Toolkit actuel reference "Gauge_DF_Small_CP", un dossier
     // qui n'existe pas dans le projet (asset deja manquant/casse
@@ -58,13 +68,19 @@ public class WorldNameplatePrefabGenerator
             return;
         }
 
-        Texture2D hoverTex = LoadOrCopyTexture(BubbleNormalSrc, $"{SpriteOutDir}/BubbleHover.png");
-        Texture2D targetTex = LoadOrCopyTexture(BubbleTargetSrc, $"{SpriteOutDir}/BubbleTarget.png");
-        Texture2D attackTex = LoadOrCopyTexture(BubbleAttackSrc, $"{SpriteOutDir}/BubbleAttack.png");
+        Texture2D iconHoverTex = LoadIconTexture(IconHoverSrc);
+        Texture2D iconTargetTex = LoadIconTexture(IconTargetSrc);
+        Texture2D iconAttackTex = LoadIconTexture(IconAttackSrc);
         Texture2D gaugeBgTex = LoadOrCopyTexture(GaugeBgSrc, $"{SpriteOutDir}/GaugeBG.png");
         Texture2D gaugeFillTex = LoadOrCopyTexture(GaugeFillSrc, $"{SpriteOutDir}/GaugeFill.png");
 
-        if (hoverTex == null || targetTex == null || attackTex == null || gaugeBgTex == null || gaugeFillTex == null)
+        if (iconHoverTex == null || iconTargetTex == null || iconAttackTex == null)
+        {
+            Debug.LogError($"[WorldNameplatePrefabGenerator] Icone introuvable (ni {IconHoverSrc}/{IconTargetSrc}/{IconAttackSrc}, ni le brouillon {BubbleIconDraftSrc}) - generer au moins le brouillon via Tools > L2Unity > Highlight > Generate NameplateBubbleIcon Texture (draft).");
+            return;
+        }
+
+        if (gaugeBgTex == null || gaugeFillTex == null)
         {
             Debug.LogError("[WorldNameplatePrefabGenerator] Une ou plusieurs textures source sont introuvables, generation annulee.");
             return;
@@ -79,15 +95,17 @@ public class WorldNameplatePrefabGenerator
 
         // Materiaux sauvegardes comme assets (indispensable : un prefab ne
         // peut referencer que des objets persistants, cf. GetOrCreateQuadMaterial).
-        // Un materiau PAR ETAT de bulle : SetBubbleState echange sharedMaterial
-        // au lieu de modifier la texture d'un materiau partage (ce qui aurait
-        // change la bulle de TOUTES les nameplates a la fois).
         EnsureFolder(MaterialOutDir);
-        Material hoverMat = GetOrCreateQuadMaterial(hoverTex, $"{MaterialOutDir}/BubbleHover.mat");
-        Material targetMat = GetOrCreateQuadMaterial(targetTex, $"{MaterialOutDir}/BubbleTarget.mat");
-        Material attackMat = GetOrCreateQuadMaterial(attackTex, $"{MaterialOutDir}/BubbleAttack.mat");
         Material gaugeBgMat = GetOrCreateQuadMaterial(gaugeBgTex, $"{MaterialOutDir}/GaugeBG.mat");
         Material gaugeFillMat = GetOrCreateQuadMaterial(gaugeFillTex, $"{MaterialOutDir}/GaugeFill.mat");
+
+        // Un materiau PAR ETAT (Unlit - pas Lit, pour ne pas reagir a
+        // l'eclairage de la scene et deformer la couleur, meme constat que
+        // HoverGroundRing) : SetBubbleState echange sharedMaterial, meme
+        // principe que l'ancien systeme a deux bulles.
+        Material iconHoverMat = GetOrCreateIconMaterial(iconHoverTex, $"{IconDir}/IconHover.mat");
+        Material iconTargetMat = GetOrCreateIconMaterial(iconTargetTex, $"{IconDir}/IconTarget.mat");
+        Material iconAttackMat = GetOrCreateIconMaterial(iconAttackTex, $"{IconDir}/IconAttack.mat");
 
         // Variante de materiau de police AVEC contour, dediee aux nameplates
         // (ne modifie pas le materiau partage "tahoma SDF Material" utilise
@@ -99,7 +117,8 @@ public class WorldNameplatePrefabGenerator
         GameObject root = new GameObject("WorldNameplate");
         root.layer = nameplateLayer;
 
-        GameObject title = CreateTextChild(root.transform, "Title", font, textMat, new Vector3(0f, 0.1f, 0f), TextAlignmentOptions.Center);
+        // Ecart Titre/Nom leger reduit (0.16 -> 0.13), juge trop grand.
+        GameObject title = CreateTextChild(root.transform, "Title", font, textMat, new Vector3(0f, 0.13f, 0f), TextAlignmentOptions.Center);
         title.GetComponent<TextMeshPro>().color = new Color(156f / 255f, 218f / 255f, 144f / 255f);
         title.layer = nameplateLayer;
 
@@ -107,12 +126,13 @@ public class WorldNameplatePrefabGenerator
         nameText.GetComponent<TextMeshPro>().color = Color.white;
         nameText.layer = nameplateLayer;
 
-        // Positions fixes (l'ecartement d'origine, prefere visuellement), avec
-        // la taille agrandie a 0.22.
-        GameObject bubbleLeft = CreateQuadChild(root.transform, "BubbleLeft", targetMat, nameplateLayer, new Vector3(-0.35f, 0f, 0f), new Vector2(0.22f, 0.22f));
-        GameObject bubbleRight = CreateQuadChild(root.transform, "BubbleRight", targetMat, nameplateLayer, new Vector3(0.35f, 0f, 0f), new Vector2(0.22f, 0.22f));
-        bubbleLeft.GetComponent<MeshRenderer>().enabled = false;
-        bubbleRight.GetComponent<MeshRenderer>().enabled = false;
+        // Icone unique a gauche du nom, positionnee verticalement dans
+        // l'ecart Titre/Nom (0.065 = milieu de 0/0.13). Textures en 160x155
+        // (quasi carre) -> quad 0.1116x0.108 (ratio respecte, +20% par
+        // rapport a 0.093x0.09, jugee trop petite) ; rapprochee du nom sur
+        // la droite (x -0.4 -> -0.3).
+        GameObject bubbleIcon = CreateQuadChild(root.transform, "BubbleIcon", iconHoverMat, nameplateLayer, new Vector3(-0.3f, 0.065f, 0f), new Vector2(0.1116f, 0.108f));
+        bubbleIcon.GetComponent<MeshRenderer>().enabled = false;
 
         GameObject gauge = new GameObject("Gauge");
         gauge.layer = nameplateLayer;
@@ -128,8 +148,9 @@ public class WorldNameplatePrefabGenerator
         // billboard pointe +Z a l'oppose de la camera) : coplanaire avec le
         // fond, les deux quads transparents z-fightaient -> clignotement
         // visible pendant le chargement.
-        GameObject gaugeBG = CreateQuadChild(gauge.transform, "GaugeBG", gaugeBgMat, nameplateLayer, Vector3.zero, new Vector2(0.8f, 0.08f));
-        GameObject gaugeFill = CreateQuadChild(gauge.transform, "GaugeFill", gaugeFillMat, nameplateLayer, new Vector3(0f, 0f, -0.005f), new Vector2(0.8f, 0.08f));
+        // Taille +30% (0.8x0.08 -> 1.04x0.104), jugee trop petite.
+        GameObject gaugeBG = CreateQuadChild(gauge.transform, "GaugeBG", gaugeBgMat, nameplateLayer, Vector3.zero, new Vector2(1.04f, 0.104f));
+        GameObject gaugeFill = CreateQuadChild(gauge.transform, "GaugeFill", gaugeFillMat, nameplateLayer, new Vector3(0f, 0f, -0.005f), new Vector2(1.04f, 0.104f));
         gaugeBG.GetComponent<MeshRenderer>().enabled = false;
         gaugeFill.GetComponent<MeshRenderer>().enabled = false;
 
@@ -245,6 +266,56 @@ public class WorldNameplatePrefabGenerator
             EditorUtility.SetDirty(material);
         }
         return material;
+    }
+
+    // Meme recette de transparence que GetOrCreateQuadMaterial, mais en
+    // Unlit : l'icone de nameplate ne doit pas reagir a l'eclairage de la
+    // scene et deformer sa couleur/texture - constat identique sur
+    // HoverGroundRing, cf. HoverRingGenerator.
+    static Material GetOrCreateIconMaterial(Texture2D texture, string assetPath)
+    {
+        Shader unlitShader = Shader.Find("Universal Render Pipeline/Unlit");
+        Material material = AssetDatabase.LoadAssetAtPath<Material>(assetPath);
+        bool isNew = material == null;
+        if (isNew)
+        {
+            material = new Material(unlitShader);
+        }
+        else if (material.shader != unlitShader)
+        {
+            material.shader = unlitShader;
+        }
+
+        material.SetFloat("_Surface", 1f);
+        material.SetFloat("_Blend", 0f);
+        material.SetFloat("_ZWrite", 0f);
+        material.SetFloat("_Cull", 0f);
+        material.SetOverrideTag("RenderType", "Transparent");
+        material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+        material.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+        material.SetTexture("_BaseMap", texture);
+
+        if (isNew)
+        {
+            AssetDatabase.CreateAsset(material, assetPath);
+        }
+        else
+        {
+            EditorUtility.SetDirty(material);
+        }
+        return material;
+    }
+
+    // Charge le PNG d'etat specifique (IconHover/IconTarget/IconAttack.png)
+    // s'il existe deja (prepare a la main), sinon retombe sur le brouillon
+    // procedural unique (BubbleIcon.png) - permet de tester avant que les 3
+    // variantes ne soient pretes.
+    static Texture2D LoadIconTexture(string path)
+    {
+        Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+        if (texture != null) return texture;
+
+        return AssetDatabase.LoadAssetAtPath<Texture2D>(BubbleIconDraftSrc);
     }
 
     static GameObject CreateQuadChild(Transform parent, string childName, Material material, int layer, Vector3 localPosition, Vector2 worldSize)

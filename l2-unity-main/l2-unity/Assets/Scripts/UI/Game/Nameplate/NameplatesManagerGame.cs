@@ -149,10 +149,13 @@ public class NameplatesManagerGame : NameplatesManagerBase
         UpdateWorldBubbleStates();
     }
 
-    // Mirroir de UpdateNameplateStyle/UpdateTargetedNameplateStyle/
-    // UpdateHoveredNameplateStyle pour le systeme world-space : cible/attaque
-    // decidees en premier, survol applique ensuite (donc visuellement
-    // prioritaire), meme ordre que l'existant.
+    // Hover sert desormais d'etat par defaut TOUJOURS affiche sur chaque
+    // nameplate active (plus une reaction au survol souris - le survol
+    // souris reste gere separement par les anneaux au sol de ClickManager).
+    // Target/Attack le remplacent quand pertinent : soit le joueur cible/
+    // attaque ce PNJ, soit ce PNJ nous attaque (son Combat.TargetId cote
+    // serveur pointe sur nous - EntityTargetSetPacket/UnsetPacket, signal
+    // temps reel independant des degats effectivement recus).
     private void UpdateWorldBubbleStates()
     {
         var target = TargetManager.Instance;
@@ -162,21 +165,25 @@ public class NameplatesManagerGame : NameplatesManagerBase
             Transform entityTransform = kvp.Value;
             if (entityTransform == null) continue;
 
-            WorldNameplate.BubbleState state = WorldNameplate.BubbleState.None;
-
             bool isCurrentTarget = target.HasTarget() && target.Target.transform == entityTransform;
-            if (isCurrentTarget)
-            {
-                // IsAttackTargetSet() compare par Identity.Id - la comparaison de
-                // references (AttackTarget == Target) echoue quand cible et cible
-                // d'attaque sont deux instances Entity distinctes de la meme unite,
-                // ce qui empechait la bulle rouge d'apparaitre.
-                bool isAttackTarget = target.IsAttackTargetSet() && !target.AttackTarget.Status.IsDead;
-                state = isAttackTarget ? WorldNameplate.BubbleState.Attack : WorldNameplate.BubbleState.Target;
-            }
+            // IsAttackTargetSet() compare par Identity.Id - la comparaison de
+            // references (AttackTarget == Target) echoue quand cible et cible
+            // d'attaque sont deux instances Entity distinctes de la meme unite,
+            // ce qui empechait la bulle rouge d'apparaitre.
+            bool isAttackTarget = isCurrentTarget && target.IsAttackTargetSet() && !target.AttackTarget.Status.IsDead;
 
-            bool isHovered = ClickManager.Instance.HoverObjectData?.ObjectTransform == entityTransform;
-            if (isHovered)
+            bool npcAttacksPlayer = entityTransform.TryGetComponent(out Entity npcEntity) && EntityCombatQuery.IsAttackingPlayer(npcEntity);
+
+            WorldNameplate.BubbleState state;
+            if (isAttackTarget || npcAttacksPlayer)
+            {
+                state = WorldNameplate.BubbleState.Attack;
+            }
+            else if (isCurrentTarget)
+            {
+                state = WorldNameplate.BubbleState.Target;
+            }
+            else
             {
                 state = WorldNameplate.BubbleState.Hover;
             }

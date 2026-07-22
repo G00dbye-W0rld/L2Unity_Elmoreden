@@ -19,6 +19,40 @@ public class ClickManager : MonoBehaviour
 
     private WorldItem _highlightedItem;
 
+    // Survol/ciblage PNJ/monstre : anneaux au sol (cf. HoverGroundRing). Le
+    // glow par emission a ete abandonne (aplat de couleur plat qui ecrasait
+    // la texture du personnage, pas reparable par reglage d'intensite),
+    // tout comme la tentative de particules et le contour post-process
+    // (Renderer Feature URP, blocages en cascade sans resultat visible).
+    //
+    // Deux instances (_hoverRing / _targetRing) : la cible actuelle et
+    // l'entite survolee peuvent etre deux PNJ differents en meme temps -
+    // meme logique de priorite que les anciennes bulles de nameplate
+    // (target/attack decides en premier, hover l'emporte visuellement si
+    // c'est la meme entite - cf. UpdateEntityHighlight/UpdateTargetRing).
+    // Un materiau/texture PAR ETAT (prepares a la main, cf. HoverRingGenerator) -
+    // si non assignes dans l'Inspector, charges automatiquement depuis
+    // Resources au demarrage.
+    [Header("Anneaux au sol (survol/cible/attaque)")]
+    [SerializeField] private Material _hoverRingMaterial;
+    [SerializeField] private Material _targetRingMaterial;
+    [SerializeField] private Material _attackRingMaterial;
+    // ClickArea (le vrai collider cliquable) n'est PAS dimensionne
+    // dynamiquement sur CollisionRadius (cf. NetworkCombat.cs - seule sa
+    // hauteur suit CollisionHeight, sa largeur/profondeur reste une valeur
+    // fixe du prefab). Un multiplicateur > 1 fait donc depasser l'anneau
+    // au-dela de la zone reellement cliquable pour certains PNJ, au point
+    // de rendre le clic sur l'attaque plus difficile pres du bord - reduit
+    // a 1 par defaut (anneau au raz du rayon de collision plutot que
+    // dessus).
+    [SerializeField] private float _hoverRingRadiusMultiplier = 1f;
+    [SerializeField] private float _hoverRingMinRadius = 0.5f;
+    [SerializeField] private float _hoverRingRotationSpeed = 30f;
+    private HoverGroundRing _hoverRing;
+    private HoverGroundRing _targetRing;
+
+    const string RingMaterialResourceDir = "Data/UI/Assets/HoverRing";
+
     private static ClickManager _instance;
     public static ClickManager Instance { get { return _instance; } }
 
@@ -46,6 +80,19 @@ public class ClickManager : MonoBehaviour
         _locatorReachedEffect = _locator.transform.GetChild(1).gameObject.GetComponent<L2Particle>();
         _mainCamera = CameraController.Instance.GetComponent<Camera>();
 
+        if (_hoverRingMaterial == null) _hoverRingMaterial = Resources.Load<Material>($"{RingMaterialResourceDir}/RingHover");
+        if (_targetRingMaterial == null) _targetRingMaterial = Resources.Load<Material>($"{RingMaterialResourceDir}/RingTarget");
+        if (_attackRingMaterial == null) _attackRingMaterial = Resources.Load<Material>($"{RingMaterialResourceDir}/RingAttack");
+        if (_hoverRingMaterial == null || _targetRingMaterial == null || _attackRingMaterial == null)
+        {
+            Debug.LogWarning("[ClickManager] Materiaux d'anneau introuvables (Inspector et Resources) - regenerer via Tools > L2Unity > Highlight > Generate HoverRing Prefab.");
+        }
+
+        _hoverRing = new HoverGroundRing(_hoverRingRotationSpeed);
+        _hoverRing.SetMaterials(_hoverRingMaterial, _targetRingMaterial, _attackRingMaterial);
+        _targetRing = new HoverGroundRing(_hoverRingRotationSpeed);
+        _targetRing.SetMaterials(_hoverRingMaterial, _targetRingMaterial, _attackRingMaterial);
+
         HideLocator(false);
     }
 
@@ -57,6 +104,10 @@ public class ClickManager : MonoBehaviour
 
     void Update()
     {
+        _hoverRing.Tick();
+        _targetRing.Tick();
+        UpdateTargetRing();
+
         if (L2GameUI.Instance.MouseOverUI || PlayerStateMachine.Instance != null && PlayerStateMachine.Instance.State == PlayerState.DEAD)
         {
             return;
@@ -76,6 +127,8 @@ public class ClickManager : MonoBehaviour
             {
                 _hoverObjectData = new ObjectData(hit.collider.gameObject);
             }
+
+            UpdateEntityHighlight(_hoverObjectData);
 
             if (InputManager.Instance.LeftClickDown &&
                 !InputManager.Instance.RightClickHeld)
@@ -131,6 +184,7 @@ public class ClickManager : MonoBehaviour
         else
         {
             UpdateItemHighlight(null);
+            UpdateEntityHighlight(null);
             CursorManager.Instance.ChangeCursor(CursorManager.CursorType.Default);
         }
 
@@ -227,6 +281,99 @@ public class ClickManager : MonoBehaviour
         {
             WorldItemTooltip.Instance.Hide();
         }
+    }
+
+    // Anneau de la cible actuelle (independant du survol souris) - meme
+    // priorite Target/Attack que les anciennes bulles de nameplate. Masque
+    // si la cible est AUSSI l'entite survolee : dans ce cas
+    // UpdateEntityHighlight() prend le relai visuel avec la couleur
+    // Target/Attack sur l'anneau de survol, pour eviter deux anneaux
+    // superposes sur la meme entite.
+    private void UpdateTargetRing()
+    {
+        TargetManager target = TargetManager.Instance;
+        if (target == null || !target.HasTarget())
+        {
+            _targetRing.Hide();
+            return;
+        }
+
+        Transform targetTransform = target.Target.transform;
+        bool hoverIsTarget = _hoverObjectData?.ObjectTransform == targetTransform;
+        if (hoverIsTarget)
+        {
+            _targetRing.Hide();
+            return;
+        }
+
+        bool isAttackTarget = IsAttackActive(target, target.Target) || EntityCombatQuery.IsAttackingPlayer(target.Target);
+        _targetRing.SetState(isAttackTarget ? HoverGroundRing.RingState.Attack : HoverGroundRing.RingState.Target);
+
+        float radius = Mathf.Max(target.Target.Appearance.CollisionRadius * _hoverRingRadiusMultiplier, _hoverRingMinRadius);
+        _targetRing.Show(targetTransform.position, radius);
+    }
+
+    // Anneau du PNJ/monstre survole (Player exclu, meme filtre de tag que
+    // le reste de la logique de survol ci-dessus). Reagit a n'importe quel
+    // PNJ/monstre survole, pas seulement la cible actuelle - mais prend la
+    // couleur Target/Attack (au lieu de Hover) si c'est aussi la cible
+    // actuelle, priorite la plus haute, meme logique que les anciennes
+    // bulles de nameplate.
+    private void UpdateEntityHighlight(ObjectData hoverData)
+    {
+        bool isEntity = hoverData?.ObjectTransform != null && hoverData.Entity != null &&
+                        (hoverData.ObjectTag == "Monster" || hoverData.ObjectTag == "Npc");
+
+        if (!isEntity)
+        {
+            _hoverRing.Hide();
+            return;
+        }
+
+        TargetManager target = TargetManager.Instance;
+        bool isCurrentTarget = target != null && target.HasTarget() && target.Target.transform == hoverData.ObjectTransform;
+        bool attacksPlayer = EntityCombatQuery.IsAttackingPlayer(hoverData.Entity);
+
+        HoverGroundRing.RingState state = HoverGroundRing.RingState.Hover;
+        if (isCurrentTarget)
+        {
+            bool isAttackTarget = IsAttackActive(target, target.Target) || attacksPlayer;
+            state = isAttackTarget ? HoverGroundRing.RingState.Attack : HoverGroundRing.RingState.Target;
+        }
+        else if (attacksPlayer)
+        {
+            // PNJ survole qui n'est pas notre cible mais nous attaque quand
+            // meme (aggro) - signale le danger independamment du ciblage.
+            state = HoverGroundRing.RingState.Attack;
+        }
+
+        _hoverRing.SetState(state);
+        float radius = Mathf.Max(hoverData.Entity.Appearance.CollisionRadius * _hoverRingRadiusMultiplier, _hoverRingMinRadius);
+        _hoverRing.Show(hoverData.ObjectTransform.position, radius);
+    }
+
+    // L'etat "attaque" brut (IsAttackTargetSet) peut clignoter/redevenir
+    // momentanement faux entre deux coups (retombant sur Target) - on le
+    // maintient artificiellement pendant AttackHoldDuration apres la
+    // derniere confirmation, borne a l'entite concernee (Identity.Id, pas
+    // une comparaison de reference - cf. commentaire IsAttackTargetSet plus
+    // haut) pour ne pas "coller" l'etat attaque a une nouvelle cible
+    // choisie juste apres.
+    private const float AttackHoldDuration = 3f;
+    private float _lastAttackTime = -999f;
+    private int _lastAttackEntityId = -1;
+
+    private bool IsAttackActive(TargetManager target, Entity checkedEntity)
+    {
+        bool raw = target.IsAttackTargetSet() && !target.AttackTarget.Status.IsDead;
+        if (raw)
+        {
+            _lastAttackTime = Time.time;
+            _lastAttackEntityId = target.AttackTarget.Identity.Id;
+        }
+
+        bool holding = checkedEntity.Identity.Id == _lastAttackEntityId && Time.time - _lastAttackTime < AttackHoldDuration;
+        return raw || holding;
     }
 
     // Suit exactement le meme flux que OnClickOnEntity()/InteractIntention

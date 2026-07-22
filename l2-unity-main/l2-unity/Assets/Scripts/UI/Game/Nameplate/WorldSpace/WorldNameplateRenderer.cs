@@ -36,14 +36,14 @@ public class WorldNameplateRenderer : MonoBehaviour
     [SerializeField] private float fadeStartFraction = 0.7f;
 
     // Materiaux-assets generes par WorldNameplatePrefabGenerator (un par etat
-    // de bulle). Si non assignes dans l'Inspector, charges automatiquement
-    // depuis Resources au premier Initialize().
-    [Header("Bubble materials (survol/cible/attaque)")]
+    // de l'icone, prepares a la main). Si non assignes dans l'Inspector,
+    // charges automatiquement depuis Resources au premier Initialize().
+    [Header("Icone (survol/cible/attaque)")]
     [SerializeField] private Material hoverMaterial;
     [SerializeField] private Material targetMaterial;
     [SerializeField] private Material attackMaterial;
 
-    const string MaterialResourceDir = "Data/UI/Assets/WorldNameplate/Materials";
+    const string MaterialResourceDir = "Data/UI/Assets/NameplateIcon";
 
     private readonly ConcurrentQueue<GameObject> _pool = new();
     private readonly ConcurrentDictionary<int, WorldNameplate> _active = new();
@@ -59,12 +59,12 @@ public class WorldNameplateRenderer : MonoBehaviour
         _playerTransform = playerTransform;
         _viewDistance = viewDistance;
 
-        if (hoverMaterial == null) hoverMaterial = Resources.Load<Material>($"{MaterialResourceDir}/BubbleHover");
-        if (targetMaterial == null) targetMaterial = Resources.Load<Material>($"{MaterialResourceDir}/BubbleTarget");
-        if (attackMaterial == null) attackMaterial = Resources.Load<Material>($"{MaterialResourceDir}/BubbleAttack");
+        if (hoverMaterial == null) hoverMaterial = Resources.Load<Material>($"{MaterialResourceDir}/IconHover");
+        if (targetMaterial == null) targetMaterial = Resources.Load<Material>($"{MaterialResourceDir}/IconTarget");
+        if (attackMaterial == null) attackMaterial = Resources.Load<Material>($"{MaterialResourceDir}/IconAttack");
         if (hoverMaterial == null || targetMaterial == null || attackMaterial == null)
         {
-            Debug.LogWarning("[WorldNameplateRenderer] Materiaux de bulle introuvables (Inspector et Resources) - regenerer via Tools > L2Unity > Nameplate > Generate WorldNameplate Prefab.");
+            Debug.LogWarning("[WorldNameplateRenderer] Materiaux d'icone introuvables (Inspector et Resources) - regenerer via Tools > L2Unity > Nameplate > Generate WorldNameplate Prefab.");
         }
     }
 
@@ -246,6 +246,13 @@ public class WorldNameplateRenderer : MonoBehaviour
             _playerNameplate = new WorldPlayerNameplate(go);
             _playerNameplate.SetBubbleMaterials(hoverMaterial, targetMaterial, attackMaterial);
             _playerNameplate.Bind(playerEntity);
+            // L'icone hover/target/attack n'a pas de sens sur SA PROPRE
+            // nameplate (on ne se cible/attaque jamais soi-meme) - masquee
+            // explicitement. Bind() l'affiche par defaut (etat Hover,
+            // toujours visible) comme pour toute autre nameplate ; jamais
+            // mise a jour ensuite puisque la nameplate du joueur ne fait
+            // pas partie de worldRenderer.ActiveTargets() / UpdateWorldBubbleStates.
+            _playerNameplate.SetBubbleState(WorldNameplate.BubbleState.None);
         }
 
         return _playerNameplate;

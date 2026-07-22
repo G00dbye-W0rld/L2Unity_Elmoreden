@@ -2,11 +2,17 @@ using UnityEngine;
 using TMPro;
 
 // Mirroir world-space de Nameplate.cs (Assets/Scripts/UI/Game/Nameplate/Nameplate/Nameplate.cs) :
-// meme logique de couleurs (karma/PvP flag/clignotement) et de bulles de ciblage,
+// meme logique de couleurs (karma/PvP flag/clignotement) et de bulle de ciblage,
 // mais ecrit dans un TMP_Text/MeshRenderer plutot qu'un VisualElement UI Toolkit.
-// Les bulles sont des Quad+MeshRenderer, pas des SpriteRenderer (constate
+// L'icone est un Quad+MeshRenderer, pas un SpriteRenderer (constate
 // invisible en jeu dans ce projet malgre plusieurs materiaux essayes -
 // cf. WorldNameplatePrefabGenerator.BuildTransparentQuadMaterial).
+//
+// Une seule icone (etoile+joyau+branche separatrice, cf.
+// NameplateBubbleIconGenerator) remplace les deux bulles gauche/droite
+// d'origine. Un MATERIAU/TEXTURE PAR ETAT (Hover/Target/Attack, prepares a
+// la main) : changer d'etat = echanger sharedMaterial, meme principe que
+// l'ancien systeme a deux bulles - pas une teinte runtime.
 public class WorldNameplate
 {
     public enum BubbleState { None, Target, Attack, Hover }
@@ -14,8 +20,7 @@ public class WorldNameplate
     private readonly GameObject _root;
     private readonly TMP_Text _nameText;
     private readonly TMP_Text _titleText;
-    private readonly MeshRenderer _bubbleLeft;
-    private readonly MeshRenderer _bubbleRight;
+    private readonly MeshRenderer _bubbleIcon;
 
     private Material _hoverMaterial;
     private Material _targetMaterial;
@@ -30,10 +35,11 @@ public class WorldNameplate
     private float _lastBlinkTime;
     private BubbleState _currentBubbleState = BubbleState.None;
 
-    // Fondu par distance : l'alpha des quads est pousse via MaterialPropertyBlock
-    // (les materiaux de bulle sont partages entre toutes les nameplates - les
-    // muter directement les ferait toutes fondre ensemble). Le texte utilise
-    // TMP_Text.alpha, un simple multiplicateur par instance.
+    // Fondu par distance : l'alpha de l'icone est pousse via MaterialPropertyBlock
+    // en blanc (le materiau-asset porte deja sa propre couleur/texture d'etat,
+    // partagee entre toutes les nameplates - le muter changerait l'icone de
+    // tout le monde a la fois). Le texte utilise TMP_Text.alpha, un simple
+    // multiplicateur par instance.
     private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
     private MaterialPropertyBlock _mpb;
     private float _currentAlpha = 1f;
@@ -49,8 +55,7 @@ public class WorldNameplate
         _root = root;
         _nameText = root.transform.Find("Name").GetComponent<TMP_Text>();
         _titleText = root.transform.Find("Title").GetComponent<TMP_Text>();
-        _bubbleLeft = root.transform.Find("BubbleLeft").GetComponent<MeshRenderer>();
-        _bubbleRight = root.transform.Find("BubbleRight").GetComponent<MeshRenderer>();
+        _bubbleIcon = root.transform.Find("BubbleIcon").GetComponent<MeshRenderer>();
         _mpb = new MaterialPropertyBlock();
 
         // Reinitialise l'alpha : cette instance enveloppe peut-etre un
@@ -61,7 +66,7 @@ public class WorldNameplate
     }
 
     // Fondu global de la nameplate (1 = opaque, 0 = invisible). Applique au
-    // texte (nom + titre) et aux bulles. La comparaison evite de reecrire les
+    // texte (nom + titre) et a l'icone. La comparaison evite de reecrire les
     // proprietes chaque frame quand l'alpha n'a pas bouge de facon perceptible.
     public virtual void SetAlpha(float alpha)
     {
@@ -70,21 +75,23 @@ public class WorldNameplate
 
         _nameText.alpha = alpha;
         _titleText.alpha = alpha;
-        ApplyQuadAlpha(_bubbleLeft, alpha);
-        ApplyQuadAlpha(_bubbleRight, alpha);
+        ApplyIconAlpha();
     }
 
-    protected void ApplyQuadAlpha(MeshRenderer renderer, float alpha)
+    // Alpha de fondu seul (blanc, ne touche pas la couleur/texture propre du
+    // materiau d'etat courant) via MaterialPropertyBlock.
+    private void ApplyIconAlpha()
     {
-        renderer.GetPropertyBlock(_mpb);
-        _mpb.SetColor(BaseColorId, new Color(1f, 1f, 1f, alpha));
-        renderer.SetPropertyBlock(_mpb);
+        _bubbleIcon.GetPropertyBlock(_mpb);
+        _mpb.SetColor(BaseColorId, new Color(1f, 1f, 1f, _currentAlpha));
+        _bubbleIcon.SetPropertyBlock(_mpb);
     }
 
-    // Un materiau-asset PAR ETAT (genere par WorldNameplatePrefabGenerator) :
-    // changer d'etat = echanger sharedMaterial, jamais modifier la texture
-    // d'un materiau en place (un materiau est partage entre toutes les
-    // nameplates - le muter changerait la bulle de tout le monde a la fois).
+    // Un materiau-asset PAR ETAT (genere par WorldNameplatePrefabGenerator a
+    // partir de 3 PNG prepares a la main) : changer d'etat = echanger
+    // sharedMaterial, jamais modifier la texture d'un materiau en place (un
+    // materiau est partage entre toutes les nameplates - le muter
+    // changerait l'icone de tout le monde a la fois).
     public void SetBubbleMaterials(Material hover, Material target, Material attack)
     {
         _hoverMaterial = hover;
@@ -101,7 +108,7 @@ public class WorldNameplate
         Entity = entity;
         _nameText.text = entity.Identity.Name;
         _titleText.text = entity.Identity.Title;
-        // Positions des bulles : fixes, celles du prefab (le placement
+        // Position de l'icone : fixe, celle du prefab (le placement
         // dynamique au bord du nom mesure via TMP donnait des marges
         // asymetriques - abandonne).
 
@@ -112,7 +119,9 @@ public class WorldNameplate
         _previousKarmaAmount = 0;
         _blink = false;
         _lastBlinkTime = 0f;
-        SetBubbleState(BubbleState.None);
+        // Hover sert desormais d'etat par defaut TOUJOURS affiche (plus une
+        // reaction au survol souris) - cf. NameplatesManagerGame.UpdateWorldBubbleStates.
+        SetBubbleState(BubbleState.Hover);
     }
 
     // Port quasi verbatim de Nameplate.ManageColors() - meme ordre de
@@ -185,8 +194,7 @@ public class WorldNameplate
         _currentBubbleState = state;
 
         bool visible = state != BubbleState.None;
-        _bubbleLeft.enabled = visible;
-        _bubbleRight.enabled = visible;
+        _bubbleIcon.enabled = visible;
 
         Material material = state switch
         {
@@ -198,8 +206,7 @@ public class WorldNameplate
 
         if (material != null)
         {
-            _bubbleLeft.sharedMaterial = material;
-            _bubbleRight.sharedMaterial = material;
+            _bubbleIcon.sharedMaterial = material;
         }
     }
 }
