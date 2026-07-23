@@ -237,12 +237,22 @@ public class NpcHtmlWindow : L2PopupWindow
         if (!silent && !_isWindowHidden)
             AudioManager.Instance.PlayUISound("window_close");
 
+        // Filet de securite : si on ferme la fenetre alors qu'un champ etait
+        // focus, le BlurEvent ne se declenche pas toujours -> on relache
+        // explicitement le verrou clavier pour ne pas rester bloque en "typing".
+        L2GameUI.Instance.IsTyping = false;
+
         L2GameUI.Instance.WindowClosed(this);
     }
 
     public void RefreshContent(int npcId, string htmlString, int itemId)
     {
         ShowWindow();
+
+        // On reconstruit le contenu : les anciens champs de saisie disparaissent
+        // sans forcement emettre de BlurEvent -> on relache le verrou clavier
+        // pour ne pas rester bloque en "typing" apres un rechargement de page.
+        L2GameUI.Instance.IsTyping = false;
 
         _content.Clear();
 
@@ -334,19 +344,30 @@ public class NpcHtmlWindow : L2PopupWindow
 
     private string ReplaceFontColors(string processed)
     {
-        // Process font color tags while preserving Unity rich text format
+        // <font color="X">...</font> -> <color=#X>...</color> (rich text Unity).
+        // Robuste : guillemets simples/doubles ou absents, espaces autour du '=',
+        // casse quelconque, prefixe '#' optionnel dans la valeur (evite un '##'
+        // qui casserait le rendu), la couleur speciale L2 "LEVEL", et le contenu
+        // pouvant contenir des retours a la ligne.
         processed = Regex.Replace(
             processed,
-            @"<font color=(?:""|')?([^""'>]+?)(?:""|')?>(.*?)</font>",
+            @"<font\s+color\s*=\s*(?:""|')?([^""'>]+?)(?:""|')?\s*>(.*?)</font>",
             match =>
             {
-                string colorValue = match.Groups[1].Value;
+                string colorValue = match.Groups[1].Value.Trim();
                 string content = match.Groups[2].Value;
-                return colorValue == "LEVEL"
-                    ? $"<color=#FFC900>{content}</color>"
-                    : $"<color=#{colorValue}>{content}</color>";
-            }
+                string hex = colorValue.Equals("LEVEL", StringComparison.OrdinalIgnoreCase)
+                    ? "FFC900"
+                    : colorValue.TrimStart('#');
+                return $"<color=#{hex}>{content}</color>";
+            },
+            RegexOptions.Singleline | RegexOptions.IgnoreCase
         );
+
+        // Balises <font ...> / </font> orphelines (HTML mal forme, <font> sans
+        // color, ou <font> imbrique non apparie) : on les retire pour qu'elles ne
+        // s'affichent pas telles quelles dans le texte.
+        processed = Regex.Replace(processed, @"</?font[^>]*>", "", RegexOptions.IgnoreCase);
 
         return processed;
     }
@@ -837,11 +858,21 @@ public class NpcHtmlWindow : L2PopupWindow
 
         if (attributes.TryGetValue("var", out string dropdownIndex))
         {
+            // Valeur initiale enregistree des la creation : ainsi un bouton qui
+            // reference $var renvoie une valeur (vide) au serveur meme si le
+            // joueur n'a rien tape, au lieu de laisser le litteral "$var".
+            _inputValues.TryAdd(dropdownIndex, textField.value);
             textField.RegisterValueChangedCallback((newVal) =>
             {
                 _inputValues[dropdownIndex] = newVal.newValue;
             });
         }
+
+        // Pendant la saisie dans un champ HTML, on coupe les entrees clavier du
+        // jeu (deplacement, raccourcis, barres de skills) pour ne pas declencher
+        // d'actions en tapant - meme mecanisme que le chat / L2InputAmountWindow.
+        textField.RegisterCallback<FocusEvent>(evt => L2GameUI.Instance.IsTyping = true);
+        textField.RegisterCallback<BlurEvent>(evt => L2GameUI.Instance.IsTyping = false);
 
         textField.AddManipulator(new BlinkingCursorManipulator(textField));
 
@@ -1023,24 +1054,20 @@ public class NpcHtmlWindow : L2PopupWindow
 
     private void ButtonClicked(string action)
     {
-        Debug.Log(action);
+        // Remplace TOUTES les variables $var par la valeur du champ de saisie /
+        // de la liste correspondante avant l'envoi au serveur (une action peut en
+        // referencer plusieurs, ex. "$search"). Une variable inconnue reste
+        // litterale (le serveur la traite comme vide/inexistante).
         if (action.Contains("$"))
         {
-            string pattern = @"\$\w+";
-            Regex regex = new Regex(pattern, RegexOptions.IgnoreCase);
-            MatchCollection matches = regex.Matches(action);
-
-            if (matches.Count > 0)
+            action = Regex.Replace(action, @"\$(\w+)", match =>
             {
-                string id = matches[matches.Count - 1].Value;
-                Debug.Log(id[1..]);
-                if (_inputValues.TryGetValue(id[1..], out string value))
-                {
-                    action = action.Replace(id, value);
-                }
-            }
+                string varName = match.Groups[1].Value;
+                return _inputValues != null && _inputValues.TryGetValue(varName, out string value)
+                    ? value
+                    : match.Value;
+            });
         }
-        Debug.Log(action);
 
         GameClient.Instance.ClientPacketHandler.RequestBypassToServer(action);
     }
