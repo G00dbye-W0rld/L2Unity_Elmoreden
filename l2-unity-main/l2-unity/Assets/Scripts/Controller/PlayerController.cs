@@ -12,7 +12,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float _currentSpeed;
     [SerializeField] private float _defaultRunSpeed = 4;
     [SerializeField] private float _defaultWalkSpeed = 4;
+    [SerializeField] private float _defaultSwimSpeed = 4;
     [SerializeField] private bool _running = true;
+    [SerializeField] private bool _swimming = false;
     [SerializeField] private bool _jumping = true;
     [SerializeField] private float _measuredSpeed;
     private Vector3 _currentPos;
@@ -23,6 +25,15 @@ public class PlayerController : MonoBehaviour
     public float _verticalVelocity = 0;
     [SerializeField] private float _jumpForce = 10;
     [SerializeField] private float _gravity = 28;
+    // Encore trop rapide a 1.5 au test - redescendue nettement (1.5 -> 0.6).
+    [SerializeField] private float _swimVerticalSpeed = 0.6f;
+    // L'origine du transform est aux pieds du personnage (pas au centre) : si
+    // on plafonne les pieds pile a la hauteur de surface, tout le corps se
+    // retrouve au-dessus de l'eau au lieu d'etre a moitie submerge. On vise
+    // donc les pieds a "surface - CollisionHeight * ratio" (0.7 = 70% du
+    // corps sous l'eau, la tete depassant), plutot que la surface elle-meme.
+    // Un poil trop haut a 0.7 au test - remontee legerement (0.7 -> 0.8).
+    [SerializeField] private float _swimSubmergeRatio = 0.8f;
 
     /* Target */
     [SerializeField] private Vector3 _targetPosition;
@@ -37,9 +48,11 @@ public class PlayerController : MonoBehaviour
     public float CurrentSpeed { get { return _currentSpeed; } }
     public float DefaultRunSpeed { get { return _defaultRunSpeed; } set { _defaultRunSpeed = value; } }
     public float DefaultWalkSpeed { get { return _defaultWalkSpeed; } set { _defaultWalkSpeed = value; } }
+    public float DefaultSwimSpeed { get { return _defaultSwimSpeed; } set { _defaultSwimSpeed = value; } }
     public bool RunningToDestination { get { return _runningToDestination; } }
     public bool IntentionToRun { get { return _intentionToRun; } set { _intentionToRun = value; } }
     public bool Running { get { return _running; } set { _running = value; } }
+    public bool Swimming { get { return _swimming; } set { _swimming = value; } }
     public bool Jumping { get { return _jumping; } set { _jumping = value; } }
     public Vector3 MoveDirection { get { return _moveDirection; } }
 
@@ -180,7 +193,11 @@ public class PlayerController : MonoBehaviour
         _axis = relativeAxis;
         _finalAngle = angleInDegrees;
 
-        if (_running)
+        if (_swimming)
+        {
+            _currentSpeed = _defaultSwimSpeed;
+        }
+        else if (_running)
         {
             _currentSpeed = _defaultRunSpeed;
         }
@@ -226,28 +243,19 @@ public class PlayerController : MonoBehaviour
     private Vector3 GetInputDirection(float speed)
     {
         /* Handle input direction */
-        Vector3 direction;
-        if (_controller.isGrounded)
-        {
-            //Vector3 forward = mainCamera.transform.TransformDirection(Vector3.forward);
-            Vector3 rotationAxis = Vector3.up; // Axis of rotation (e.g., upwards)
-            // Create a Quaternion representing the rotation
-            Quaternion rotation = Quaternion.AngleAxis(_mainCamera.transform.eulerAngles.y, rotationAxis);
-            // Rotate the vector based on camera angle
-            Vector3 forward = rotation * Vector3.forward;
-            // Calculate vector based on keyboard inputs + camera angle
-            Vector3 right = new Vector3(forward.z, 0, -forward.x);
-            forward.y = 0;
-            direction = _axis.x * right + _axis.y * forward;
-        }
-        else if (!_controller.isGrounded)
-        {
-            direction = transform.forward;
-        }
-        else
-        {
-            direction = Vector3.zero;
-        }
+        // Toujours relatif a la camera (comme la marche), plus de branche
+        // "en l'air" separee : cette branche figeait la direction sur
+        // transform.forward (sans lien avec la camera/les touches) des que
+        // _controller.isGrounded etait faux - donc pas seulement en nageant
+        // (deja corrige) mais aussi en sautant, ce qui donnait l'impression
+        // que le personnage etait devie dans une direction fixe pendant tout
+        // le saut, quel que soit l'axe presse.
+        Vector3 rotationAxis = Vector3.up;
+        Quaternion rotation = Quaternion.AngleAxis(_mainCamera.transform.eulerAngles.y, rotationAxis);
+        Vector3 forward = rotation * Vector3.forward;
+        Vector3 right = new Vector3(forward.z, 0, -forward.x);
+        forward.y = 0;
+        Vector3 direction = _axis.x * right + _axis.y * forward;
 
         direction = direction.normalized * speed;
 
@@ -256,6 +264,16 @@ public class PlayerController : MonoBehaviour
 
     private Vector3 ApplyGravity(Vector3 dir)
     {
+        // En nage : pas de gravite, deplacement vertical pilote par le joueur
+        // (SwimUp/SwimDown), borne en haut par la surface de l'eau (le fond
+        // est deja gere naturellement par la collision terrain du
+        // CharacterController, pas besoin de le clamper ici).
+        if (_swimming)
+        {
+            dir.y = ApplySwimVertical();
+            return dir;
+        }
+
         /* Handle gravity */
         if (_controller.isGrounded)
         {
@@ -273,12 +291,58 @@ public class PlayerController : MonoBehaviour
         return dir;
     }
 
+    private float ApplySwimVertical()
+    {
+        float vertical = 0f;
+        if (InputManager.Instance.SwimUp)
+        {
+            vertical = _swimVerticalSpeed;
+        }
+        else if (InputManager.Instance.SwimDown)
+        {
+            vertical = -_swimVerticalSpeed;
+        }
+
+        // Empeche de sortir de l'eau par le haut : si on est deja a/au-dessus
+        // de la surface, ou si la vitesse demandee franchirait la surface
+        // cette frame, on plafonne au lieu de couper brutalement a 0 (evite
+        // un a-coup visible pile a la surface). Si la hauteur de surface est
+        // introuvable (hors de l'emprise de tout plan d'eau connu), on NE
+        // laisse PAS monter sans limite - mieux vaut bloquer prematurement a
+        // un endroit precis que de laisser le joueur s'envoler hors de la
+        // zone d'eau (ce qui faisait ensuite couper l'etat de nage cote
+        // serveur en sortant du cuboide, rendant Z sans effet juste apres).
+        if (vertical > 0f)
+        {
+            if (WaterSurfaceQuery.TryGetSurfaceHeight(transform.position, out float surfaceY))
+            {
+                // _controller.height (capsule reellement utilisee par la
+                // collision) plutot que Appearance.CollisionHeight : source
+                // fiable a coup sur (toujours configuree pour que la
+                // collision fonctionne), contrairement a la donnee
+                // "Appearance" dont on n'est pas certain qu'elle soit deja
+                // peuplee au moment de ce calcul - c'etait trop haut au test
+                // malgre ce plafond, signe qu'elle valait sans doute ~0 la.
+                float feetTargetY = surfaceY - _controller.height * _swimSubmergeRatio;
+                float distanceToTarget = feetTargetY - transform.position.y;
+                vertical = distanceToTarget <= 0f ? 0f : Mathf.Min(vertical, distanceToTarget / Time.deltaTime);
+            }
+            else
+            {
+                vertical = 0f;
+            }
+        }
+
+        _verticalVelocity = vertical;
+        return vertical;
+    }
+
     private float GetInputMoveSpeed(float speed)
     {
         float smoothDuration = 0.2f;
 
 
-        float selectSpeed = Running ? _defaultRunSpeed : _defaultWalkSpeed;
+        float selectSpeed = Swimming ? _defaultSwimSpeed : (Running ? _defaultRunSpeed : _defaultWalkSpeed);
 
         if (InputManager.Instance.Move)
         {

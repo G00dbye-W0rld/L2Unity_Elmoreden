@@ -15,6 +15,7 @@ public class NewHumanoidAnimationController : NewBaseAnimationController
     [SerializeField] private float _defaultAtkWaitAnimationSpeed = 0.5f;
     [SerializeField] private float _defaultRunAnimationSpeed = 0.35f;
     [SerializeField] private float _defaultWalkAnimationSpeed = 0.4f;
+    [SerializeField] private float _defaultSwimAnimationSpeed = 0.4f;
     [SerializeField] private float _defaultJumpAnimationSpeed = 1.25f;
     [SerializeField] private float _defaultDieAnimationSpeed = 0.5f;
 
@@ -409,6 +410,29 @@ public class NewHumanoidAnimationController : NewBaseAnimationController
         }
     }
 
+    // Nage : un seul jeu de clips par race/genre (indices 42-45 de
+    // HumanoidAnimationDefaultEvent), pas de variante par arme comme
+    // Run()/Walk()/Wait() - a l'image de Sit()/Jump() ci-dessous.
+    public override void Swim()
+    {
+        _lastAnimationType = HumanoidWeaponAnimType.other;
+        if (PlayAnimation((int)HumanoidAnimationDefaultEvent.swim))
+        {
+            _animancerState.EffectiveSpeed = _swimSpdMultiplier * _defaultSwimAnimationSpeed;
+
+            if (!_animancerState.HasEvents)
+            {
+                _animancerState.Events.Add(0.5f, () => AudioHandler.PlayBreatheSound());
+            }
+        }
+    }
+
+    public override void SwimWait()
+    {
+        _lastAnimationType = HumanoidWeaponAnimType.other;
+        PlayAnimation((int)HumanoidAnimationDefaultEvent.swim_wait);
+    }
+
     public override void Sit()
     {
         _lastAnimationType = HumanoidWeaponAnimType.other;
@@ -424,7 +448,8 @@ public class NewHumanoidAnimationController : NewBaseAnimationController
     public override void Die()
     {
         _lastAnimationType = HumanoidWeaponAnimType.other;
-        if (PlayAnimation((int)HumanoidAnimationDefaultEvent.death))
+        HumanoidAnimationDefaultEvent animEvent = _entityReferenceHolder.Entity.Swimming ? HumanoidAnimationDefaultEvent.swim_death : HumanoidAnimationDefaultEvent.death;
+        if (PlayAnimation((int)animEvent))
         {
             _animancerState.EffectiveSpeed = _defaultDieAnimationSpeed;
 
@@ -441,7 +466,8 @@ public class NewHumanoidAnimationController : NewBaseAnimationController
     public override void DieWait()
     {
         _lastAnimationType = HumanoidWeaponAnimType.other;
-        PlayAnimation((int)HumanoidAnimationDefaultEvent.deathwait);
+        HumanoidAnimationDefaultEvent animEvent = _entityReferenceHolder.Entity.Swimming ? HumanoidAnimationDefaultEvent.swim_death_wait : HumanoidAnimationDefaultEvent.deathwait;
+        PlayAnimation((int)animEvent);
     }
 
     public override void Resurrect()

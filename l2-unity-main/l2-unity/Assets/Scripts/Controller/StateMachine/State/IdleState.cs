@@ -19,12 +19,22 @@ public class IdleState : StateBase
 
         }
 
-        NewPlayerAnimationController.Instance.Wait();
+        if (PlayerEntity.Instance.Swimming)
+        {
+            NewPlayerAnimationController.Instance.SwimWait();
+        }
+        else
+        {
+            NewPlayerAnimationController.Instance.Wait();
+        }
     }
 
     public override void Update()
     {
-        if (InputManager.Instance.Jump)
+        // SwimUp partage la meme touche (Espace) que Jump : sans ce garde, nager
+        // vers la surface declencherait aussi un saut (changement d'etat non
+        // voulu pendant la nage).
+        if (InputManager.Instance.Jump && !PlayerEntity.Instance.Swimming)
         {
             _stateMachine.ChangeIntention(Intention.INTENTION_JUMP);
             return;

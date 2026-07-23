@@ -1,3 +1,5 @@
+using AtmosphericHeightFog;
+using Bitgem.VFX.StylisedWater;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
@@ -17,13 +19,31 @@ public static class GameSettings
     private const string ResolutionIndexKey = "Settings_ResolutionIndex";
     private const string FullscreenKey = "Settings_Fullscreen";
     private const string AntiAliasingKey = "Settings_AntiAliasing";
-    private const string ShadowsKey = "Settings_ShadowsEnabled";
+    private const string ShadowDistanceKey = "Settings_ShadowDistanceLevel";
     private const string GraphicCursorKey = "Settings_GraphicCursor";
+    private const string ViewDistanceKey = "Settings_ViewDistanceLevel";
+    private const string WaterDetailKey = "Settings_WaterDetailLevel";
 
     private static readonly int[] MsaaSamples = { 1, 2, 4, 8 };
+    // Index aligne sur les choix du dropdown "Distance des ombres" (Desactivees/Proches/Moyennes/Lointaines).
+    private static readonly float[] ShadowDistances = { 0f, 25f, 50f, 100f };
+    // Index aligne sur "Distance d'affichage" (Faible/Moyenne/Elevee/Tres elevee). Facteurs
+    // d'ECHELLE relatifs, pas des distances absolues : chaque carte a son propre brouillard
+    // (Atmospheric Height Fog) deja calibre par les artistes (ex. la scene Game.unity a
+    // fogDistanceStart=179.49/fogDistanceEnd=381) - un chiffre en dur ecrasait ce reglage et
+    // pouvait meme inverser start>end (brouillard partout des le palier par defaut). Le far
+    // clip de la camera suit la meme echelle pour rester cohérent avec le brouillard.
+    private static readonly float[] ViewDistanceScale = { 0.6f, 1f, 1.6f, 2.4f };
+    // Index aligne sur "Detail de l'eau" (Basse/Moyenne/Haute). Moyenne = valeurs par defaut du
+    // materiau (WaterVolume-URP.shadergraph) : _DetailStrength/_RefractStrength/_BumpStrength.
+    private static readonly float[] WaterDetailStrengths = { 0.05f, 0.2f, 0.4f };
+    private static readonly float[] WaterRefractStrengths = { 0.03f, 0.08f, 0.16f };
+    private static readonly float[] WaterBumpStrengths = { 0.25f, 0.5f, 0.8f };
 
     private static bool _loaded;
-    private static float _cachedShadowDistance = -1f;
+    private static float _cachedFarClipPlane = -1f;
+    private static float _cachedFogDistanceStart = -1f;
+    private static float _cachedFogDistanceEnd = -1f;
 
     public static float MasterVolume { get; private set; } = 1f;
     public static float MusicVolume { get; private set; } = 1f;
@@ -37,8 +57,10 @@ public static class GameSettings
     public static bool Fullscreen { get; private set; } = true;
     // Index dans MsaaSamples (0 = desactive, 1 = x2, 2 = x4, 3 = x8)
     public static int AntiAliasingLevel { get; private set; } = 0;
-    public static bool ShadowsEnabled { get; private set; } = true;
+    public static int ShadowDistanceLevel { get; private set; } = 2;
     public static bool GraphicCursorEnabled { get; private set; } = true;
+    public static int ViewDistanceLevel { get; private set; } = 1;
+    public static int WaterDetailLevel { get; private set; } = 1;
 
     private static void Load()
     {
@@ -55,8 +77,10 @@ public static class GameSettings
         ResolutionIndex = PlayerPrefs.GetInt(ResolutionIndexKey, -1);
         Fullscreen = PlayerPrefs.GetInt(FullscreenKey, Screen.fullScreen ? 1 : 0) == 1;
         AntiAliasingLevel = PlayerPrefs.GetInt(AntiAliasingKey, 0);
-        ShadowsEnabled = PlayerPrefs.GetInt(ShadowsKey, 1) == 1;
+        ShadowDistanceLevel = PlayerPrefs.GetInt(ShadowDistanceKey, 2);
         GraphicCursorEnabled = PlayerPrefs.GetInt(GraphicCursorKey, 1) == 1;
+        ViewDistanceLevel = PlayerPrefs.GetInt(ViewDistanceKey, 1);
+        WaterDetailLevel = PlayerPrefs.GetInt(WaterDetailKey, 1);
     }
 
     // Applique les valeurs sauvegardees au demarrage (audio + video). A appeler
@@ -105,17 +129,69 @@ public static class GameSettings
         if (QualitySettings.renderPipeline is UniversalRenderPipelineAsset urpAsset)
         {
             urpAsset.msaaSampleCount = MsaaSamples[Mathf.Clamp(AntiAliasingLevel, 0, MsaaSamples.Length - 1)];
-
-            if (_cachedShadowDistance < 0f)
-            {
-                _cachedShadowDistance = urpAsset.shadowDistance > 0f ? urpAsset.shadowDistance : 50f;
-            }
-            urpAsset.shadowDistance = ShadowsEnabled ? _cachedShadowDistance : 0f;
+            urpAsset.shadowDistance = ShadowDistances[Mathf.Clamp(ShadowDistanceLevel, 0, ShadowDistances.Length - 1)];
         }
 
         if (CursorManager.Instance != null)
         {
             CursorManager.Instance.SetGraphicCursorEnabled(GraphicCursorEnabled);
+        }
+
+        float viewScale = ViewDistanceScale[Mathf.Clamp(ViewDistanceLevel, 0, ViewDistanceScale.Length - 1)];
+
+        Camera mainCamera = Camera.main;
+        if (mainCamera != null)
+        {
+            if (_cachedFarClipPlane < 0f)
+            {
+                _cachedFarClipPlane = mainCamera.farClipPlane;
+            }
+            mainCamera.farClipPlane = _cachedFarClipPlane * viewScale;
+        }
+
+        if (HeightFogGlobal.Instance != null)
+        {
+            if (_cachedFogDistanceStart < 0f)
+            {
+                _cachedFogDistanceStart = HeightFogGlobal.Instance.fogDistanceStart;
+                _cachedFogDistanceEnd = HeightFogGlobal.Instance.fogDistanceEnd;
+            }
+            HeightFogGlobal.Instance.fogDistanceStart = _cachedFogDistanceStart * viewScale;
+            HeightFogGlobal.Instance.fogDistanceEnd = _cachedFogDistanceEnd * viewScale;
+        }
+
+        ApplyWaterDetail();
+    }
+
+    // Noms de propriete reels du shader (WaterVolume-URP.shadergraph) : Shader Graph ne genere
+    // un nom lisible ("_WaveFrequency" etc.) QUE si la propriete a une "Reference" surchargee
+    // dans le Blackboard. _DetailStrength/_RefractStrength/_BumpStrength n'en ont pas -> le
+    // materiau les expose seulement sous leur nom auto-genere (Vector1_XXXXXXXX). Un premier
+    // essai avec les noms "propres" ne faisait donc rien (Material.SetFloat sur une propriete
+    // inexistante echoue silencieusement, pas d'erreur ni d'exception).
+    private const string DetailStrengthProperty = "Vector1_46E42935";
+    private const string RefractStrengthProperty = "Vector1_A6A0BC26";
+    private const string BumpStrengthProperty = "Vector1_B9F56378";
+
+    // Cherche tous les plans d'eau de la scene (meme approche que WaterSurfaceQuery :
+    // tous les WaterVolumeBase actifs, pas un singleton, au cas ou une carte en ait
+    // plusieurs disjoints) et applique le palier de detail/refraction sur une copie
+    // d'instance du materiau (.material, pas .sharedMaterial, pour ne pas modifier l'asset).
+    private static void ApplyWaterDetail()
+    {
+        int idx = Mathf.Clamp(WaterDetailLevel, 0, WaterDetailStrengths.Length - 1);
+        WaterVolumeBase[] volumes = Object.FindObjectsByType<WaterVolumeBase>(FindObjectsSortMode.None);
+        foreach (WaterVolumeBase volume in volumes)
+        {
+            MeshRenderer meshRenderer = volume.GetComponent<MeshRenderer>();
+            if (meshRenderer == null) continue;
+
+            Material material = meshRenderer.material;
+            if (!material.HasProperty(DetailStrengthProperty)) continue;
+
+            material.SetFloat(DetailStrengthProperty, WaterDetailStrengths[idx]);
+            material.SetFloat(RefractStrengthProperty, WaterRefractStrengths[idx]);
+            material.SetFloat(BumpStrengthProperty, WaterBumpStrengths[idx]);
         }
     }
 
@@ -200,13 +276,31 @@ public static class GameSettings
         ApplyVideo();
     }
 
-    public static void SetShadowsEnabled(bool value)
+    public static void SetShadowDistanceLevel(int level)
     {
         Load();
-        ShadowsEnabled = value;
-        PlayerPrefs.SetInt(ShadowsKey, ShadowsEnabled ? 1 : 0);
+        ShadowDistanceLevel = level;
+        PlayerPrefs.SetInt(ShadowDistanceKey, ShadowDistanceLevel);
         PlayerPrefs.Save();
         ApplyVideo();
+    }
+
+    public static void SetViewDistanceLevel(int level)
+    {
+        Load();
+        ViewDistanceLevel = level;
+        PlayerPrefs.SetInt(ViewDistanceKey, ViewDistanceLevel);
+        PlayerPrefs.Save();
+        ApplyVideo();
+    }
+
+    public static void SetWaterDetailLevel(int level)
+    {
+        Load();
+        WaterDetailLevel = level;
+        PlayerPrefs.SetInt(WaterDetailKey, WaterDetailLevel);
+        PlayerPrefs.Save();
+        ApplyWaterDetail();
     }
 
     public static void SetGraphicCursorEnabled(bool value)

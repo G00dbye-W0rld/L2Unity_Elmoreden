@@ -620,8 +620,8 @@ public class GameServerPacketHandler : ServerPacketHandler
     private void OnChangeMoveType(byte[] data)
     {
         ChangeMoveTypePacket packet = new ChangeMoveTypePacket(data);
-        // Debug.Log("ChangeMoveType: " + packet.Owner + " running? " + packet.Running);
-        World.Instance.ChangeMoveType(packet.Owner, packet.Running);
+        // Debug.Log("ChangeMoveType: " + packet.Owner + " running? " + packet.Running + " swimming? " + packet.Swimming);
+        World.Instance.ChangeMoveType(packet.Owner, packet.Running, packet.Swimming);
     }
 
     private void OnEntityDie(byte[] data)

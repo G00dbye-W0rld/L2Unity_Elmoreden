@@ -7,8 +7,10 @@ public class Stats
     [SerializeField] protected int _runSpeed;
     [SerializeField] protected float _moveSpeedMultiplier;
     [SerializeField] protected int _walkSpeed;
+    [SerializeField] protected int _swimSpeed;
     [SerializeField] protected float _scaledRunSpeed;
     [SerializeField] protected float _scaledWalkSpeed;
+    [SerializeField] protected float _scaledSwimSpeed;
     [SerializeField] protected float _attackSpeedMultiplier;
     [SerializeField] private float _attackRange;
     [SerializeField] protected int _pAtkSpd;
@@ -22,10 +24,12 @@ public class Stats
     public int Level { get => _level; set => _level = value; }
     public int RunSpeed { get => _runSpeed; set => _runSpeed = value; }
     public int WalkSpeed { get => _walkSpeed; set => _walkSpeed = value; }
+    public int SwimSpeed { get => _swimSpeed; set => _swimSpeed = value; }
     public float MoveSpeedMultiplier { get => _moveSpeedMultiplier; set => _moveSpeedMultiplier = value; }
     public float AttackSpeedMultiplier { get => _attackSpeedMultiplier; set => _attackSpeedMultiplier = value; }
     public float ScaledRunSpeed { get => _scaledRunSpeed; set => _scaledRunSpeed = value; }
     public float ScaledWalkSpeed { get => _scaledWalkSpeed; set => _scaledWalkSpeed = value; }
+    public float ScaledSwimSpeed { get => _scaledSwimSpeed; set => _scaledSwimSpeed = value; }
     public int PAtkSpd { get => _pAtkSpd; set => _pAtkSpd = value; }
     public int MAtkSpd { get => _mAtkSpd; set => _mAtkSpd = value; }
     public int MaxHp { get => _maxHp; set => _maxHp = value; }
@@ -39,6 +43,7 @@ public class Stats
         _attackRange = stats.AttackRange;
         _runSpeed = stats.RunSpeed;
         _walkSpeed = stats.WalkSpeed;
+        _swimSpeed = stats.SwimSpeed;
         // _scaledRunSpeed = stats.ScaledRunSpeed;
         // _scaledWalkSpeed = stats._scaledWalkSpeed;
         // _moveSpeedMultiplier = stats.MoveSpeedMultiplier;

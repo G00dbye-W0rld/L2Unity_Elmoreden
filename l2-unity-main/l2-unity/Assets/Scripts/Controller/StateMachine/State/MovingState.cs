@@ -8,7 +8,11 @@ public class MovingState : StateBase
 
     private void UpdateMoveAnimation()
     {
-        if (PlayerEntity.Instance.Running)
+        if (PlayerEntity.Instance.Swimming)
+        {
+            NewPlayerAnimationController.Instance.Swim();
+        }
+        else if (PlayerEntity.Instance.Running)
         {
             NewPlayerAnimationController.Instance.Run();
         }
@@ -63,7 +67,10 @@ public class MovingState : StateBase
             TargetManager.Instance.ClearAttackTarget();
         }
 
-        if (InputManager.Instance.Jump)
+        // SwimUp partage la meme touche (Espace) que Jump : sans ce garde, nager
+        // vers la surface declencherait aussi un saut (changement d'etat non
+        // voulu pendant la nage).
+        if (InputManager.Instance.Jump && !PlayerEntity.Instance.Swimming)
         {
             _stateMachine.ChangeIntention(Intention.INTENTION_JUMP);
         }

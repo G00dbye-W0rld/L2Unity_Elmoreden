@@ -49,6 +49,14 @@ public class PlayerEntity : Entity
         return converted;
     }
 
+    public override float UpdateSwimSpeed(int speed)
+    {
+        float converted = base.UpdateSwimSpeed(speed);
+        PlayerController.Instance.DefaultSwimSpeed = converted;
+
+        return converted;
+    }
+
     public void OnActionFailed()
     {
         PlayerStateMachine.Instance.OnActionDenied();
@@ -86,6 +94,30 @@ public class PlayerEntity : Entity
         if (CharacterInfoWindow.Instance != null)
         {
             CharacterInfoWindow.Instance.UpdateValues();
+        }
+    }
+
+    public override void UpdateSwimming(bool swimming)
+    {
+        base.UpdateSwimming(swimming);
+
+        if (PlayerController.Instance != null)
+        {
+            PlayerController.Instance.Swimming = swimming;
+        }
+
+        if (!swimming)
+        {
+            // Force une nouvelle recherche des volumes d'eau a la prochaine
+            // session de nage, au cas ou on aurait change de carte entre
+            // temps (sans effet si toujours la meme carte, juste un cache a
+            // reconstruire une fois).
+            WaterSurfaceQuery.Invalidate();
+        }
+
+        if (PlayerStateMachine.Instance != null)
+        {
+            PlayerStateMachine.Instance.NotifyEvent(Event.MOVE_TYPE_UPDATED);
         }
     }
 }

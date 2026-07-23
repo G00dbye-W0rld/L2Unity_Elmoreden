@@ -84,6 +84,7 @@ public class PlayerSpawner : EntitySpawnStrategy<PlayerAppearance, PlayerStats, 
         entity.UpdateMAtkSpeed(stats.MAtkSpd);
         entity.UpdateWalkSpeed(stats.WalkSpeed);
         entity.UpdateRunSpeed(stats.RunSpeed);
+        entity.UpdateSwimSpeed(stats.SwimSpeed);
 
         ((PlayerStats)entity.Stats).UpdateStats(stats);
 

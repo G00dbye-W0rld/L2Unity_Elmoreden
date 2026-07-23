@@ -65,9 +65,10 @@
        chaine flex (qui traverse plusieurs GroupBox/TemplateContainer) ne se
        propage pas. Sans ca, la boite epouse ses lignes et son bord bas dessine
        un trait au milieu de la fenetre sur les onglets courts (Jeu/Audio), avec
-       le fond sombre de la fenetre visible en dessous. Fenetre = 430px de haut
-       moins l'entete/les onglets/le pied => ~310px disponibles ici. */
-    min-height: 305px;
+       le fond sombre de la fenetre visible en dessous. Fenetre = 500px de haut
+       moins l'entete/les onglets/le pied => ~375px disponibles ici (agrandie de
+       430 a 500 pour loger les touches reassignables sur 2 colonnes). */
+    min-height: 375px;
     flex-direction: column;
     overflow: hidden;
     background-image: resource('Data/UI/Assets/Tab/Tab_DF_bg');
@@ -194,6 +195,88 @@
 
 .l2-slider:active .unity-base-slider__tracker {
     background-image: resource('Data/UI/Assets/Scrollbar/HorizontalSliderBarCenterOn');
+}
+
+/* ---------- Section "Touches" (onglet Jeu) ---------- */
+.settings-section-label {
+    font-size: 12px;
+    -unity-font-style: bold;
+    margin-top: 2px;
+    margin-bottom: 6px;
+    flex-shrink: 0;
+}
+
+.settings-keybind-columns {
+    flex-direction: row;
+    flex-grow: 1;
+}
+
+.settings-keybind-column {
+    flex-direction: column;
+    flex-grow: 1;
+    flex-basis: 0;
+    margin-right: 16px;
+}
+
+.settings-keybind-column:last-child {
+    margin-right: 0;
+}
+
+.settings-keybind-row {
+    flex-direction: row;
+    align-items: center;
+    min-height: 22px;
+    margin-bottom: 6px;
+    padding: 0;
+}
+
+.settings-keybind-label {
+    width: 105px;
+    flex-shrink: 0;
+    font-size: 12px;
+}
+
+.settings-keybind-btn {
+    width: 75px;
+    height: 22px;
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    background-color: transparent;
+    background-image: resource('Data/UI/Assets/Button/Button_DF');
+    -unity-slice-left: 15;
+    -unity-slice-top: 15;
+    -unity-slice-right: 15;
+    -unity-slice-bottom: 15;
+    -unity-slice-scale: 1px;
+    color: rgba(255, 249, 227, 0.96);
+    font-size: 11px;
+    -unity-text-align: middle-center;
+    -unity-font-definition: resource('Data/UI/Assets/Font/tahoma Light');
+}
+
+.settings-keybind-btn:hover {
+    background-image: resource('Data/UI/Assets/Button/Button_DF_Over');
+}
+
+.settings-keybind-btn:active {
+    background-image: resource('Data/UI/Assets/Button/Button_DF_Down');
+}
+
+.settings-keybind-btn-listening {
+    color: rgb(255, 210, 90);
+}
+
+.settings-keybind-footer {
+    flex-direction: row;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 6px;
+    padding: 0;
+}
+
+.settings-keybind-reset-btn {
+    width: 130px;
 }
 
 /* ---------- Pied de fenêtre ---------- */

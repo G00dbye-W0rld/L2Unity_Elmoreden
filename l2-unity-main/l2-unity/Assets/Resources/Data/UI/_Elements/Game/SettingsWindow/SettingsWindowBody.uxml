@@ -32,16 +32,20 @@
                     <ui:DropdownField name="AntiAliasingDropdown" choices="Désactivé,x2,x4,x8" class="l2-dropdown settings-dropdown" />
                 </ui:GroupBox>
                 <ui:GroupBox class="settings-row">
-                    <ui:Label text="Ombres" class="settings-row-label l2-color-3" />
-                    <ui:Toggle name="ShadowsToggle" class="settings-toggle" />
+                    <ui:Label text="Distance des ombres" class="settings-row-label settings-row-label-wide l2-color-3" />
+                    <ui:DropdownField name="ShadowDistanceDropdown" choices="Désactivées,Proches,Moyennes,Lointaines" class="l2-dropdown settings-dropdown" />
                 </ui:GroupBox>
                 <ui:GroupBox class="settings-row">
                     <ui:Label text="Curseur graphique" class="settings-row-label l2-color-3" />
                     <ui:Toggle name="GraphicCursorToggle" class="settings-toggle" />
                 </ui:GroupBox>
-                <ui:GroupBox class="settings-row settings-row-disabled">
-                    <ui:Label text="Distance d'affichage (à venir)" class="settings-row-label settings-row-label-wide l2-color-3" />
-                    <ui:DropdownField name="ViewDistanceDropdown" choices="Faible,Moyenne,Élevée,Très élevée" picking-mode="Ignore" class="l2-dropdown settings-dropdown" />
+                <ui:GroupBox class="settings-row">
+                    <ui:Label text="Distance d'affichage" class="settings-row-label settings-row-label-wide l2-color-3" />
+                    <ui:DropdownField name="ViewDistanceDropdown" choices="Faible,Moyenne,Élevée,Très élevée" class="l2-dropdown settings-dropdown" />
+                </ui:GroupBox>
+                <ui:GroupBox class="settings-row">
+                    <ui:Label text="Détail de l'eau" class="settings-row-label settings-row-label-wide l2-color-3" />
+                    <ui:DropdownField name="WaterDetailDropdown" choices="Basse,Moyenne,Haute" class="l2-dropdown settings-dropdown" />
                 </ui:GroupBox>
                 <ui:GroupBox class="settings-row settings-row-disabled">
                     <ui:Label text="Effets météo (à venir)" class="settings-row-label settings-row-label-wide l2-color-3" />
@@ -86,6 +90,15 @@
                 <ui:GroupBox class="settings-row settings-row-disabled">
                     <ui:Label text="Invitations de groupe (à venir)" class="settings-row-label settings-row-label-wide l2-color-3" />
                     <ui:Toggle name="DenyPartyRequestToggle" picking-mode="Ignore" class="settings-toggle" />
+                </ui:GroupBox>
+
+                <ui:Label text="Touches" class="settings-section-label l2-color-3" />
+                <ui:VisualElement name="KeybindColumns" class="settings-keybind-columns">
+                    <ui:VisualElement name="KeybindColumnLeft" class="settings-keybind-column" />
+                    <ui:VisualElement name="KeybindColumnRight" class="settings-keybind-column" />
+                </ui:VisualElement>
+                <ui:GroupBox class="settings-keybind-footer">
+                    <ui:Button name="ResetKeybindsButton" text="Réinitialiser" parse-escape-sequences="true" class="settings-footer-btn settings-keybind-reset-btn" />
                 </ui:GroupBox>
             </ui:VisualElement>
 

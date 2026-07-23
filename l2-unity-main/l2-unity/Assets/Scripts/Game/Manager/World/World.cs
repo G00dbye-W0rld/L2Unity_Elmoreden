@@ -215,11 +215,12 @@ public class World : MonoBehaviour
         });
     }
 
-    public Task ChangeMoveType(int owner, bool running)
+    public Task ChangeMoveType(int owner, bool running, bool swimming)
     {
         return _worldSpawner.ExecuteWithEntityAsync(owner, e =>
                 {
                     e.UpdateMoveType(running);
+                    e.UpdateSwimming(swimming);
                 });
     }
 

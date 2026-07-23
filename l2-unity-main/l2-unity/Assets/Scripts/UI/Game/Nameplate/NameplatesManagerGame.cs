@@ -1,6 +1,12 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
+// Execution tardive (apres l'ordre par defaut 0, donc apres CameraController
+// qui n'a pas d'attribut explicite) : indispensable pour que
+// HandlePlayerNameplate() (appelee depuis LateUpdate ci-dessous) lise la
+// rotation de camera DEJA finalisee pour cette frame, pas celle de la frame
+// precedente - cf. le bug de "nom qui vibre vu de profil" corrige ci-dessous.
+[DefaultExecutionOrder(100)]
 public class NameplatesManagerGame : NameplatesManagerBase
 {
     private PlayerNameplate playerNameplate;
@@ -46,6 +52,21 @@ public class NameplatesManagerGame : NameplatesManagerBase
         {
             worldRenderer.CullOutOfRange(t => IsNameplateVisible(t));
         }
+    }
+
+    // HandlePlayerNameplate() etait appelee depuis FixedUpdate (cadence fixe
+    // ~50Hz), completement decorrelee du rendu a cadence variable et du
+    // deplacement du joueur (qui bouge en Update() a chaque frame de rendu) :
+    // la nameplate "rattrapait" par a-coups a chaque tick physique au lieu de
+    // suivre le personnage en continu. Vu presque de profil, meme un tout
+    // petit decalage de rattrapage se traduit par une vibration tres visible
+    // (une plaque de texte quasi perpendiculaire a la camera amplifie
+    // enormement les moindres variations d'angle/position). Deplacee en
+    // LateUpdate (apres tout mouvement du joueur ET apres la rotation finale
+    // de la camera, cf. [DefaultExecutionOrder] plus haut).
+    private void LateUpdate()
+    {
+        if (!IsSystemReady()) return;
 
         HandlePlayerNameplate();
     }

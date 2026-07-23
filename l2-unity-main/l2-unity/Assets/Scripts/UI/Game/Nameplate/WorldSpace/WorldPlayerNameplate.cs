@@ -9,6 +9,20 @@ using UnityEngine;
 // avance/recule avec le ratio).
 public class WorldPlayerNameplate : WorldNameplate
 {
+    // SetupGaugePacket.GaugeColor -> materiau. BLUE (cast de sort) et CYAN
+    // (oxygene/noyade, WaterTaskManager cote serveur) partagent le meme
+    // materiau bleu (asset MP) - aucun asset cyan dedie dans le projet, et
+    // suffisant pour l'usage demande (jauge d'oxygene "bleue"). GREEN (faim
+    // de monture) retombe sur le materiau CP par defaut, faute d'asset vert.
+    private const string GaugeMaterialResourceDir = "Data/UI/Assets/WorldNameplate/Materials";
+    private static Material _gaugeBgDefaultMat;
+    private static Material _gaugeFillDefaultMat;
+    private static Material _gaugeBgBlueMat;
+    private static Material _gaugeFillBlueMat;
+    private static Material _gaugeBgRedMat;
+    private static Material _gaugeFillRedMat;
+    private static bool _gaugeMaterialsLoaded;
+
     private readonly Transform _gaugeRoot;
     private readonly MeshRenderer _gaugeBG;
     private readonly MeshRenderer _gaugeFill;
@@ -39,12 +53,48 @@ public class WorldPlayerNameplate : WorldNameplate
 
         _gaugeBG.enabled = false;
         _gaugeFill.enabled = false;
+
+        LoadGaugeMaterialsOnce();
+    }
+
+    // Charge une seule fois (statique, partagee par toutes les instances) -
+    // avec repli sur le materiau deja bake dans le prefab (celui assigne par
+    // WorldNameplatePrefabGenerator) si les variantes par couleur n'ont pas
+    // encore ete generees, pour ne rien casser en attendant.
+    private void LoadGaugeMaterialsOnce()
+    {
+        if (_gaugeMaterialsLoaded) return;
+        _gaugeMaterialsLoaded = true;
+
+        _gaugeBgDefaultMat = Resources.Load<Material>($"{GaugeMaterialResourceDir}/GaugeBG") ?? _gaugeBG.sharedMaterial;
+        _gaugeFillDefaultMat = Resources.Load<Material>($"{GaugeMaterialResourceDir}/GaugeFill") ?? _gaugeFill.sharedMaterial;
+        _gaugeBgBlueMat = Resources.Load<Material>($"{GaugeMaterialResourceDir}/GaugeBG_Blue") ?? _gaugeBgDefaultMat;
+        _gaugeFillBlueMat = Resources.Load<Material>($"{GaugeMaterialResourceDir}/GaugeFill_Blue") ?? _gaugeFillDefaultMat;
+        _gaugeBgRedMat = Resources.Load<Material>($"{GaugeMaterialResourceDir}/GaugeBG_Red") ?? _gaugeBgDefaultMat;
+        _gaugeFillRedMat = Resources.Load<Material>($"{GaugeMaterialResourceDir}/GaugeFill_Red") ?? _gaugeFillDefaultMat;
     }
 
     public void ShowGauge(SetupGaugePacket.GaugeColor color, float startTime, int durationMs)
     {
         GaugeStartTime = startTime;
         GaugeEndTime = startTime + durationMs / 1000f;
+
+        switch (color)
+        {
+            case SetupGaugePacket.GaugeColor.BLUE:
+            case SetupGaugePacket.GaugeColor.CYAN:
+                _gaugeBG.sharedMaterial = _gaugeBgBlueMat;
+                _gaugeFill.sharedMaterial = _gaugeFillBlueMat;
+                break;
+            case SetupGaugePacket.GaugeColor.RED:
+                _gaugeBG.sharedMaterial = _gaugeBgRedMat;
+                _gaugeFill.sharedMaterial = _gaugeFillRedMat;
+                break;
+            default:
+                _gaugeBG.sharedMaterial = _gaugeBgDefaultMat;
+                _gaugeFill.sharedMaterial = _gaugeFillDefaultMat;
+                break;
+        }
 
         if (!_isGaugeVisible)
         {

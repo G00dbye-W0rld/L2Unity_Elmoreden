@@ -39,8 +39,22 @@ public class WorldNameplatePrefabGenerator
     // Le systeme UI Toolkit actuel reference "Gauge_DF_Small_CP", un dossier
     // qui n'existe pas dans le projet (asset deja manquant/casse
     // aujourd'hui) - on utilise donc la variante existante la plus proche.
+    // Sert de variante par defaut/GREEN (aucun asset vert dedie dans le
+    // projet - cf. GaugeMaterialResourceDir plus bas).
     const string GaugeBgSrc = "Assets/Resources/Data/UI/Assets/Status/Gauge/Gauge_DF_CP/Gauge_DF_CP_bg_Center.png";
     const string GaugeFillSrc = "Assets/Resources/Data/UI/Assets/Status/Gauge/Gauge_DF_CP/Gauge_DF_CP_Center.png";
+
+    // SetupGauge (serveur) porte une couleur (BLUE=cast sort, RED=cadence
+    // arc, CYAN=oxygene/noyade, GREEN=faim monture) que WorldPlayerNameplate
+    // ignorait totalement jusqu'ici (toujours le meme visuel CP quel que soit
+    // le contexte). BLUE et CYAN partagent le meme asset MP (bleu) - aucun
+    // asset cyan dedie dans le projet, et suffisant pour l'usage demande
+    // (jauge d'oxygene "bleue"). RED reutilise l'asset HP (rouge), deja
+    // present et plus lisible que le CP generique pour la cadence d'arc.
+    const string GaugeBgBlueSrc = "Assets/Resources/Data/UI/Assets/Status/Gauge/Gauge_DF_Small_mp/Gauge_DF_Small_mp_bg_Center.png";
+    const string GaugeFillBlueSrc = "Assets/Resources/Data/UI/Assets/Status/Gauge/Gauge_DF_Small_mp/Gauge_DF_Small_mp_Center.png";
+    const string GaugeBgRedSrc = "Assets/Resources/Data/UI/Assets/Status/Gauge/Gauge_DF_Small_HP/Gauge_DF_Small_hp_bg_Center.png";
+    const string GaugeFillRedSrc = "Assets/Resources/Data/UI/Assets/Status/Gauge/Gauge_DF_Small_HP/Gauge_DF_Small_hp_Center.png";
 
     const string SpriteOutDir = "Assets/Resources/Data/UI/Assets/WorldNameplate";
     const string MaterialOutDir = SpriteOutDir + "/Materials";
@@ -73,6 +87,10 @@ public class WorldNameplatePrefabGenerator
         Texture2D iconAttackTex = LoadIconTexture(IconAttackSrc);
         Texture2D gaugeBgTex = LoadOrCopyTexture(GaugeBgSrc, $"{SpriteOutDir}/GaugeBG.png");
         Texture2D gaugeFillTex = LoadOrCopyTexture(GaugeFillSrc, $"{SpriteOutDir}/GaugeFill.png");
+        Texture2D gaugeBgBlueTex = LoadOrCopyTexture(GaugeBgBlueSrc, $"{SpriteOutDir}/GaugeBG_Blue.png");
+        Texture2D gaugeFillBlueTex = LoadOrCopyTexture(GaugeFillBlueSrc, $"{SpriteOutDir}/GaugeFill_Blue.png");
+        Texture2D gaugeBgRedTex = LoadOrCopyTexture(GaugeBgRedSrc, $"{SpriteOutDir}/GaugeBG_Red.png");
+        Texture2D gaugeFillRedTex = LoadOrCopyTexture(GaugeFillRedSrc, $"{SpriteOutDir}/GaugeFill_Red.png");
 
         if (iconHoverTex == null || iconTargetTex == null || iconAttackTex == null)
         {
@@ -80,7 +98,7 @@ public class WorldNameplatePrefabGenerator
             return;
         }
 
-        if (gaugeBgTex == null || gaugeFillTex == null)
+        if (gaugeBgTex == null || gaugeFillTex == null || gaugeBgBlueTex == null || gaugeFillBlueTex == null || gaugeBgRedTex == null || gaugeFillRedTex == null)
         {
             Debug.LogError("[WorldNameplatePrefabGenerator] Une ou plusieurs textures source sont introuvables, generation annulee.");
             return;
@@ -98,6 +116,13 @@ public class WorldNameplatePrefabGenerator
         EnsureFolder(MaterialOutDir);
         Material gaugeBgMat = GetOrCreateQuadMaterial(gaugeBgTex, $"{MaterialOutDir}/GaugeBG.mat");
         Material gaugeFillMat = GetOrCreateQuadMaterial(gaugeFillTex, $"{MaterialOutDir}/GaugeFill.mat");
+        // Variantes par couleur (SetupGaugePacket.GaugeColor), chargees a la
+        // volee par WorldPlayerNameplate.ShowGauge - cf. GaugeBgBlueSrc plus
+        // haut pour le detail des choix d'assets par couleur.
+        GetOrCreateQuadMaterial(gaugeBgBlueTex, $"{MaterialOutDir}/GaugeBG_Blue.mat");
+        GetOrCreateQuadMaterial(gaugeFillBlueTex, $"{MaterialOutDir}/GaugeFill_Blue.mat");
+        GetOrCreateQuadMaterial(gaugeBgRedTex, $"{MaterialOutDir}/GaugeBG_Red.mat");
+        GetOrCreateQuadMaterial(gaugeFillRedTex, $"{MaterialOutDir}/GaugeFill_Red.mat");
 
         // Un materiau PAR ETAT (Unlit - pas Lit, pour ne pas reagir a
         // l'eclairage de la scene et deformer la couleur, meme constat que
@@ -137,7 +162,8 @@ public class WorldNameplatePrefabGenerator
         GameObject gauge = new GameObject("Gauge");
         gauge.layer = nameplateLayer;
         gauge.transform.SetParent(root.transform, false);
-        gauge.transform.localPosition = new Vector3(0f, -0.2f, 0f);
+        // Descendue legerement (-0.2 -> -0.26), jugee trop proche du nom.
+        gauge.transform.localPosition = new Vector3(0f, -0.26f, 0f);
 
         // GaugeFill est centre comme GaugeBG (pas de decalage a gauche - un
         // Quad n'a pas de notion de pivot comme un Sprite) : c'est
@@ -148,9 +174,10 @@ public class WorldNameplatePrefabGenerator
         // billboard pointe +Z a l'oppose de la camera) : coplanaire avec le
         // fond, les deux quads transparents z-fightaient -> clignotement
         // visible pendant le chargement.
-        // Taille +30% (0.8x0.08 -> 1.04x0.104), jugee trop petite.
-        GameObject gaugeBG = CreateQuadChild(gauge.transform, "GaugeBG", gaugeBgMat, nameplateLayer, Vector3.zero, new Vector2(1.04f, 0.104f));
-        GameObject gaugeFill = CreateQuadChild(gauge.transform, "GaugeFill", gaugeFillMat, nameplateLayer, new Vector3(0f, 0f, -0.005f), new Vector2(1.04f, 0.104f));
+        // Epaisseur +50% (0.104 -> 0.156), jugee pas assez visible ; largeur
+        // inchangee.
+        GameObject gaugeBG = CreateQuadChild(gauge.transform, "GaugeBG", gaugeBgMat, nameplateLayer, Vector3.zero, new Vector2(1.04f, 0.156f));
+        GameObject gaugeFill = CreateQuadChild(gauge.transform, "GaugeFill", gaugeFillMat, nameplateLayer, new Vector3(0f, 0f, -0.005f), new Vector2(1.04f, 0.156f));
         gaugeBG.GetComponent<MeshRenderer>().enabled = false;
         gaugeFill.GetComponent<MeshRenderer>().enabled = false;
 

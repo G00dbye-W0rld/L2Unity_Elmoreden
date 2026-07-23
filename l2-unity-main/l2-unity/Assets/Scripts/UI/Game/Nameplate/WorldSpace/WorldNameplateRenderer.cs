@@ -30,6 +30,9 @@ public class WorldNameplateRenderer : MonoBehaviour
     [Tooltip("Taille ECRAN de la barre de cast, independante du zoom : la jauge est contre-scalee chaque frame pour garder une taille apparente constante quelle que soit la distance camera (elle ignore le clamp min/max applique au reste de la nameplate).")]
     [SerializeField] private float gaugeScreenFactor = 0.075f;
 
+    [Tooltip("Vitesse de lissage de la rotation billboard (Slerp par frame). Sans lissage, root.rotation copiait directement _mainCameraTransform.forward chaque frame - le moindre micro-bruit de la camera (suivi du joueur en mouvement) se traduisait par une vibration visible du nom, surtout genante vue de profil (une rotation infime y change beaucoup l'aspect d'un plan de texte plat). Plus haut = plus reactif mais moins filtre.")]
+    [SerializeField] private float billboardSmoothing = 20f;
+
     [Header("Fondu par distance")]
     [Tooltip("Debut du fondu, en fraction de la distance de disparition (cull) : 0.7 = commence a 70% de la portee, termine (invisible) pile au cull. Exprime en fraction pour rester aligne sur le cull quelle que soit sa valeur - pas de pop. La nameplate du joueur local n'est jamais estompee.")]
     [Range(0f, 1f)]
@@ -160,7 +163,8 @@ public class WorldNameplateRenderer : MonoBehaviour
         camForwardFlat.y = 0f;
         if (camForwardFlat.sqrMagnitude > 0.0001f)
         {
-            root.rotation = Quaternion.LookRotation(camForwardFlat);
+            Quaternion targetRotation = Quaternion.LookRotation(camForwardFlat);
+            root.rotation = Quaternion.Slerp(root.rotation, targetRotation, Time.deltaTime * billboardSmoothing);
         }
 
         float distance = toCamera.magnitude;

@@ -120,8 +120,8 @@ public class PlayerInfoPacket : ServerPacket
 
             Stats.RunSpeed = ReadI();
             Stats.WalkSpeed = ReadI();
-            ReadI(); // swim speed
-            ReadI(); // swim speed
+            Stats.SwimSpeed = ReadI(); // swim speed
+            ReadI(); // swim speed (identique, envoye deux fois par le serveur)
             ReadI();
             ReadI();
             ReadI(); //RunSpeed

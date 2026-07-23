@@ -17,6 +17,8 @@ public class InputManager : MonoBehaviour
     private InputAction _arrowUpAction;
     private InputAction _arrowDownAction;
     private InputAction _jumpAction;
+    private InputAction _swimUpAction;
+    private InputAction _swimDownAction;
     private InputAction _attackAction;
     private InputAction _nextTargetAction;
     private InputAction _targetSelfAction;
@@ -59,6 +61,11 @@ public class InputManager : MonoBehaviour
     [field: SerializeField] public bool Move { get; private set; }
     [field: SerializeField] public bool MoveForward { get; private set; }
     [field: SerializeField] public bool Jump { get; private set; }
+    // Maintenus (IsPressed), pas WasPerformedThisFrame comme Jump : la nage
+    // verticale doit monter/descendre en continu tant que la touche reste
+    // enfoncee, pas juste sur l'appui initial.
+    [field: SerializeField] public bool SwimUp { get; private set; }
+    [field: SerializeField] public bool SwimDown { get; private set; }
     [field: SerializeField] public bool Attack { get; private set; }
     [field: SerializeField] public bool NextTarget { get; private set; }
     [field: SerializeField] public bool TargetSelf { get; private set; }
@@ -87,6 +94,8 @@ public class InputManager : MonoBehaviour
 
     private PlayerInput _playerInput;
 
+    public InputActionAsset Actions { get { return _playerInput.actions; } }
+
     private static InputManager _instance;
     public static InputManager Instance { get { return _instance; } }
 
@@ -102,8 +111,14 @@ public class InputManager : MonoBehaviour
         }
 
         _playerInput = GetComponent<PlayerInput>();
+        KeybindManager.ApplySavedOverrides(_playerInput.actions);
 
         SetupInputActions();
+    }
+
+    public InputAction GetAction(string name)
+    {
+        return _playerInput.actions[name];
     }
 
     private void SetupInputActions()
@@ -118,6 +133,8 @@ public class InputManager : MonoBehaviour
         _arrowUpAction = _playerInput.actions["ArrowUp"];
         _arrowDownAction = _playerInput.actions["ArrowDown"];
         _jumpAction = _playerInput.actions["Jump"];
+        _swimUpAction = _playerInput.actions["SwimUp"];
+        _swimDownAction = _playerInput.actions["SwimDown"];
         _nextTargetAction = _playerInput.actions["NextTarget"];
         _targetSelfAction = _playerInput.actions["TargetSelf"];
         _attackAction = _playerInput.actions["Attack"];
@@ -189,6 +206,8 @@ public class InputManager : MonoBehaviour
         {
             MoveInput = _moveAction.ReadValue<Vector2>();
             Jump = _jumpAction.WasPerformedThisFrame();
+            SwimUp = _swimUpAction.IsPressed();
+            SwimDown = _swimDownAction.IsPressed();
             Attack = _attackAction.WasPerformedThisFrame();
             NextTarget = _nextTargetAction.WasPerformedThisFrame();
             TargetSelf = _targetSelfAction.WasPerformedThisFrame();
@@ -210,6 +229,8 @@ public class InputManager : MonoBehaviour
         else
         {
             MoveInput = Vector2.zero;
+            SwimUp = false;
+            SwimDown = false;
         }
 
         ArrowUp = _arrowUpAction.WasPerformedThisFrame();

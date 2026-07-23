@@ -1,5 +1,7 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
 // Fenetre de reglages systeme.
@@ -24,6 +26,9 @@ public class SettingsWindow : L2PopupWindow
     private Button _audioTabBtn;
     private Button _gameTabBtn;
 
+    private readonly Dictionary<string, Button> _keybindButtons = new Dictionary<string, Button>();
+    private InputActionRebindingExtensions.RebindingOperation _activeRebind;
+
     private struct SettingsSnapshot
     {
         public float Master, Music, SFX, UI, Ambient;
@@ -31,8 +36,11 @@ public class SettingsWindow : L2PopupWindow
         public int Resolution;
         public bool Fullscreen;
         public int AntiAliasing;
-        public bool Shadows;
+        public int ShadowDistance;
         public bool GraphicCursor;
+        public int ViewDistance;
+        public int WaterDetail;
+        public string KeybindOverridesJson;
     }
 
     private SettingsSnapshot _snapshot;
@@ -171,17 +179,120 @@ public class SettingsWindow : L2PopupWindow
             GameSettings.SetAntiAliasingLevel(aaDropdown.choices.IndexOf(evt.newValue));
         });
 
-        Toggle shadowsToggle = (Toggle)GetElementById("ShadowsToggle");
-        shadowsToggle.RegisterValueChangedCallback(evt => GameSettings.SetShadowsEnabled(evt.newValue));
+        DropdownField shadowDropdown = (DropdownField)GetElementById("ShadowDistanceDropdown");
+        shadowDropdown.RegisterValueChangedCallback(evt =>
+        {
+            GameSettings.SetShadowDistanceLevel(shadowDropdown.choices.IndexOf(evt.newValue));
+        });
 
         Toggle cursorToggle = (Toggle)GetElementById("GraphicCursorToggle");
         cursorToggle.RegisterValueChangedCallback(evt => GameSettings.SetGraphicCursorEnabled(evt.newValue));
+
+        DropdownField viewDistanceDropdown = (DropdownField)GetElementById("ViewDistanceDropdown");
+        viewDistanceDropdown.RegisterValueChangedCallback(evt =>
+        {
+            GameSettings.SetViewDistanceLevel(viewDistanceDropdown.choices.IndexOf(evt.newValue));
+        });
+
+        DropdownField waterDetailDropdown = (DropdownField)GetElementById("WaterDetailDropdown");
+        waterDetailDropdown.RegisterValueChangedCallback(evt =>
+        {
+            GameSettings.SetWaterDetailLevel(waterDetailDropdown.choices.IndexOf(evt.newValue));
+        });
 
         BindAudioSlider("MasterVolumeSlider", GameSettings.SetMasterVolume, "Master");
         BindAudioSlider("MusicVolumeSlider", GameSettings.SetMusicVolume, "Music");
         BindAudioSlider("SFXVolumeSlider", GameSettings.SetSFXVolume, "SFX");
         BindAudioSlider("UIVolumeSlider", GameSettings.SetUIVolume, "UI");
         BindAudioSlider("AmbientVolumeSlider", GameSettings.SetAmbientVolume, "Ambient");
+
+        BuildKeybindRows();
+    }
+
+    // Genere une ligne (label + bouton) par action reassignable, repartie sur 2
+    // colonnes (moitie/moitie) pour tenir dans la hauteur de la fenetre sans
+    // ScrollView - un ScrollView imbrique ici s'est deja revele fragile par le
+    // passe dans cette fenetre (cf. commentaire sur .settings-content-box).
+    // Fait en C# plutot qu'en UXML statique : la liste vient de
+    // KeybindManager.Rebindables, seul point de verite pour ne pas
+    // desynchroniser UI et logique.
+    private void BuildKeybindRows()
+    {
+        VisualElement columnLeft = GetElementById("KeybindColumnLeft");
+        VisualElement columnRight = GetElementById("KeybindColumnRight");
+        columnLeft.Clear();
+        columnRight.Clear();
+        _keybindButtons.Clear();
+
+        int total = KeybindManager.Rebindables.Length;
+        int leftCount = (total + 1) / 2;
+
+        for (int i = 0; i < total; i++)
+        {
+            KeybindManager.RebindableAction entry = KeybindManager.Rebindables[i];
+            InputAction action = InputManager.Instance.GetAction(entry.ActionName);
+
+            GroupBox row = new GroupBox();
+            row.AddToClassList("settings-keybind-row");
+
+            Label label = new Label(entry.Label);
+            label.AddToClassList("settings-keybind-label");
+            label.AddToClassList("l2-color-3");
+            row.Add(label);
+
+            Button rebindButton = new Button { text = KeybindManager.GetBindingDisplayString(action) };
+            rebindButton.AddToClassList("settings-keybind-btn");
+            rebindButton.RegisterCallback<ClickEvent>(evt => BeginRebind(action, rebindButton));
+            row.Add(rebindButton);
+
+            (i < leftCount ? columnLeft : columnRight).Add(row);
+            _keybindButtons[entry.ActionName] = rebindButton;
+        }
+
+        Button resetButton = (Button)GetElementById("ResetKeybindsButton");
+        resetButton.AddManipulator(new ButtonClickSoundManipulator(resetButton));
+        resetButton.RegisterCallback<ClickEvent>(evt => ResetAllKeybinds());
+    }
+
+    private void BeginRebind(InputAction action, Button button)
+    {
+        // Une seule reassignation a la fois : ignore le clic si une autre est deja en cours.
+        if (_activeRebind != null) return;
+
+        button.text = "...";
+        button.AddToClassList("settings-keybind-btn-listening");
+
+        _activeRebind = KeybindManager.StartRebind(
+            action,
+            onComplete: () =>
+            {
+                _activeRebind = null;
+                button.RemoveFromClassList("settings-keybind-btn-listening");
+                button.text = KeybindManager.GetBindingDisplayString(action);
+                KeybindManager.SaveOverrides(InputManager.Instance.Actions);
+            },
+            onCancel: () =>
+            {
+                _activeRebind = null;
+                button.RemoveFromClassList("settings-keybind-btn-listening");
+                button.text = KeybindManager.GetBindingDisplayString(action);
+            });
+    }
+
+    private void ResetAllKeybinds()
+    {
+        KeybindManager.ResetAll(InputManager.Instance.Actions);
+        RefreshKeybindButtonLabels();
+    }
+
+    private void RefreshKeybindButtonLabels()
+    {
+        foreach (KeybindManager.RebindableAction entry in KeybindManager.Rebindables)
+        {
+            if (!_keybindButtons.TryGetValue(entry.ActionName, out Button button)) continue;
+            InputAction action = InputManager.Instance.GetAction(entry.ActionName);
+            button.text = KeybindManager.GetBindingDisplayString(action);
+        }
     }
 
     // previewChannel : bus FMOD dont on joue un son temoin quand on RELACHE le
@@ -222,7 +333,6 @@ public class SettingsWindow : L2PopupWindow
     private void RefreshControlsFromGameSettings()
     {
         ((Toggle)GetElementById("FullscreenToggle")).SetValueWithoutNotify(GameSettings.Fullscreen);
-        ((Toggle)GetElementById("ShadowsToggle")).SetValueWithoutNotify(GameSettings.ShadowsEnabled);
         ((Toggle)GetElementById("GraphicCursorToggle")).SetValueWithoutNotify(GameSettings.GraphicCursorEnabled);
 
         DropdownField qualityDropdown = (DropdownField)GetElementById("QualityDropdown");
@@ -230,6 +340,15 @@ public class SettingsWindow : L2PopupWindow
 
         DropdownField aaDropdown = (DropdownField)GetElementById("AntiAliasingDropdown");
         aaDropdown.SetValueWithoutNotify(aaDropdown.choices[Mathf.Clamp(GameSettings.AntiAliasingLevel, 0, aaDropdown.choices.Count - 1)]);
+
+        DropdownField shadowDropdown = (DropdownField)GetElementById("ShadowDistanceDropdown");
+        shadowDropdown.SetValueWithoutNotify(shadowDropdown.choices[Mathf.Clamp(GameSettings.ShadowDistanceLevel, 0, shadowDropdown.choices.Count - 1)]);
+
+        DropdownField viewDistanceDropdown = (DropdownField)GetElementById("ViewDistanceDropdown");
+        viewDistanceDropdown.SetValueWithoutNotify(viewDistanceDropdown.choices[Mathf.Clamp(GameSettings.ViewDistanceLevel, 0, viewDistanceDropdown.choices.Count - 1)]);
+
+        DropdownField waterDetailDropdown = (DropdownField)GetElementById("WaterDetailDropdown");
+        waterDetailDropdown.SetValueWithoutNotify(waterDetailDropdown.choices[Mathf.Clamp(GameSettings.WaterDetailLevel, 0, waterDetailDropdown.choices.Count - 1)]);
 
         DropdownField resolutionDropdown = (DropdownField)GetElementById("ResolutionDropdown");
         if (resolutionDropdown.choices != null && resolutionDropdown.choices.Count > 0)
@@ -247,6 +366,8 @@ public class SettingsWindow : L2PopupWindow
         ((Slider)GetElementById("SFXVolumeSlider")).SetValueWithoutNotify(GameSettings.SFXVolume);
         ((Slider)GetElementById("UIVolumeSlider")).SetValueWithoutNotify(GameSettings.UIVolume);
         ((Slider)GetElementById("AmbientVolumeSlider")).SetValueWithoutNotify(GameSettings.AmbientVolume);
+
+        RefreshKeybindButtonLabels();
     }
 
     private void BindFooter()
@@ -272,9 +393,19 @@ public class SettingsWindow : L2PopupWindow
 
     private void HandleCancelClick()
     {
+        CancelActiveRebind();
         ApplySnapshot(_snapshot);
         RefreshControlsFromGameSettings();
         HideWindow(false);
+    }
+
+    // Annule proprement une reassignation en cours si la fenetre se ferme
+    // pendant qu'on ecoute une touche (sinon l'operation resterait active et
+    // l'action concernee resterait desactivee indefiniment).
+    private void CancelActiveRebind()
+    {
+        _activeRebind?.Cancel();
+        _activeRebind = null;
     }
 
     private void HandleApplyClick()
@@ -295,8 +426,11 @@ public class SettingsWindow : L2PopupWindow
             Resolution = GameSettings.ResolutionIndex,
             Fullscreen = GameSettings.Fullscreen,
             AntiAliasing = GameSettings.AntiAliasingLevel,
-            Shadows = GameSettings.ShadowsEnabled,
+            ShadowDistance = GameSettings.ShadowDistanceLevel,
             GraphicCursor = GameSettings.GraphicCursorEnabled,
+            ViewDistance = GameSettings.ViewDistanceLevel,
+            WaterDetail = GameSettings.WaterDetailLevel,
+            KeybindOverridesJson = KeybindManager.CaptureOverridesJson(InputManager.Instance.Actions),
         };
     }
 
@@ -311,8 +445,11 @@ public class SettingsWindow : L2PopupWindow
         GameSettings.SetResolutionIndex(snap.Resolution);
         GameSettings.SetFullscreen(snap.Fullscreen);
         GameSettings.SetAntiAliasingLevel(snap.AntiAliasing);
-        GameSettings.SetShadowsEnabled(snap.Shadows);
+        GameSettings.SetShadowDistanceLevel(snap.ShadowDistance);
         GameSettings.SetGraphicCursorEnabled(snap.GraphicCursor);
+        GameSettings.SetViewDistanceLevel(snap.ViewDistance);
+        GameSettings.SetWaterDetailLevel(snap.WaterDetail);
+        KeybindManager.RestoreOverrides(InputManager.Instance.Actions, snap.KeybindOverridesJson);
     }
 
     public override void ShowWindow()
@@ -325,6 +462,7 @@ public class SettingsWindow : L2PopupWindow
 
     public override void HideWindow(bool silent)
     {
+        CancelActiveRebind();
         base.HideWindow(silent);
 
         if (!silent)

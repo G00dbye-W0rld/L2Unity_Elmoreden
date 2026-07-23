@@ -64,6 +64,7 @@ public class UserSpawner : EntitySpawnStrategy<PlayerAppearance, Stats, PlayerSt
         entity.UpdateMAtkSpeed(stats.MAtkSpd);
         entity.UpdateWalkSpeed(stats.WalkSpeed);
         entity.UpdateRunSpeed(stats.RunSpeed);
+        entity.UpdateSwimSpeed(stats.SwimSpeed);
 
         entity.Stats.UpdateStats(stats);
 

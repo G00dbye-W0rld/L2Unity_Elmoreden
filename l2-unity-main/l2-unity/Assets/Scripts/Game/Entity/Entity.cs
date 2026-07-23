@@ -16,6 +16,7 @@ public abstract class Entity : MonoBehaviour
     [SerializeField] private CharacterModelType _raceId;
     [SerializeField] private bool _running;
     [SerializeField] private bool _sitting;
+    [SerializeField] private bool _swimming;
 
     public Status Status { get => _status; set => _status = value; }
     public Stats Stats { get => _stats; set => _stats = value; }
@@ -26,6 +27,7 @@ public abstract class Entity : MonoBehaviour
     public CharacterModelType RaceId { get { return _raceId; } set { _raceId = value; } }
     public bool EntityLoaded { get { return _entityLoaded; } set { _entityLoaded = value; } }
     public bool Running { get { return _running; } set { _running = value; } }
+    public bool Swimming { get { return _swimming; } set { _swimming = value; } }
     public NewBaseAnimationController AnimationController { get { return _referenceHolder.NewAnimationController; } }
     public EntityReferenceHolder ReferenceHolder { get { return _referenceHolder; } }
     public Gear Gear { get { return _referenceHolder.Gear; } }
@@ -72,7 +74,14 @@ public abstract class Entity : MonoBehaviour
     public virtual void OnStopMoving()
     {
         // Debug.LogWarning("On stop moving base");
-        AnimationController.Wait();
+        if (Swimming)
+        {
+            AnimationController.SwimWait();
+        }
+        else
+        {
+            AnimationController.Wait();
+        }
     }
 
     public virtual void OnStartMoving(bool walking)
@@ -143,6 +152,22 @@ public abstract class Entity : MonoBehaviour
         return scaled;
     }
 
+    public virtual float UpdateSwimSpeed(int speed)
+    {
+        if (speed == _stats.SwimSpeed)
+        {
+            return _stats.ScaledSwimSpeed;
+        }
+
+        float scaled = StatsConverter.Instance.ConvertStat(Stat.SPEED, speed);
+        _stats.SwimSpeed = speed;
+        _stats.ScaledSwimSpeed = scaled;
+
+        AnimationController.SetSwimSpeed(scaled);
+
+        return scaled;
+    }
+
     public virtual void UpdateWaitType(ChangeWaitTypePacket.WaitType moveType)
     {
         if (moveType == ChangeWaitTypePacket.WaitType.WT_SITTING)
@@ -158,6 +183,15 @@ public abstract class Entity : MonoBehaviour
     public virtual void UpdateMoveType(bool running)
     {
         Running = running;
+    }
+
+    // Separee de UpdateMoveType (comme UpdateWaitType l'est deja pour s'asseoir) :
+    // le flag "nage" arrive dans le meme packet ChangeMoveType que "running" mais
+    // represente un etat independant (zone d'eau cote serveur), pas un choix
+    // d'entree du joueur.
+    public virtual void UpdateSwimming(bool swimming)
+    {
+        Swimming = swimming;
     }
 
     public void CastSkill(Skill skill, Entity target, int hitTime, int reuseDelay, PooledEffect[] castEffects)

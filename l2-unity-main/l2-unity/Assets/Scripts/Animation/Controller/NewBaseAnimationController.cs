@@ -19,6 +19,7 @@ public abstract class NewBaseAnimationController : MonoBehaviour
     [SerializeField] protected float _castSpdMultiplier = 1;
     [SerializeField] protected float _runSpdMultiplier = 1;
     [SerializeField] protected float _walkSpdMultiplier = 1;
+    [SerializeField] protected float _swimSpdMultiplier = 1;
     [Header("Bow")]
     [SerializeField] protected float _nockArrowRatio = 0.2f;
     [SerializeField] protected float _shootArrowRatio = 0.65f;
@@ -91,6 +92,11 @@ public abstract class NewBaseAnimationController : MonoBehaviour
         _walkSpdMultiplier = value;
     }
 
+    public virtual void SetSwimSpeed(float value)
+    {
+        _swimSpdMultiplier = value;
+    }
+
     public virtual void SetPAtkSpd(float value)
     {
         _atkSpd = value;
@@ -127,6 +133,13 @@ public abstract class NewBaseAnimationController : MonoBehaviour
 
     public abstract void Jump();
 
+    // Par defaut (monstres, qui n'ont pas de clips de nage) : reutilise Run()/
+    // Wait() pour ne pas planter si un PNJ entre dans une WaterZone cote
+    // serveur (cf. WaterZone.java, appliquee aussi aux Npc). Seul
+    // NewHumanoidAnimationController fournit une vraie animation de nage.
+    public virtual void Swim() { Run(); }
+    public virtual void SwimWait() { Wait(); }
+
     // No-op par defaut (les monstres ne ramassent pas d'objets) - seul
     // NewHumanoidAnimationController fournit une vraie implementation.
     public virtual void PickupItem() { }
@@ -161,7 +174,11 @@ public abstract class NewBaseAnimationController : MonoBehaviour
 
     public virtual void Move()
     {
-        if (_entityReferenceHolder.Entity.Running)
+        if (_entityReferenceHolder.Entity.Swimming)
+        {
+            Swim();
+        }
+        else if (_entityReferenceHolder.Entity.Running)
         {
             Run();
         }
