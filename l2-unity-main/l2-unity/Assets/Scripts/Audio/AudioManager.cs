@@ -210,4 +210,40 @@ public class AudioManager : MonoBehaviour
     {
         PlaySound(_weaponSwishes[(int)weaponType], position);
     }
+
+    // Joue un court son temoin pour previsualiser le niveau d'un bus depuis la
+    // fenetre de reglages. Chaque canal passe par SON bus FMOD, donc le son
+    // entendu reflete bien le volume qu'on est en train d'ajuster. Musique et
+    // Ambiance ne declenchent pas de temoin : ces bus jouent deja en continu en
+    // jeu, leur volume change donc en direct a l'oreille quand on bouge le slider.
+    public void PlayVolumePreview(string channel)
+    {
+        switch (channel)
+        {
+            case "SFX":
+                PlaySwishSound(WeaponType.sword, GetListenerPosition());
+                break;
+            case "UI":
+            case "Master":
+                PlayUISound("click_01");
+                break;
+        }
+    }
+
+    private Vector3 GetListenerPosition()
+    {
+        return Camera.main != null ? Camera.main.transform.position : Vector3.zero;
+    }
+
+    public float MasterVolume => _masterVolume;
+    public float MusicVolume => _musicVolume;
+    public float SFXVolume => _SFXVolume;
+    public float UIVolume => _UIVolume;
+    public float AmbientVolume => _ambientVolume;
+
+    public void SetMasterVolume(float value) => _masterVolume = Mathf.Clamp01(value);
+    public void SetMusicVolume(float value) => _musicVolume = Mathf.Clamp01(value);
+    public void SetSFXVolume(float value) => _SFXVolume = Mathf.Clamp01(value);
+    public void SetUIVolume(float value) => _UIVolume = Mathf.Clamp01(value);
+    public void SetAmbientVolume(float value) => _ambientVolume = Mathf.Clamp01(value);
 }

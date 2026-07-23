@@ -72,6 +72,10 @@ public class L2GameUI : L2UI
         {
             SystemMenuWindow.Instance.AddWindow(_rootVisualContainer);
         }
+        if (SettingsWindow.Instance != null)
+        {
+            SettingsWindow.Instance.AddWindow(_rootVisualContainer);
+        }
         if (MenuWindow.Instance != null)
         {
             MenuWindow.Instance.AddWindow(_rootVisualContainer);

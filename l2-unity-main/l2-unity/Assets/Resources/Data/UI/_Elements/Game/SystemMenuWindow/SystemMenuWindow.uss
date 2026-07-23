@@ -90,6 +90,20 @@
     opacity: 1;
 }
 
+/* Icone de la ligne Reglages : l'asset d'origine Icon_DF_MenuWnd_SystemMenu
+   fait 64x64 avec l'engrenage cantonne au coin haut-gauche (36x36) et le reste
+   transparent -> il paraissait minuscule. On utilise une version recadree au
+   plus juste (Icon_df_SystemMenuWnd_Settings, ~36x36) qui remplit la case
+   comme Restart/Exit. */
+.settings-menu-icon {
+    width: 15px;
+    height: 15px;
+    max-width: 16px;
+    max-height: 16px;
+    background-image: resource('Data/UI/Assets/Menu/Icon_df_SystemMenuWnd_Settings');
+    -unity-background-scale-mode: scale-to-fit;
+}
+
 .system-menu-row-text {
     margin-top: 0;
     margin-right: 0;

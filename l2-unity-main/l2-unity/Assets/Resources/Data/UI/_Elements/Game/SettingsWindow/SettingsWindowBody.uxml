@@ -1,0 +1,102 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/Resources/Data/UI/_Elements/L2StyleSheet.uss?fileID=7433441132597879392&amp;guid=72e99cc94b130bf4ba100dceaa830b13&amp;type=3#L2StyleSheet" />
+    <Style src="project://database/Assets/Resources/Data/UI/_Elements/Game/SettingsWindow/SettingsWindow.uss?fileID=7433441132597879392&amp;guid=7ae15458a5d15474e87c88b7f4c089e2&amp;type=3#SettingsWindow" />
+    <ui:GroupBox name="Body" class="settings-window-content">
+
+        <!-- Barre d'onglets -->
+        <ui:GroupBox name="Tabs" class="settings-tabs">
+            <ui:Button name="VideoTabBtn" text="Vidéo" parse-escape-sequences="true" class="settings-tab-btn active" />
+            <ui:Button name="AudioTabBtn" text="Audio" parse-escape-sequences="true" class="settings-tab-btn" />
+            <ui:Button name="GameTabBtn" text="Jeu" parse-escape-sequences="true" class="settings-tab-btn" />
+        </ui:GroupBox>
+
+        <!-- Zone de contenu (3 panneaux, un seul visible) -->
+        <ui:VisualElement name="ContentBox" class="settings-content-box">
+
+            <!-- Panneau VIDEO -->
+            <ui:VisualElement name="VideoPanel" class="settings-panel">
+                <ui:GroupBox class="settings-row">
+                    <ui:Label text="Résolution" class="settings-row-label l2-color-3" />
+                    <ui:DropdownField name="ResolutionDropdown" class="l2-dropdown settings-dropdown" />
+                </ui:GroupBox>
+                <ui:GroupBox class="settings-row">
+                    <ui:Label text="Plein écran" class="settings-row-label l2-color-3" />
+                    <ui:Toggle name="FullscreenToggle" class="settings-toggle" />
+                </ui:GroupBox>
+                <ui:GroupBox class="settings-row">
+                    <ui:Label text="Qualité" class="settings-row-label l2-color-3" />
+                    <ui:DropdownField name="QualityDropdown" choices="Basse,Ultra" class="l2-dropdown settings-dropdown" />
+                </ui:GroupBox>
+                <ui:GroupBox class="settings-row">
+                    <ui:Label text="Anti-aliasing" class="settings-row-label l2-color-3" />
+                    <ui:DropdownField name="AntiAliasingDropdown" choices="Désactivé,x2,x4,x8" class="l2-dropdown settings-dropdown" />
+                </ui:GroupBox>
+                <ui:GroupBox class="settings-row">
+                    <ui:Label text="Ombres" class="settings-row-label l2-color-3" />
+                    <ui:Toggle name="ShadowsToggle" class="settings-toggle" />
+                </ui:GroupBox>
+                <ui:GroupBox class="settings-row">
+                    <ui:Label text="Curseur graphique" class="settings-row-label l2-color-3" />
+                    <ui:Toggle name="GraphicCursorToggle" class="settings-toggle" />
+                </ui:GroupBox>
+                <ui:GroupBox class="settings-row settings-row-disabled">
+                    <ui:Label text="Distance d'affichage (à venir)" class="settings-row-label settings-row-label-wide l2-color-3" />
+                    <ui:DropdownField name="ViewDistanceDropdown" choices="Faible,Moyenne,Élevée,Très élevée" picking-mode="Ignore" class="l2-dropdown settings-dropdown" />
+                </ui:GroupBox>
+                <ui:GroupBox class="settings-row settings-row-disabled">
+                    <ui:Label text="Effets météo (à venir)" class="settings-row-label settings-row-label-wide l2-color-3" />
+                    <ui:DropdownField name="WeatherDropdown" choices="Aucun,Pluie,Brouillard,Vent" picking-mode="Ignore" class="l2-dropdown settings-dropdown" />
+                </ui:GroupBox>
+            </ui:VisualElement>
+
+            <!-- Panneau AUDIO -->
+            <ui:VisualElement name="AudioPanel" class="settings-panel hidden">
+                <ui:GroupBox class="settings-row">
+                    <ui:Label text="Général" class="settings-row-label l2-color-3" />
+                    <ui:Slider name="MasterVolumeSlider" low-value="0" high-value="1" value="1" class="l2-slider" />
+                </ui:GroupBox>
+                <ui:GroupBox class="settings-row">
+                    <ui:Label text="Musique" class="settings-row-label l2-color-3" />
+                    <ui:Slider name="MusicVolumeSlider" low-value="0" high-value="1" value="1" class="l2-slider" />
+                </ui:GroupBox>
+                <ui:GroupBox class="settings-row">
+                    <ui:Label text="Effets" class="settings-row-label l2-color-3" />
+                    <ui:Slider name="SFXVolumeSlider" low-value="0" high-value="1" value="1" class="l2-slider" />
+                </ui:GroupBox>
+                <ui:GroupBox class="settings-row">
+                    <ui:Label text="Interface" class="settings-row-label l2-color-3" />
+                    <ui:Slider name="UIVolumeSlider" low-value="0" high-value="1" value="1" class="l2-slider" />
+                </ui:GroupBox>
+                <ui:GroupBox class="settings-row">
+                    <ui:Label text="Ambiance" class="settings-row-label l2-color-3" />
+                    <ui:Slider name="AmbientVolumeSlider" low-value="0" high-value="1" value="1" class="l2-slider" />
+                </ui:GroupBox>
+            </ui:VisualElement>
+
+            <!-- Panneau JEU -->
+            <ui:VisualElement name="GamePanel" class="settings-panel hidden">
+                <ui:GroupBox class="settings-row settings-row-disabled">
+                    <ui:Label text="Butin de groupe (à venir)" class="settings-row-label settings-row-label-wide l2-color-3" />
+                    <ui:DropdownField name="PartyLootDropdown" choices="Aléatoire,Aléatoire incluant spoil,Par ordre de tour,Au plus proche" picking-mode="Ignore" class="l2-dropdown settings-dropdown" />
+                </ui:GroupBox>
+                <ui:GroupBox class="settings-row settings-row-disabled">
+                    <ui:Label text="Refuser les duels (à venir)" class="settings-row-label settings-row-label-wide l2-color-3" />
+                    <ui:Toggle name="DeclineDuelsToggle" picking-mode="Ignore" class="settings-toggle" />
+                </ui:GroupBox>
+                <ui:GroupBox class="settings-row settings-row-disabled">
+                    <ui:Label text="Invitations de groupe (à venir)" class="settings-row-label settings-row-label-wide l2-color-3" />
+                    <ui:Toggle name="DenyPartyRequestToggle" picking-mode="Ignore" class="settings-toggle" />
+                </ui:GroupBox>
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+        <!-- Pied de fenetre -->
+        <ui:GroupBox name="Footer" class="settings-footer">
+            <ui:Button name="ConfirmButton" text="Confirmer" parse-escape-sequences="true" class="settings-footer-btn" />
+            <ui:Button name="CancelButton" text="Annuler" parse-escape-sequences="true" class="settings-footer-btn" />
+            <ui:Button name="ApplyButton" text="Appliquer" parse-escape-sequences="true" class="settings-footer-btn" />
+        </ui:GroupBox>
+
+    </ui:GroupBox>
+</ui:UXML>

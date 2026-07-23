@@ -63,6 +63,9 @@ public class SystemMenuWindow : L2PopupWindow
         VisualElement restartButton = GetElementByClass("restart-btn");
         restartButton.AddManipulator(new ButtonClickSoundManipulator(restartButton));
         restartButton.RegisterCallback<ClickEvent>((evt) => HandleRestartButtonClick());
+        VisualElement settingsButton = GetElementByClass("settings-btn");
+        settingsButton.AddManipulator(new ButtonClickSoundManipulator(settingsButton));
+        settingsButton.RegisterCallback<ClickEvent>((evt) => HandleSettingsButtonClick());
 
         _windowHeight = _windowEle.worldBound.height;
         RegisterClickWindowEvent(_windowEle, null);
@@ -82,6 +85,12 @@ public class SystemMenuWindow : L2PopupWindow
     {
         HideWindow(false);
         ExitWindow.Instance.OpenWindow(false);
+    }
+
+    private void HandleSettingsButtonClick()
+    {
+        HideWindow(false);
+        SettingsWindow.Instance.ToggleHideWindow();
     }
 
     public override void ToggleHideWindow()

@@ -16,6 +16,7 @@ public class CursorManager : MonoBehaviour
     [SerializeField] private Texture2D _talkCursorTexture;
     [SerializeField] private Texture2D _pickupCursorTexture;
     private string _cursorFolder = "Data/UI/Assets/Cursor/";
+    private bool _graphicCursorEnabled = true;
 
     private static CursorManager _instance;
     public static CursorManager Instance { get { return _instance; } }
@@ -45,7 +46,26 @@ public class CursorManager : MonoBehaviour
         }
 
         _lastCursorType = cursorType;
+        ApplyCursor(cursorType);
+    }
 
+    // Bascule entre le curseur graphique (textures ci-dessus) et le curseur OS
+    // natif - reglage "Curseur graphique" de SettingsWindow. Reapplique
+    // immediatement (contourne le garde-fou _lastCursorType de ChangeCursor,
+    // qui sinon ignorerait un changement de reglage a type de curseur inchange).
+    public void SetGraphicCursorEnabled(bool enabled)
+    {
+        _graphicCursorEnabled = enabled;
+        ApplyCursor(_lastCursorType);
+    }
+
+    private void ApplyCursor(CursorType cursorType)
+    {
+        if (!_graphicCursorEnabled)
+        {
+            UnityEngine.Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+            return;
+        }
 
         switch (cursorType)
         {
