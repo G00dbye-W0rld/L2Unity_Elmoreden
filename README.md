@@ -1,4 +1,4 @@
-# L2Unity — Guide d'installation et de lancement
+# L2Unity — Guide d'installation, de lancement et d'ajout de contenu
 
 Ce dossier contient un MMORPG inspiré de Lineage 2 (projet fan, non officiel), composé de **trois programmes séparés** qui doivent tourner ensemble :
 
@@ -8,12 +8,13 @@ Ce dossier contient un MMORPG inspiré de Lineage 2 (projet fan, non officiel), 
 | `l2-unity-gameserver-master/gameserver/` | Le **gameserver** — gère le monde, les personnages, les combats |
 | `l2-unity-loginserver-main/loginserver/` | Le **loginserver** — gère les comptes et la connexion |
 
-Ce guide part du principe que tout est déjà installé sur cette machine (JDK, base de données, Unity) et t'explique comment **lancer** le jeu, étape par étape. Si tu repars de zéro sur une autre machine, lis d'abord la section [Prérequis](#prérequis).
+Ce guide est en deux parties : la **Partie 1** explique comment **lancer** le jeu quand tout est déjà installé (si tu repars de zéro sur une autre machine, lis d'abord la section [Prérequis](#prérequis)). La **Partie 2** explique comment **ajouter du contenu** au jeu (PNJ, monstres...).
 
 ---
 
 ## Sommaire
 
+### Partie 1 — Lancer le jeu
 1. [Prérequis](#prérequis)
 2. [Étape 1 — Préparer la base de données (une seule fois)](#étape-1--préparer-la-base-de-données-une-seule-fois)
 3. [Étape 2 — Vérifier que tout est prêt](#étape-2--vérifier-que-tout-est-prêt)
@@ -22,7 +23,12 @@ Ce guide part du principe que tout est déjà installé sur cette machine (JDK, 
 6. [Arrêter les serveurs](#arrêter-les-serveurs)
 7. [Dépannage](#dépannage)
 
+### Partie 2 — Ajouter du contenu
+8. [Ajouter un PNJ ou un monstre custom](#ajouter-un-pnj-ou-un-monstre-custom)
+
 ---
+
+# Partie 1 — Lancer le jeu
 
 ## Prérequis
 
@@ -116,6 +122,91 @@ Ferme simplement les deux fenêtres de terminal (loginserver et gameserver), ou 
 | `setup-check.sh` signale la base "vide ou introuvable" alors qu'elle existe | WampServer pas démarré, ou mauvais port/identifiants dans `conf/server.properties` | Vérifie que WampServer tourne, relance `setup-check.sh` |
 | Le client Unity n'arrive pas à se connecter | Le loginserver n'est pas encore prêt, ou son adresse/port a changé | Vérifie que la fenêtre loginserver affiche bien `listening on port 2107` avant de lancer Unity |
 | Le serveur "Bartz" n'apparaît pas dans la liste des serveurs en jeu | Le gameserver n'a pas fini de démarrer ou n'a pas réussi à s'enregistrer | Attends la ligne `Registered as server: [1] Bartz.` dans sa fenêtre avant de jouer |
+
+---
+
+# Partie 2 — Ajouter du contenu
+
+## Ajouter un PNJ ou un monstre custom
+
+Un PNJ (ou un monstre) est défini à **4 endroits différents** : deux côté serveur (ses stats, et où il apparaît dans le monde), deux côté client (son apparence, et son nom affiché). Le chemin le plus simple pour débuter est de **réutiliser un visuel déjà existant** (un modèle 3D déjà présent dans le jeu) plutôt que d'en créer un nouveau — ça évite tout travail dans l'éditeur Unity et se limite à éditer des fichiers texte.
+
+> **Choisis d'abord un ID libre**, par exemple `900001` (un nombre qui n'est utilisé par aucun PNJ officiel de Lineage 2, pour éviter tout conflit). Le même ID sera réutilisé partout ci-dessous.
+>
+> Le plus simple pour remplir chaque fichier : **pars d'un PNJ existant qui ressemble à ce que tu veux** (même type de créature, même gabarit), copie son entrée dans chacun des 4 fichiers, et modifie juste ce qui doit changer.
+
+### 1. Définir ses stats côté serveur
+
+Fichier : `l2-unity-gameserver-master/gameserver/data/xml/npcs/` (un des fichiers existants, ou un nouveau).
+
+```xml
+<npc id="900001" name="Mon PNJ Custom" title="" alias="mon_pnj_custom">
+    <set name="type" val="Monster"/>   <!-- "Folk" pour un PNJ non-hostile (marchand, garde...), "Monster" pour un ennemi -->
+    <set name="level" val="10"/>
+    <set name="radius" val="10.0"/>    <!-- taille du collider (unités L2, pas de conversion a faire ici) -->
+    <set name="height" val="25.0"/>
+    <set name="hp" val="500.0"/>
+    <set name="mp" val="100.0"/>
+    <set name="pAtk" val="20.0"/>
+    <set name="pDef" val="40.0"/>
+    <set name="runSpd" val="60"/>
+    <set name="walkSpd" val="25"/>
+</npc>
+```
+
+`radius`/`height` définissent la taille du collider de blocage du PNJ (cf. le fix du 2026-07-24 : ces deux valeurs sont ce qui empêche maintenant le joueur de traverser les PNJ) — mets des valeurs cohérentes avec un PNJ similaire si tu n'es pas sûr.
+
+### 2. Le faire apparaître dans le monde
+
+Sans cette étape, le PNJ existe en théorie mais n'apparaît jamais en jeu. Fichier : `l2-unity-gameserver-master/gameserver/data/xml/spawnlist/<région>.xml` (le fichier correspond à la zone de la carte où le PNJ doit apparaître).
+
+```xml
+<territory name="mon_pnj_zone" minZ="-3648" maxZ="-3448">
+    <node x="-91080" y="248292"/>
+    <node x="-90792" y="247860"/>
+    <node x="-90136" y="248300"/>
+    <node x="-90432" y="248720"/>
+</territory>
+<npcmaker name="mon_pnj_zone_m1" territory="mon_pnj_zone" maximumNpcs="1">
+    <ai type="default_maker"/>
+    <npc id="900001" total="1" respawn="1min"/>
+</npcmaker>
+```
+
+- `territory` : une zone polygonale (liste de points x/y) où le PNJ peut apparaître.
+- `npcmaker` : combien d'exemplaires (`total`) et le délai avant réapparition après la mort (`respawn`).
+
+Pour trouver des coordonnées x/y valides sans en connaître à l'avance, le plus simple est de repérer la position d'un `<territory>` déjà existant proche de l'endroit voulu (dans le même fichier de région) et de s'en inspirer, ou de demander de l'aide pour retrouver une position précise en jeu.
+
+### 3. Lui donner une apparence, côté client
+
+Fichier : `l2-unity-main/l2-unity/Assets/StreamingAssets/Data/Meta/Npcgrp_Classic.txt`
+
+Ajoute une ligne avec le **même `npc_id`**. Le champ le plus important est `mesh_name` : pointe-le vers un modèle qui existe déjà (copie le `mesh_name` d'un PNJ qui a le look voulu), et recopie le **même nombre brut** que `radius`/`height` du XML serveur dans `collision_radius`/`collision_height` (pas de conversion à faire, elle se fait automatiquement au chargement) :
+
+```
+npc_begin	npc_id=900001	class_name=[LineageMonster.mon_pnj_custom]	mesh_name=[LineageMonsters.gremlin_m00]	collision_radius=10.0	collision_radius_2=10.0	collision_height=25.0	collision_height_2=25.0	npc_type=monster_normal	npc_end
+```
+
+> Sans cette entrée, le PNJ ne spawnera pas du tout côté client (juste une erreur silencieuse dans les logs) — c'est l'oubli le plus facile à faire.
+
+### 4. Lui donner un nom affiché
+
+Fichier : `l2-unity-main/l2-unity/Assets/StreamingAssets/Data/Meta/NpcName_Classic-eu.txt`
+
+```
+npc_begin	id=900001	name=[Mon PNJ Custom]	nick=[ Lvl: 10]	nickcolor=9CE8A9FF	npc_end
+```
+
+### 5. Tester
+
+1. Redémarre le gameserver (il charge les XML une seule fois, au démarrage). Si un comportement bizarre apparaît alors que la config semble correcte, `./gradlew --stop` avant de relancer (cf. [Dépannage](#dépannage)).
+2. Relance le Play Mode dans Unity.
+3. Va à l'endroit où le spawn a été placé.
+
+### Aller plus loin : un tout nouveau visuel
+
+Si le PNJ a besoin d'un modèle 3D qui n'existe encore nulle part dans le jeu (pas juste réutiliser un PNJ existant), il faut en plus créer un nouveau prefab Unity avec animation et collider — une étape bien plus impliquée, hors du cadre de ce guide simple. Le point de départ le plus sûr est de partir du prefab d'un PNJ existant qui a une structure proche (mêmes composants) et de le personnaliser à partir de là.
 
 ---
 

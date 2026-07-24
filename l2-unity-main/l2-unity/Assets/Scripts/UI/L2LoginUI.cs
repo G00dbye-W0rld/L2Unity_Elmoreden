@@ -33,6 +33,7 @@ public class L2LoginUI : L2UI
 
     private void Start()
     {
+        MouseOverUI = false;
         _windowsLoaded = 0;
     }
 

@@ -100,6 +100,29 @@ public class NpcSpawner : EntitySpawnStrategy<Appearance, Stats, NpcStatus>
             npcGo.transform.eulerAngles.z
         );
 
+        // Un CharacterController ne bloque pas de facon fiable un AUTRE CharacterController
+        // (limitation connue de Unity - chaque CC ignore les autres CC comme obstacles
+        // "durs", contrairement a un Collider classique) : joueur ET PNJ utilisent tous
+        // les deux un CC pour se deplacer, donc elargir le CC du PNJ seul (essai
+        // precedent) ne pouvait pas suffire a bloquer le joueur, quelle que soit la
+        // taille. On ajoute donc un Collider classique separe (pas de Rigidbody => traite
+        // comme statique par la physique), dimensionne avec la vraie taille par PNJ
+        // (radius du gameserver, deja parse ici via npcgrp - /52.5f pour matcher les
+        // unites moteur) : le CC du joueur bloque correctement contre CE type de
+        // collider. Hauteur/centre repris tels quels du CC existant (deja ajustes
+        // visuellement par le rig) plutot que recalcules a partir de la hauteur XML -
+        // un essai precedent avec center=height/2 avait fait "flotter" les PNJ, la
+        // convention de pivot exacte du modele n'etant pas height/2.
+        CharacterController controller = npcGo.GetComponent<CharacterController>();
+        if (controller != null)
+        {
+            CapsuleCollider blockingCollider = npcGo.AddComponent<CapsuleCollider>();
+            blockingCollider.center = controller.center;
+            blockingCollider.height = controller.height;
+            blockingCollider.radius = npcgrp.CollisionRadius > 0f ? npcgrp.CollisionRadius : controller.radius;
+            blockingCollider.isTrigger = false;
+        }
+
         return npcGo;
     }
     #endregion
