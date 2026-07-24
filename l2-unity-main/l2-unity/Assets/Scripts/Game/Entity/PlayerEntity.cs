@@ -106,6 +106,8 @@ public class PlayerEntity : Entity
             PlayerController.Instance.Swimming = swimming;
         }
 
+        AudioManager.Instance?.Play3DSoundByReferenceName(swimming ? "ChrSound/water_in" : "ChrSound/water_out", transform.position);
+
         if (!swimming)
         {
             // Force une nouvelle recherche des volumes d'eau a la prochaine

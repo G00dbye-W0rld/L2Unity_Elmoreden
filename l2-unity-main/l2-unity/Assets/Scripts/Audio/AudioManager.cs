@@ -26,6 +26,13 @@ public class AudioManager : MonoBehaviour
 
     private EventReference[] _weaponSwishes;
 
+    // Boucle de nage : instance longue duree geree a la main (start/stop), sur le
+    // meme principe que MusicManager - contrairement aux autres sons de ce fichier
+    // qui sont tous des PlayOneShot.
+    private EventInstance _swimLoopInstance;
+    private bool _swimLoopInstanceValid;
+    private bool _swimLoopPlaying;
+
     private static AudioManager _instance;
     public static AudioManager Instance { get { return _instance; } }
 
@@ -42,6 +49,14 @@ public class AudioManager : MonoBehaviour
 
         SetBuses();
         CacheEvents();
+    }
+
+    private void OnDestroy()
+    {
+        if (_swimLoopPlaying)
+        {
+            _swimLoopInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+        }
     }
 
     private void SetBuses()
@@ -68,6 +83,44 @@ public class AudioManager : MonoBehaviour
         _weaponSwishes[(int)WeaponType.dual] = RuntimeManager.PathToEventReference("event:/ItemSound/sword_mid");
         _weaponSwishes[(int)WeaponType.dualfist] = RuntimeManager.PathToEventReference("event:/ItemSound/fist");
         _weaponSwishes[(int)WeaponType.pole] = RuntimeManager.PathToEventReference("event:/ItemSound/spear");
+
+        EventReference swimLoopRef = RuntimeManager.PathToEventReference("event:/ChrSound/swim_loop");
+        if (!swimLoopRef.IsNull)
+        {
+            try
+            {
+                _swimLoopInstance = RuntimeManager.CreateInstance(swimLoopRef);
+                _swimLoopInstanceValid = true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"AudioManager: impossible de creer l'instance FMOD pour event:/ChrSound/swim_loop ({e.Message}).");
+            }
+        }
+    }
+
+    // Demarre/arrete la boucle de nage et suit la position du joueur tant qu'elle
+    // joue (son 3D, pour que les autres joueurs proches l'entendent positionne).
+    public void SetSwimLoopActive(bool active, Vector3 position)
+    {
+        if (!_swimLoopInstanceValid) return;
+
+        if (active && !_swimLoopPlaying)
+        {
+            _swimLoopInstance.set3DAttributes(RuntimeUtils.To3DAttributes(position));
+            _swimLoopInstance.start();
+            _swimLoopPlaying = true;
+        }
+        else if (!active && _swimLoopPlaying)
+        {
+            _swimLoopInstance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+            _swimLoopPlaying = false;
+        }
+
+        if (_swimLoopPlaying)
+        {
+            _swimLoopInstance.set3DAttributes(RuntimeUtils.To3DAttributes(position));
+        }
     }
 
     private void Update()

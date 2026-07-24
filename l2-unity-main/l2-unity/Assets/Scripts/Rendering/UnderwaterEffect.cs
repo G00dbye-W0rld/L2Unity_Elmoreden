@@ -1,4 +1,6 @@
 using AtmosphericHeightFog;
+using FMOD.Studio;
+using FMODUnity;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -39,6 +41,12 @@ public class UnderwaterEffect : MonoBehaviour
     [SerializeField] private float _underwaterFogStart = 0f;
     [SerializeField] private float _underwaterFogEnd = 12f;
 
+    // Boucle d'ambiance a assigner dans l'Inspector une fois l'evenement cree
+    // cote FMOD Studio (aucun evenement d'ambiance sous-marine n'existait avant -
+    // seul le fichier .wav brut etait importe, jamais assemble en Event).
+    [Header("Ambiance sonore")]
+    [SerializeField] private EventReference _underwaterAmbienceEvent;
+
     private ColorAdjustments _colorAdjustments;
     private Vignette _vignette;
     private LensDistortion _lensDistortion;
@@ -51,8 +59,29 @@ public class UnderwaterEffect : MonoBehaviour
     private float _capturedFogStart;
     private float _capturedFogEnd;
 
+    private EventInstance _ambienceInstance;
+    private bool _ambienceInstanceValid;
+    private bool _ambiencePlaying;
+
     private void Start()
     {
+        if (!_underwaterAmbienceEvent.IsNull)
+        {
+            try
+            {
+                _ambienceInstance = RuntimeManager.CreateInstance(_underwaterAmbienceEvent);
+                _ambienceInstanceValid = true;
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"UnderwaterEffect: impossible de creer l'instance FMOD pour {_underwaterAmbienceEvent} ({e.Message}). Banks pas a jour dans cette session Play ? Il faut re-Build cote FMOD Studio PUIS sortir/rentrer en Play Mode, les banks ne se rechargent pas a chaud.");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("UnderwaterEffect: aucun event d'ambiance sous-marine assigne dans l'Inspector (champ Underwater Ambience Event).");
+        }
+
         if (_postProcessProfile == null) return;
 
         _postProcessProfile.TryGet(out _colorAdjustments);
@@ -66,17 +95,23 @@ public class UnderwaterEffect : MonoBehaviour
         if (_lensDistortion != null) _lensDistortion.active = true;
     }
 
+    private void OnDestroy()
+    {
+        if (_ambiencePlaying)
+        {
+            _ambienceInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+        }
+    }
+
     private void Update()
     {
-        if (_colorAdjustments == null) return;
-
         Camera mainCamera = Camera.main;
         if (mainCamera == null) return;
 
         Vector3 camPos = mainCamera.transform.position;
         bool underwater = WaterSurfaceQuery.TryGetSurfaceHeight(camPos, out float surfaceY) && camPos.y < surfaceY;
 
-        if (underwater && !_wasUnderwater)
+        if (underwater && !_wasUnderwater && _colorAdjustments != null)
         {
             _capturedColorFilter = _colorAdjustments.colorFilter.value;
             _capturedContrast = _colorAdjustments.contrast.value;
@@ -91,6 +126,14 @@ public class UnderwaterEffect : MonoBehaviour
 
         float targetBlend = underwater ? Mathf.Clamp01((surfaceY - camPos.y) / _transitionDistance) : 0f;
         _blend = Mathf.MoveTowards(_blend, targetBlend, Time.deltaTime * _blendSpeed);
+
+        UpdateVisuals();
+        UpdateAmbience(camPos);
+    }
+
+    private void UpdateVisuals()
+    {
+        if (_colorAdjustments == null) return;
 
         _colorAdjustments.colorFilter.value = Color.Lerp(_capturedColorFilter, _underwaterColorFilter, _blend);
         _colorAdjustments.contrast.value = _capturedContrast + _underwaterContrastDelta * _blend;
@@ -111,6 +154,38 @@ public class UnderwaterEffect : MonoBehaviour
         {
             HeightFogGlobal.Instance.fogDistanceStart = Mathf.Lerp(_capturedFogStart, _underwaterFogStart, _blend);
             HeightFogGlobal.Instance.fogDistanceEnd = Mathf.Lerp(_capturedFogEnd, _underwaterFogEnd, _blend);
+        }
+    }
+
+    // Demarre des que le blend quitte 0 (donc des l'entree dans la zone de
+    // transition, pas besoin d'attendre l'immersion complete) et s'arrete
+    // seulement une fois le blend revenu exactement a 0 (MoveTowards l'atteint
+    // pile, contrairement a un Lerp qui ne fait que s'en approcher) - le volume
+    // de l'instance suit le blend en direct pour un fondu au meme rythme que le visuel.
+    // Position 3D calee en permanence sur la camera/auditeur : que l'event ait ete
+    // authore en 2D ou en 3D cote FMOD Studio, une distance nulle avec l'auditeur
+    // annule toute attenuation par distance (evite de dependre d'un reglage FMOD
+    // Studio pas toujours evident a verifier/retirer depuis l'UI).
+    private void UpdateAmbience(Vector3 listenerPosition)
+    {
+        if (!_ambienceInstanceValid) return;
+
+        if (_blend > 0f && !_ambiencePlaying)
+        {
+            _ambienceInstance.set3DAttributes(RuntimeUtils.To3DAttributes(listenerPosition));
+            _ambienceInstance.start();
+            _ambiencePlaying = true;
+        }
+        else if (_blend <= 0f && _ambiencePlaying)
+        {
+            _ambienceInstance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+            _ambiencePlaying = false;
+        }
+
+        if (_ambiencePlaying)
+        {
+            _ambienceInstance.set3DAttributes(RuntimeUtils.To3DAttributes(listenerPosition));
+            _ambienceInstance.setVolume(_blend);
         }
     }
 }

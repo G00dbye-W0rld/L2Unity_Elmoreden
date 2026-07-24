@@ -127,6 +127,9 @@ public class PlayerController : MonoBehaviour
             _controller.Move(ApplyGravity(Vector3.zero) * Time.deltaTime);
         }
 
+        bool swimmingAndMoving = _swimming && (InputManager.Instance.Move || _runningToDestination);
+        AudioManager.Instance?.SetSwimLoopActive(swimmingAndMoving, transform.position);
+
         MeasureSpeed();
     }
 
