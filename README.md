@@ -129,18 +129,22 @@ Ferme simplement les deux fenêtres de terminal (loginserver et gameserver), ou 
 
 ## Ajouter un PNJ ou un monstre custom
 
-Un PNJ (ou un monstre) est défini à **4 endroits différents** : deux côté serveur (ses stats, et où il apparaît dans le monde), deux côté client (son apparence, et son nom affiché). Le chemin le plus simple pour débuter est de **réutiliser un visuel déjà existant** (un modèle 3D déjà présent dans le jeu) plutôt que d'en créer un nouveau — ça évite tout travail dans l'éditeur Unity et se limite à éditer des fichiers texte.
+Il y a deux façons de faire, selon si le PNJ doit **réutiliser une apparence déjà présente dans le jeu** (méthode simple, 100% côté serveur) ou avoir **un visuel qui n'existe encore nulle part** (méthode complète, nécessite aussi Unity).
 
-> **Choisis d'abord un ID libre**, par exemple `900001` (un nombre qui n'est utilisé par aucun PNJ officiel de Lineage 2, pour éviter tout conflit). Le même ID sera réutilisé partout ci-dessous.
->
-> Le plus simple pour remplir chaque fichier : **pars d'un PNJ existant qui ressemble à ce que tu veux** (même type de créature, même gabarit), copie son entrée dans chacun des 4 fichiers, et modifie juste ce qui doit changer.
+> **Choisis d'abord un ID libre**, par exemple `900001` (un nombre qui n'est utilisé par aucun PNJ officiel de Lineage 2, pour éviter tout conflit).
 
-### 1. Définir ses stats côté serveur
+### Méthode simple (recommandée) : réutiliser une apparence existante
+
+C'est déjà comme ça que fonctionne la Boutique GM de ce projet (`npc id="900000"`) : un PNJ avec ses propres stats/IA/nom, qui **affiche l'apparence d'un autre PNJ déjà existant**, sans toucher à un seul fichier côté client. Le mécanisme s'appelle `idTemplate`.
+
+#### 1. Définir le PNJ côté serveur
 
 Fichier : `l2-unity-gameserver-master/gameserver/data/xml/npcs/` (un des fichiers existants, ou un nouveau).
 
 ```xml
-<npc id="900001" name="Mon PNJ Custom" title="" alias="mon_pnj_custom">
+<npc id="900001" idTemplate="20001" name="Mon PNJ Custom" title="" alias="mon_pnj_custom">
+    <set name="usingServerSideName" val="true"/>
+    <set name="usingServerSideTitle" val="true"/>
     <set name="type" val="Monster"/>   <!-- "Folk" pour un PNJ non-hostile (marchand, garde...), "Monster" pour un ennemi -->
     <set name="level" val="10"/>
     <set name="radius" val="10.0"/>    <!-- taille du collider (unités L2, pas de conversion a faire ici) -->
@@ -154,9 +158,13 @@ Fichier : `l2-unity-gameserver-master/gameserver/data/xml/npcs/` (un des fichier
 </npc>
 ```
 
-`radius`/`height` définissent la taille du collider de blocage du PNJ (cf. le fix du 2026-07-24 : ces deux valeurs sont ce qui empêche maintenant le joueur de traverser les PNJ) — mets des valeurs cohérentes avec un PNJ similaire si tu n'es pas sûr.
+Les deux points clés :
+- **`idTemplate="20001"`** : "affiche-toi comme le PNJ 20001 (le Gremlin)". Le client ne reçoit **jamais** le vrai id (`900001`) — seulement `20001` — donc il n'a besoin d'aucune nouvelle donnée pour savoir quel modèle 3D afficher : il connaît déjà le Gremlin. Choisis n'importe quel `id` de PNJ existant dont tu veux réutiliser le look.
+- **`usingServerSideName`/`usingServerSideTitle` à `true`** : sans ça, le nom/titre affichés seraient ceux du PNJ réutilisé (ici "Gremlin"), pas "Mon PNJ Custom". Avec `true`, le serveur envoie ton propre nom/titre directement, sans passer par les fichiers client.
 
-### 2. Le faire apparaître dans le monde
+`radius`/`height` restent les **vraies valeurs de ce PNJ** (pas celles du 20001) — le serveur les envoie indépendamment de l'apparence affichée, donc un PNJ custom peut avoir un collider différent de celui dont il emprunte le visuel.
+
+#### 2. Le faire apparaître dans le monde
 
 Sans cette étape, le PNJ existe en théorie mais n'apparaît jamais en jeu. Fichier : `l2-unity-gameserver-master/gameserver/data/xml/spawnlist/<région>.xml` (le fichier correspond à la zone de la carte où le PNJ doit apparaître).
 
@@ -178,35 +186,31 @@ Sans cette étape, le PNJ existe en théorie mais n'apparaît jamais en jeu. Fic
 
 Pour trouver des coordonnées x/y valides sans en connaître à l'avance, le plus simple est de repérer la position d'un `<territory>` déjà existant proche de l'endroit voulu (dans le même fichier de région) et de s'en inspirer, ou de demander de l'aide pour retrouver une position précise en jeu.
 
-### 3. Lui donner une apparence, côté client
-
-Fichier : `l2-unity-main/l2-unity/Assets/StreamingAssets/Data/Meta/Npcgrp_Classic.txt`
-
-Ajoute une ligne avec le **même `npc_id`**. Le champ le plus important est `mesh_name` : pointe-le vers un modèle qui existe déjà (copie le `mesh_name` d'un PNJ qui a le look voulu), et recopie le **même nombre brut** que `radius`/`height` du XML serveur dans `collision_radius`/`collision_height` (pas de conversion à faire, elle se fait automatiquement au chargement) :
-
-```
-npc_begin	npc_id=900001	class_name=[LineageMonster.mon_pnj_custom]	mesh_name=[LineageMonsters.gremlin_m00]	collision_radius=10.0	collision_radius_2=10.0	collision_height=25.0	collision_height_2=25.0	npc_type=monster_normal	npc_end
-```
-
-> Sans cette entrée, le PNJ ne spawnera pas du tout côté client (juste une erreur silencieuse dans les logs) — c'est l'oubli le plus facile à faire.
-
-### 4. Lui donner un nom affiché
-
-Fichier : `l2-unity-main/l2-unity/Assets/StreamingAssets/Data/Meta/NpcName_Classic-eu.txt`
-
-```
-npc_begin	id=900001	name=[Mon PNJ Custom]	nick=[ Lvl: 10]	nickcolor=9CE8A9FF	npc_end
-```
-
-### 5. Tester
+#### 3. Tester
 
 1. Redémarre le gameserver (il charge les XML une seule fois, au démarrage). Si un comportement bizarre apparaît alors que la config semble correcte, `./gradlew --stop` avant de relancer (cf. [Dépannage](#dépannage)).
 2. Relance le Play Mode dans Unity.
 3. Va à l'endroit où le spawn a été placé.
 
-### Aller plus loin : un tout nouveau visuel
+C'est tout — pas de fichier côté client (`Npcgrp_Classic.txt`/`NpcName_Classic-eu.txt`) à toucher.
 
-Si le PNJ a besoin d'un modèle 3D qui n'existe encore nulle part dans le jeu (pas juste réutiliser un PNJ existant), il faut en plus créer un nouveau prefab Unity avec animation et collider — une étape bien plus impliquée, hors du cadre de ce guide simple. Le point de départ le plus sûr est de partir du prefab d'un PNJ existant qui a une structure proche (mêmes composants) et de le personnaliser à partir de là.
+### Méthode complète : un tout nouveau visuel
+
+Si le PNJ a besoin d'un modèle 3D qui **n'existe encore nulle part** dans le jeu, `idTemplate` ne peut pas aider (il ne fait que pointer vers une apparence déjà connue du client) — il faut alors remplir les 4 endroits où un PNJ est défini :
+
+1. **Stats côté serveur** — même fichier XML qu'au-dessus, mais **sans** `idTemplate` (ou avec `idTemplate` égal au nouvel `id` lui-même, ce qui revient au même).
+2. **Spawn** — identique à l'étape 2 ci-dessus.
+3. **Apparence côté client** — nouvelle entrée dans `l2-unity-main/l2-unity/Assets/StreamingAssets/Data/Meta/Npcgrp_Classic.txt`, avec le **même `npc_id`** que le serveur. Le champ `mesh_name` doit pointer vers le nouveau prefab (voir point 5), et `collision_radius`/`collision_height` doivent recopier le **même nombre brut** que `radius`/`height` du XML serveur (pas de conversion à faire, elle est automatique) :
+   ```
+   npc_begin	npc_id=900001	class_name=[LineageMonster.mon_pnj_custom]	mesh_name=[LineageMonsters.mon_nouveau_modele]	collision_radius=10.0	collision_radius_2=10.0	collision_height=25.0	collision_height_2=25.0	npc_type=monster_normal	npc_end
+   ```
+   > Sans cette entrée, le PNJ ne spawnera pas du tout côté client (juste une erreur silencieuse dans les logs) — c'est l'oubli le plus facile à faire.
+4. **Nom affiché côté client** — nouvelle entrée dans `l2-unity-main/l2-unity/Assets/StreamingAssets/Data/Meta/NpcName_Classic-eu.txt` :
+   ```
+   npc_begin	id=900001	name=[Mon PNJ Custom]	nick=[ Lvl: 10]	nickcolor=9CE8A9FF	npc_end
+   ```
+5. **Le modèle 3D lui-même** — créer un nouveau prefab Unity avec animation et collider, une étape bien plus impliquée, hors du cadre de ce guide simple. Le point de départ le plus sûr est de partir du prefab d'un PNJ existant qui a une structure proche (mêmes composants) et de le personnaliser à partir de là.
+6. **Tester** — identique à l'étape 3 ci-dessus.
 
 ---
 
