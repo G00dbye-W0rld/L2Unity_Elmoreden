@@ -17,6 +17,7 @@ public class AuthRequestPacket extends ReceivablePacket {
     private final byte[] raw = new byte[128];
     private String account;
     private byte[] passHashBytes;
+    private String hwid = "";
 
     public AuthRequestPacket(byte[] data, RSAPrivateKey privateKey) {
         super(data);
@@ -52,6 +53,17 @@ public class AuthRequestPacket extends ReceivablePacket {
             }
         } catch (Exception ex) {
             log.warn("There has been an error parsing credentials!", ex);
+        }
+
+        // Identifiant machine, ajoute apres le bloc RSA de 128 octets. L'iterateur
+        // de base reste bloque a 1 (le bloc RSA a ete copie a la main plus haut,
+        // pas via l'iterateur) - on l'avance donc explicitement jusqu'a 129 avant
+        // de lire la chaine.
+        try {
+            readB(128);
+            hwid = readS();
+        } catch (Exception ex) {
+            hwid = "";
         }
     }
 }

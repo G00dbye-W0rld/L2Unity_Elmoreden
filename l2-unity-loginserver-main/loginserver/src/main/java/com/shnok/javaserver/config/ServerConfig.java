@@ -40,6 +40,15 @@ public interface ServerConfig extends Mutable, Reloadable {
     Integer accountInactiveLevel();
     @Key("server.show.license")
     Boolean showLicense();
+    @Key("bruteforce.max.attempts")
+    @DefaultValue("5")
+    Integer bruteforceMaxAttempts();
+    @Key("bruteforce.window.minutes")
+    @DefaultValue("15")
+    Integer bruteforceWindowMinutes();
+    @Key("bruteforce.lockout.minutes")
+    @DefaultValue("15")
+    Integer bruteforceLockoutMinutes();
     @Key("rsa.padding.mode.gameserver")
     String gameserverRsaPaddingMode();
     @Key("rsa.padding.mode.client")

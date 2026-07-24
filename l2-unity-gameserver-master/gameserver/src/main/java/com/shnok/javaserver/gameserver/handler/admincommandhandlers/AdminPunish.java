@@ -20,6 +20,9 @@ public class AdminPunish implements IAdminCommandHandler
 	private static final String UPDATE_JAIL = "UPDATE characters SET x=-114356, y=-249645, z=-2984, punish_level=?, punish_timer=? WHERE char_name=?";
 	private static final String UPDATE_UNJAIL = "UPDATE characters SET x=17836, y=170178, z=-3507, punish_level=0, punish_timer=0 WHERE char_name=?";
 	private static final String UPDATE_ACCESS = "UPDATE characters SET accesslevel=? WHERE char_name=?";
+	private static final String INSERT_ACCOUNT_BAN = "INSERT INTO account_bans (login, reason, banned_by, ban_date, expire_date) VALUES (?, ?, ?, ?, ?) " +
+		"ON DUPLICATE KEY UPDATE reason=VALUES(reason), banned_by=VALUES(banned_by), ban_date=VALUES(ban_date), expire_date=VALUES(expire_date)";
+	private static final String DELETE_ACCOUNT_BAN = "DELETE FROM account_bans WHERE login=?";
 	
 	private static final String[] ADMIN_COMMANDS =
 	{
@@ -70,23 +73,30 @@ public class AdminPunish implements IAdminCommandHandler
 				switch (param)
 				{
 					case "account":
-						if (targetPlayer == null)
+					{
+						if (StringUtil.isEmpty(name))
 						{
-							if (StringUtil.isEmpty(name))
-							{
-								player.sendMessage("Usage: //ban account [name].");
-								return;
-							}
-							
-							LoginServerThread.getInstance().sendAccessLevel(name, -100);
-							player.sendMessage("Ban request sent for account " + name + ".");
+							player.sendMessage("Usage: //ban account <name> [duration_minutes] [reason...]");
+							return;
 						}
-						else
-						{
-							targetPlayer.getPunishment().setType(PunishmentType.ACC, 0);
-							player.sendMessage(targetPlayer.getAccountName() + " account is banned.");
-						}
+
+						// Le reste des tokens (apres le nom et l'eventuelle duree) forme la raison.
+						final StringBuilder reasonBuilder = new StringBuilder();
+						while (st.hasMoreTokens())
+							reasonBuilder.append(st.nextToken()).append(' ');
+						final String reason = reasonBuilder.toString().trim();
+
+						final long expireDate = (duration > 0) ? System.currentTimeMillis() + (duration * 60000L) : 0;
+
+						banAccount(name, reason, player.getName(), expireDate);
+						LoginServerThread.getInstance().sendAccessLevel(name, -100);
+
+						if (targetPlayer != null)
+							targetPlayer.logout(false);
+
+						player.sendMessage("Account " + name + " has been banned" + ((duration > 0) ? " for " + duration + " minutes" : " permanently") + (reason.isEmpty() ? "." : " (" + reason + ")."));
 						break;
+					}
 					
 					case "chat":
 						if (targetPlayer == null)
@@ -218,7 +228,8 @@ public class AdminPunish implements IAdminCommandHandler
 							player.sendMessage(targetPlayer.getName() + " account isn't actually banned.");
 							return;
 						}
-						
+
+						unbanAccount(name);
 						LoginServerThread.getInstance().sendAccessLevel(name, 0);
 						player.sendMessage("Unban request sent for account " + name + ".");
 						break;
@@ -367,6 +378,38 @@ public class AdminPunish implements IAdminCommandHandler
 		}
 	}
 	
+	private static void banAccount(String login, String reason, String bannedBy, long expireDate)
+	{
+		try (Connection con = ConnectionPool.getConnection();
+			PreparedStatement ps = con.prepareStatement(INSERT_ACCOUNT_BAN))
+		{
+			ps.setString(1, login);
+			ps.setString(2, reason);
+			ps.setString(3, bannedBy);
+			ps.setLong(4, System.currentTimeMillis());
+			ps.setLong(5, expireDate);
+			ps.execute();
+		}
+		catch (Exception e)
+		{
+			LOGGER.error("Couldn't insert account ban.", e);
+		}
+	}
+
+	private static void unbanAccount(String login)
+	{
+		try (Connection con = ConnectionPool.getConnection();
+			PreparedStatement ps = con.prepareStatement(DELETE_ACCOUNT_BAN))
+		{
+			ps.setString(1, login);
+			ps.execute();
+		}
+		catch (Exception e)
+		{
+			LOGGER.error("Couldn't delete account ban.", e);
+		}
+	}
+
 	private static void changeCharAccessLevel(Player targetPlayer, String name, Player player, int lvl)
 	{
 		if (targetPlayer != null)

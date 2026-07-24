@@ -34,6 +34,7 @@ public class DbFactory {
 
         // Add entity classes to configuration
         configuration.addAnnotatedClass(DBAccountInfo.class);
+        configuration.addAnnotatedClass(DBAccountBan.class);
         configuration.addAnnotatedClass(DBGameServer.class);
 
         return configuration.buildSessionFactory();

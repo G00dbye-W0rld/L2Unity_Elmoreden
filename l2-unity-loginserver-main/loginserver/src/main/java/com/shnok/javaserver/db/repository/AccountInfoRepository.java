@@ -63,4 +63,18 @@ public class AccountInfoRepository implements AccountInfoDao {
             log.error("SQL ERROR: {}", e.getMessage(), e);
         }
     }
+
+    @Override
+    public void updateAccessLevel(String account, int accessLevel) {
+        try (Session session = DbFactory.getSessionFactory().openSession()) {
+            session.beginTransaction();
+            session.createQuery("UPDATE DBAccountInfo i SET accessLevel=:accessLevel WHERE login=:login")
+                    .setParameter("login", account)
+                    .setParameter("accessLevel", accessLevel)
+                    .executeUpdate();
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            log.error("SQL ERROR: {}", e.getMessage(), e);
+        }
+    }
 }

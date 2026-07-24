@@ -57,6 +57,7 @@ public class LoginClientThread extends Thread {
     private Map<Integer, long[]> charsToDelete;
     private int connectionTimeoutMs;
     private int expectedCharacterCount;
+    private String hwid;
 
     public LoginClientThread(Socket con) {
         connection = con;
@@ -126,6 +127,11 @@ public class LoginClientThread extends Thread {
 
     public void close(AccountKickedReason kickedReason) {
         sendPacket(new AccountKickedPacket(kickedReason));
+        disconnect();
+    }
+
+    public void close(AccountKickedReason kickedReason, String reason, long expireDate) {
+        sendPacket(new AccountKickedPacket(kickedReason, reason, expireDate));
         disconnect();
     }
 
@@ -204,6 +210,14 @@ public class LoginClientThread extends Thread {
     }
 
     private void removeSelf() {
+        // Si le client n'a jamais atteint le gameserver, personne n'enverra jamais
+        // de PlayerLogout pour liberer son HWID - on le fait ici. S'il a bien
+        // rejoint le gameserver (joinedGS), on laisse PlayerLogout s'en charger
+        // plus tard, au vrai moment de la deconnexion en jeu.
+        if (!joinedGS && (hwid != null)) {
+            LoginServerController.getInstance().releaseHwid(hwid);
+        }
+
         if (authenticated) {
             authenticated = false;
 

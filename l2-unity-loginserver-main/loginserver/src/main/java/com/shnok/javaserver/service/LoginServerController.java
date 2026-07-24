@@ -17,7 +17,9 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.shnok.javaserver.config.Configuration.server;
 import static java.security.spec.RSAKeyGenParameterSpec.F4;
@@ -26,6 +28,10 @@ import static java.security.spec.RSAKeyGenParameterSpec.F4;
 @Getter
 public class LoginServerController {
     private final List<LoginClientThread> clients = new ArrayList<>();
+    // Limite "un client lance par machine" : HWID -> compte actuellement actif
+    // avec ce HWID. En memoire seulement (etat de session live, pas la peine de
+    // le persister en base).
+    private final Map<String, String> hwidToAccount = new HashMap<>();
     protected final ScrambledKeyPair[] keyPairs;
     protected byte[][] blowfishKeys;
     private static final int BLOWFISH_KEYS = 20;
@@ -180,5 +186,21 @@ public class LoginServerController {
         if(client != null) {
             removeClient(client);
         }
+    }
+
+    public synchronized String getAccountForHwid(String hwid) {
+        return hwidToAccount.get(hwid);
+    }
+
+    public synchronized void claimHwid(String hwid, String account) {
+        hwidToAccount.put(hwid, account);
+    }
+
+    public synchronized void releaseHwid(String hwid) {
+        hwidToAccount.remove(hwid);
+    }
+
+    public synchronized void releaseHwidForAccount(String account) {
+        hwidToAccount.values().removeIf(account::equals);
     }
 }

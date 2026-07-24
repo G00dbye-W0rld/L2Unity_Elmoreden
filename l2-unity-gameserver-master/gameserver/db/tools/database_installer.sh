@@ -73,6 +73,7 @@ echo "Upgrading gameserver content"
 fi
 
 $MYL < ../sql/accounts.sql &> /dev/null
+$MYL < ../sql/account_bans.sql &> /dev/null
 $MYL < ../sql/gameservers.sql &> /dev/null
 
 $MYG < ../sql/auctions.sql &> /dev/null

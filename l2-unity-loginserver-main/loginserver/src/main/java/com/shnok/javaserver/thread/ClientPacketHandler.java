@@ -1,6 +1,8 @@
 package com.shnok.javaserver.thread;
 
+import com.shnok.javaserver.db.entity.DBAccountBan;
 import com.shnok.javaserver.db.entity.DBAccountInfo;
+import com.shnok.javaserver.db.repository.AccountBanRepository;
 import com.shnok.javaserver.db.repository.AccountInfoRepository;
 import com.shnok.javaserver.dto.external.clientpackets.AuthRequestPacket;
 import com.shnok.javaserver.dto.external.clientpackets.RequestServerListPacket;
@@ -10,6 +12,7 @@ import com.shnok.javaserver.enums.*;
 import com.shnok.javaserver.enums.packettypes.external.ClientPacketType;
 import com.shnok.javaserver.model.GameServerInfo;
 import com.shnok.javaserver.model.SessionKey;
+import com.shnok.javaserver.security.BruteForceProtector;
 import com.shnok.javaserver.security.NewCrypt;
 import com.shnok.javaserver.service.GameServerController;
 import com.shnok.javaserver.service.LoginServerController;
@@ -106,10 +109,20 @@ public class ClientPacketHandler extends Thread {
         AuthRequestPacket packet = new AuthRequestPacket(data, privateKey);
         String account = packet.getAccount();
         byte[] passHashBytes = packet.getPassHashBytes();
+        String hwid = packet.getHwid();
 
         log.debug("Received auth for account: {}", account);
 
         InetAddress clientAddr = client.getConnection().getInetAddress();
+        String clientIp = client.getConnectionIp();
+
+        // Anti-bruteforce : verrouille par compte ET par IP, meme si le mot de
+        // passe fourni cette fois est correct - tant que le verrou est actif,
+        // aucune connexion ne passe sur cette cle.
+        if (BruteForceProtector.isLocked(account) || BruteForceProtector.isLocked(clientIp)) {
+            client.close(LoginFailReason.REASON_ACCESS_FAILED_TRY_AGAIN_LATER);
+            return;
+        }
 
         DBAccountInfo accountInfo;
 
@@ -118,6 +131,8 @@ public class ClientPacketHandler extends Thread {
 
         if (accountInfo != null) {
             if(!accountInfo.getPassHash().equals(hashBase64)) {
+                BruteForceProtector.recordFailure(account);
+                BruteForceProtector.recordFailure(clientIp);
                 client.close(LoginFailReason.REASON_USER_OR_PASS_WRONG);
                 return;
             }
@@ -131,10 +146,27 @@ public class ClientPacketHandler extends Thread {
             AccountInfoRepository.getInstance().createAccount(accountInfo);
             log.info("Autocreated account {}.", account);
         } else {
+            BruteForceProtector.recordFailure(clientIp);
             client.close(LoginFailReason.REASON_USER_OR_PASS_WRONG);
             return;
         }
 
+        // Identifiants corrects : on remet les compteurs d'echec a zero.
+        BruteForceProtector.reset(account);
+        BruteForceProtector.reset(clientIp);
+
+        // Limite "un client lance par machine" : si ce HWID est deja actif sur un
+        // AUTRE compte, on kicke l'ancienne session (ou qu'elle soit : encore sur
+        // le loginserver, ou deja en jeu) et on laisse passer celle-ci - au cas ou
+        // un bug empecherait la premiere session de se liberer proprement.
+        if ((hwid != null) && !hwid.isEmpty()) {
+            String previousAccount = LoginServerController.getInstance().getAccountForHwid(hwid);
+            if ((previousAccount != null) && !previousAccount.equalsIgnoreCase(account)) {
+                kickAccountEverywhere(previousAccount);
+            }
+            LoginServerController.getInstance().claimHwid(hwid, account);
+            client.setHwid(hwid);
+        }
 
         AuthLoginResult result = tryCheckinAccount(accountInfo);
 
@@ -162,7 +194,10 @@ public class ClientPacketHandler extends Thread {
                 client.close(LoginFailReason.REASON_INACTIVE);
                 break;
             case ACCOUNT_BANNED:
-                client.close(AccountKickedReason.REASON_PERMANENTLY_BANNED);
+                DBAccountBan ban = AccountBanRepository.getInstance().getBan(account);
+                String banReason = (ban != null) ? ban.getReason() : "";
+                long banExpireDate = (ban != null) ? ban.getExpireDate() : 0;
+                client.close(AccountKickedReason.REASON_PERMANENTLY_BANNED, banReason, banExpireDate);
                 break;
             case ALREADY_ON_LS:
                 LoginClientThread oldClient = LoginServerController.getInstance().getClient(accountInfo.getLogin());
@@ -192,7 +227,18 @@ public class ClientPacketHandler extends Thread {
             if (info.getAccessLevel() == server.accountInactiveLevel()) {
                 return AuthLoginResult.ACCOUNT_INACTIVE;
             }
-            return AuthLoginResult.ACCOUNT_BANNED;
+
+            // Verification paresseuse de l'expiration : pas de tache planifiee, on
+            // ne verifie qu'au moment ou le compte essaie justement de se reconnecter.
+            DBAccountBan ban = AccountBanRepository.getInstance().getBan(info.getLogin());
+            if ((ban != null) && (ban.getExpireDate() != 0) && (ban.getExpireDate() <= System.currentTimeMillis())) {
+                AccountInfoRepository.getInstance().updateAccessLevel(info.getLogin(), 0);
+                AccountBanRepository.getInstance().deleteBan(info.getLogin());
+                info.setAccessLevel(0);
+                log.info("Ban expired for account {}, auto-unbanned.", info.getLogin());
+            } else {
+                return AuthLoginResult.ACCOUNT_BANNED;
+            }
         }
 
         AuthLoginResult ret = AuthLoginResult.INVALID_PASSWORD;
@@ -211,6 +257,21 @@ public class ClientPacketHandler extends Thread {
         }
 
         return ret;
+    }
+
+    // Kicke un compte, ou qu'il soit actuellement : encore en cours d'auth sur le
+    // loginserver, ou deja connecte a un gameserver. Utilise pour liberer un HWID
+    // detenu par une autre session que celle qui vient de s'authentifier.
+    private void kickAccountEverywhere(String account) {
+        LoginClientThread oldClient = LoginServerController.getInstance().getClient(account);
+        if (oldClient != null) {
+            oldClient.close(LoginFailReason.REASON_ACCOUNT_IN_USE);
+        }
+
+        GameServerInfo gsi = isAccountInAnyGameServer(account);
+        if ((gsi != null) && gsi.isAuthed()) {
+            gsi.getGameServerThread().kickPlayer(account);
+        }
     }
 
     public GameServerInfo isAccountInAnyGameServer(String account) {

@@ -10,4 +10,5 @@ public interface AccountInfoDao {
     public void updateAccount(DBAccountInfo accountInfo);
 
     void updateAccountLastServer(String account, int serverId);
+    void updateAccessLevel(String account, int accessLevel);
 }

@@ -1,5 +1,6 @@
 package com.shnok.javaserver.thread;
 
+import com.shnok.javaserver.db.repository.AccountInfoRepository;
 import com.shnok.javaserver.dto.internal.gameserverpackets.*;
 import com.shnok.javaserver.dto.internal.loginserverpackets.AuthResponsePacket;
 import com.shnok.javaserver.dto.internal.loginserverpackets.PlayerAuthResponsePacket;
@@ -91,6 +92,9 @@ public class GameServerPacketHandler extends Thread {
                 }
                 if(type == GameServerPacketType.PlayerAuthRequest) {
                     onReceivePlayerAuthRequest();
+                }
+                if(type == GameServerPacketType.ChangeAccessLevel) {
+                    onReceiveChangeAccessLevel();
                 }
                 break;
         }
@@ -217,6 +221,7 @@ public class GameServerPacketHandler extends Thread {
         PlayerLogoutPacket packet = new PlayerLogoutPacket(data);
 
         gameserver.removeAccountOnGameServer(packet.getPlayer());
+        LoginServerController.getInstance().releaseHwidForAccount(packet.getPlayer());
 
         log.info("Player {} logged out from game server {}[{}].", packet.getPlayer(), gameserver.getServerName(),
                 gameserver.getServerId());
@@ -229,6 +234,14 @@ public class GameServerPacketHandler extends Thread {
         log.info("Received {} character(s) for account {}.", packet.getCharCount(), packet.getAccount());
         LoginServerController.getInstance().setCharactersOnServer(packet.getAccount(),
                 packet.getCharCount(), gameserver.getServerId());
+    }
+
+    private void onReceiveChangeAccessLevel() {
+        ChangeAccessLevelPacket packet = new ChangeAccessLevelPacket(data);
+
+        AccountInfoRepository.getInstance().updateAccessLevel(packet.getAccount(), packet.getAccessLevel());
+
+        log.info("Access level for account {} changed to {}.", packet.getAccount(), packet.getAccessLevel());
     }
 
     private void onReceivePlayerAuthRequest() {

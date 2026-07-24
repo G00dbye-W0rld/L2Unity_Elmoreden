@@ -11,6 +11,12 @@ public class AccountKickedPacket : LoginServerPacket
     private AccountKickedReason _kickedReason;
     public AccountKickedReason KickedReason { get { return _kickedReason; } }
 
+    private string _reason;
+    public string Reason { get { return _reason; } }
+
+    // Millisecondes epoch, 0 = permanent.
+    private long _expireDate;
+    public long ExpireDate { get { return _expireDate; } }
 
     public AccountKickedPacket(byte[] d) : base(d)
     {
@@ -20,5 +26,7 @@ public class AccountKickedPacket : LoginServerPacket
     public override void Parse()
     {
         _kickedReason = (AccountKickedReason)ReadB();
+        _reason = ReadS();
+        _expireDate = ReadL();
     }
 }

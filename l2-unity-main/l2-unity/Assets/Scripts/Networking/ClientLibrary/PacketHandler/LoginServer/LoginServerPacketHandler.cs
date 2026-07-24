@@ -116,6 +116,12 @@ public class LoginServerPacketHandler : ServerPacketHandler
 
         EventProcessor.Instance.QueueEvent(() =>
         {
+            if (packet.FailedReason == LoginServerFailPacket.LoginFailedReason.REASON_ACCESS_FAILED_TRY_AGAIN_LATER)
+            {
+                L2ConfirmWindow.Instance.ShowWindow("Trop de tentatives de connexion. Réessayez dans quelques minutes.", () => { }, null);
+                return;
+            }
+
             int systemMessageId = 449;
             switch (packet.FailedReason)
             {
@@ -149,6 +155,23 @@ public class LoginServerPacketHandler : ServerPacketHandler
         AccountKickedPacket.AccountKickedReason kickedReason = packet.KickedReason;
 
         Debug.LogWarning($"Account kicked reason: {Enum.GetName(typeof(AccountKickedPacket.AccountKickedReason), kickedReason)}");
+
+        if (kickedReason == AccountKickedPacket.AccountKickedReason.REASON_PERMANENTLY_BANNED)
+        {
+            string message = "Ce compte est banni.";
+            if (!string.IsNullOrEmpty(packet.Reason))
+            {
+                message += "\nRaison : " + packet.Reason;
+            }
+            message += packet.ExpireDate > 0
+                ? "\nFin du bannissement : " + DateTimeOffset.FromUnixTimeMilliseconds(packet.ExpireDate).ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                : "\nBannissement permanent.";
+
+            EventProcessor.Instance.QueueEvent(() =>
+            {
+                L2ConfirmWindow.Instance.ShowWindow(message, () => { }, null);
+            });
+        }
 
         _client.Disconnect();
     }

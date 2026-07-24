@@ -56,6 +56,7 @@ echo Done.
 echo.
 echo Installing empty character-related tables.
 %mysqlPath% -h %LSHOST% -u %LSUSER% --password=%LSPASS% -D %LSDB% < ../sql/accounts.sql
+%mysqlPath% -h %LSHOST% -u %LSUSER% --password=%LSPASS% -D %LSDB% < ../sql/account_bans.sql
 %mysqlPath% -h %GSHOST% -u %GSUSER% --password=%GSPASS% -D %GSDB% < ../sql/auctions.sql
 %mysqlPath% -h %GSHOST% -u %GSUSER% --password=%GSPASS% -D %GSDB% < ../sql/augmentations.sql
 %mysqlPath% -h %GSHOST% -u %GSUSER% --password=%GSPASS% -D %GSDB% < ../sql/bbs_favorite.sql
