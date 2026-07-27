@@ -131,10 +131,13 @@ public class ShopWindow : L2PopupWindow
             TabSwitched(ShopTab.ShopTabType.BUY);
         }
 
-        if (products == null || products.Length == 0)
+        // Liste vide : on met quand meme l'onglet a jour avec une liste vide.
+        // L'ancien code sortait ici sans rien faire, donc la fenetre gardait
+        // affiches les objets du marchand (ou de la categorie) precedente -
+        // tres visible en passant d'une categorie du GM shop a une autre.
+        if (products == null)
         {
-            Debug.Log("Shop product list is empty.");
-            return;
+            products = new Product[0];
         }
 
         if (type == ShopTab.ShopTabType.BUY)

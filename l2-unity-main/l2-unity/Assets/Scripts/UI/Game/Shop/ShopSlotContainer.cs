@@ -64,26 +64,41 @@ public class ShopSlotContainer : L2SlotContainer
 
     private void AddOrUpdateProduct(Product product, int quantity)
     {
-        Debug.LogWarning("[" + _slotType + "] Add or update product: " + product.ItemId + " Qty: " + quantity);
-
+        // 0 = l'utilisateur a valide une quantite nulle : c'est une
+        // annulation. L'ancien code la convertissait en 1, donc valider 0
+        // achetait quand meme un exemplaire.
         if (quantity == 0)
         {
-            quantity = 1;
+            return;
         }
 
-        int slot = GetProductSlot(product.ItemId);
+        int slot = GetProductSlot(product);
         if (slot != -1)
         {
-            if (quantity < 0 && _products[slot].Count + quantity <= 0)
+            // Le produit est deja la : on ajuste sa quantite, quel que soit
+            // son type. L'ancien code ne le faisait que pour les objets
+            // empilables (TYPE1_ITEM_QUESTITEM_ADENA) et, pour tous les
+            // autres, tombait sur le _products.Add() final : une arme ajoutee
+            // deux fois creait deux lignes distinctes au lieu d'incrementer,
+            // et une quantite negative (retrait) creait une ligne au Count
+            // negatif, faussant le total calcule par CalculatePrice().
+            int newCount = _products[slot].Count + quantity;
+            if (newCount <= 0)
             {
                 RemoveProduct(slot);
-                return;
             }
-            else if (_products[slot].Type1 == ItemType1.TYPE1_ITEM_QUESTITEM_ADENA)
+            else
             {
-                _products[slot].Count += quantity;
-                return;
+                _products[slot].Count = newCount;
             }
+            return;
+        }
+
+        // Retirer quelque chose qui n'est pas dans la liste n'a pas de sens :
+        // sans ce garde-fou on inserait un produit de quantite negative.
+        if (quantity < 0)
+        {
+            return;
         }
 
         Product p = new Product(product);
@@ -96,11 +111,26 @@ public class ShopSlotContainer : L2SlotContainer
         _products.RemoveAt(slot);
     }
 
-    private int GetProductSlot(int itemId)
+    // Identification d'un produit deja present dans la liste.
+    //
+    // Onglet VENTE : les produits viennent de l'inventaire, ou chaque objet
+    // NON empilable possede son propre ObjectId - et le serveur l'attend
+    // (RequestSellItemPacket ecrit ObjectId + ItemId + Count). Deux epees
+    // identiques ne doivent donc surtout pas fusionner en une ligne.
+    // Onglet ACHAT : les produits sont des modeles sans ObjectId
+    // (BuyListPacket ne le renseigne jamais, il vaut 0) et le serveur ne veut
+    // que ItemId + Count - on regroupe alors par ItemId.
+    private int GetProductSlot(Product product)
     {
+        bool hasObjectId = product.ObjectId != 0;
+
         for (int i = 0; i < _products.Count; i++)
         {
-            if (_products[i].ItemId == itemId)
+            if (hasObjectId)
+            {
+                if (_products[i].ObjectId == product.ObjectId) return i;
+            }
+            else if (_products[i].ItemId == product.ItemId)
             {
                 return i;
             }

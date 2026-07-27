@@ -41,7 +41,15 @@ public class ProductSlot : InventorySlot
 
     public virtual void SwapBasket()
     {
-        if (Product.Type1 != ItemType1.TYPE1_ITEM_QUESTITEM_ADENA)
+        // Un objet d'INVENTAIRE non empilable (ObjectId reel, exemplaire
+        // unique) part directement au panier : il n'y a pas de quantite a
+        // choisir. En revanche un produit de MARCHAND (ObjectId a 0, simple
+        // modele) peut etre achete en plusieurs exemplaires, meme s'il s'agit
+        // d'une arme ou d'une armure - l'ancienne condition ne regardait que
+        // le type et privait donc l'achat de toute saisie de quantite.
+        bool isUniqueInventoryItem = Product.ObjectId != 0 && Product.Type1 != ItemType1.TYPE1_ITEM_QUESTITEM_ADENA;
+
+        if (isUniqueInventoryItem)
         {
             ((ShopSlotContainer)_currentSlotContainer).AdjacentContainer.AddToBasket(Product, 1);
         }
