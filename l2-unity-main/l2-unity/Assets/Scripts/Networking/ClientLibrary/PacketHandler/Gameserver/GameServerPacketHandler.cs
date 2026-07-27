@@ -89,6 +89,12 @@ public class GameServerPacketHandler : ServerPacketHandler
             case GameServerPacketType.InventoryUpdate:
                 OnInventoryUpdate(data);
                 break;
+            case GameServerPacketType.ChooseInventoryItem:
+                OnChooseInventoryItem(data);
+                break;
+            case GameServerPacketType.EnchantResult:
+                OnEnchantResult(data);
+                break;
             case GameServerPacketType.LeaveWorld:
                 OnLeaveWorld(data);
                 break;
@@ -190,6 +196,30 @@ public class GameServerPacketHandler : ServerPacketHandler
                 break;
             case GameServerPacketType.PartyEffect:
                 OnPartyEffect(data);
+                break;
+            case GameServerPacketType.AskJoinParty:
+                OnAskJoinParty(data);
+                break;
+            case GameServerPacketType.JoinParty:
+                OnJoinParty(data);
+                break;
+            case GameServerPacketType.PartySmallWindowAll:
+                OnPartySmallWindowAll(data);
+                break;
+            case GameServerPacketType.PartySmallWindowAdd:
+                OnPartySmallWindowAdd(data);
+                break;
+            case GameServerPacketType.PartySmallWindowDelete:
+                OnPartySmallWindowDelete(data);
+                break;
+            case GameServerPacketType.PartySmallWindowDeleteAll:
+                OnPartySmallWindowDeleteAll(data);
+                break;
+            case GameServerPacketType.PartySmallWindowUpdate:
+                OnPartySmallWindowUpdate(data);
+                break;
+            case GameServerPacketType.PartyMemberPosition:
+                OnPartyMemberPosition(data);
                 break;
             case GameServerPacketType.EtcStatusUpdate:
                 OnEtcStatusUpdate(data);
@@ -570,6 +600,18 @@ public class GameServerPacketHandler : ServerPacketHandler
         _eventProcessor.QueueEvent(() => PlayerInventory.Instance.UpdateInventory(packet.Items));
     }
 
+    private void OnChooseInventoryItem(byte[] data)
+    {
+        ChooseInventoryItemPacket packet = new ChooseInventoryItemPacket(data);
+        _eventProcessor.QueueEvent(() => EnchantManager.Instance.BeginSelection(packet.ItemId));
+    }
+
+    private void OnEnchantResult(byte[] data)
+    {
+        EnchantResultPacket packet = new EnchantResultPacket(data);
+        _eventProcessor.QueueEvent(() => EnchantManager.Instance.OnEnchantResult(packet.Result));
+    }
+
     private void OnLeaveWorld(byte[] data)
     {
 #if UNITY_EDITOR
@@ -809,6 +851,73 @@ public class GameServerPacketHandler : ServerPacketHandler
         PartyEffectPacket packet = new PartyEffectPacket(data);
         Debug.LogWarning("Part effects not yet handled!");
         // _eventProcessor.QueueEvent(() => BuffWindow.Instance.UpsertBuffs(packet.ObjectId, packet.Type, packet.Effects));
+    }
+
+    // Couche B : alimente PartyManager (source de verite unique de l'etat de
+    // groupe cote client), consomme par les nameplates et la fenetre Party.
+    private void OnAskJoinParty(byte[] data)
+    {
+        AskJoinPartyPacket packet = new AskJoinPartyPacket(data);
+        _eventProcessor.QueueEvent(() =>
+        {
+            if (GameSettings.DenyPartyRequests)
+            {
+                GameClient.Instance.ClientPacketHandler.SendRequestAnswerJoinParty(false);
+                return;
+            }
+
+            L2ConfirmWindow.Instance.ShowWindow(
+                $"{packet.RequestorName} vous invite à rejoindre son groupe.",
+                () => GameClient.Instance.ClientPacketHandler.SendRequestAnswerJoinParty(true),
+                () => GameClient.Instance.ClientPacketHandler.SendRequestAnswerJoinParty(false),
+                30f);
+        });
+    }
+
+    private void OnJoinParty(byte[] data)
+    {
+        JoinPartyPacket packet = new JoinPartyPacket(data);
+        Debug.Log($"[Party] Réponse à l'invitation envoyée : {(packet.Accepted ? "acceptée" : "refusée")}.");
+    }
+
+    private void OnPartySmallWindowAll(byte[] data)
+    {
+        PartySmallWindowAllPacket packet = new PartySmallWindowAllPacket(data);
+        _eventProcessor.QueueEvent(() =>
+            PartyManager.Instance.SetFullState(packet.LeaderObjectId, (PartyLootRule)packet.LootRuleId, packet.Members));
+    }
+
+    private void OnPartySmallWindowAdd(byte[] data)
+    {
+        PartySmallWindowAddPacket packet = new PartySmallWindowAddPacket(data);
+        _eventProcessor.QueueEvent(() =>
+            PartyManager.Instance.AddMember(packet.LeaderObjectId, (PartyLootRule)packet.LootRuleId, packet.Member));
+    }
+
+    private void OnPartySmallWindowDelete(byte[] data)
+    {
+        PartySmallWindowDeletePacket packet = new PartySmallWindowDeletePacket(data);
+        _eventProcessor.QueueEvent(() => PartyManager.Instance.RemoveMember(packet.ObjectId));
+    }
+
+    private void OnPartySmallWindowDeleteAll(byte[] data)
+    {
+        PartySmallWindowDeleteAllPacket packet = new PartySmallWindowDeleteAllPacket(data);
+        _eventProcessor.QueueEvent(() => PartyManager.Instance.Disband());
+    }
+
+    private void OnPartySmallWindowUpdate(byte[] data)
+    {
+        PartySmallWindowUpdatePacket packet = new PartySmallWindowUpdatePacket(data);
+        _eventProcessor.QueueEvent(() =>
+            PartyManager.Instance.UpdateMemberVitals(packet.ObjectId, packet.Hp, packet.MaxHp, packet.Mp, packet.MaxMp, packet.Cp, packet.MaxCp));
+    }
+
+    private void OnPartyMemberPosition(byte[] data)
+    {
+        PartyMemberPositionPacket packet = new PartyMemberPositionPacket(data);
+        // Pas exploite pour l'instant (pas de radar/mini-carte de groupe) - le
+        // paquet est correctement parse et pret a etre branche plus tard.
     }
 
     private void OnEtcStatusUpdate(byte[] data)

@@ -76,6 +76,10 @@ public class L2GameUI : L2UI
         {
             SettingsWindow.Instance.AddWindow(_rootVisualContainer);
         }
+        if (PartyWindow.Instance != null)
+        {
+            PartyWindow.Instance.AddWindow(_rootVisualContainer);
+        }
         if (MenuWindow.Instance != null)
         {
             MenuWindow.Instance.AddWindow(_rootVisualContainer);
@@ -222,8 +226,22 @@ public class L2GameUI : L2UI
             }
         }
 
+        if (InputManager.Instance.OpenParty)
+        {
+            if (PartyWindow.Instance != null)
+            {
+                PartyWindow.Instance.ToggleHideWindow();
+            }
+        }
+
         if (InputManager.Instance.CloseWindow)
         {
+            if (EnchantManager.Instance.IsSelecting) // Prioritize enchant selection cancel
+            {
+                EnchantManager.Instance.CancelSelection();
+                return;
+            }
+
             if (PlayerStateMachine.Instance?.State == PlayerState.SKILL) // Prioritize skill cast cancel
             {
                 return;

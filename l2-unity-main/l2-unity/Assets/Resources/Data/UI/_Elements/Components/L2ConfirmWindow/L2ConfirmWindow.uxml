@@ -10,6 +10,9 @@
             </ui:VisualElement>
             <ui:Label text="Warning message! Warning message! Warning message! Warning message!" name="Content" picking-mode="Ignore" class="l2-color-4 confirm-window-content" />
         </ui:VisualElement>
+        <ui:VisualElement name="TimeoutGaugeBg" picking-mode="Ignore" class="confirm-window-timeout-bg hidden">
+            <ui:VisualElement name="TimeoutGaugeFill" picking-mode="Ignore" class="confirm-window-timeout-fill" />
+        </ui:VisualElement>
         <ui:VisualElement name="ButtonBox" picking-mode="Ignore" class="confirm-window-button-box">
             <ui:Instance template="L2Button" name="OkButton" class="confirm-window-button">
                 <AttributeOverrides element-name="ButtonLabel" text="OK" enable-rich-text="true" />

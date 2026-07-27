@@ -9,6 +9,9 @@ public class L2ConfirmWindow : L2PopupWindow
     private Action _cancelAction;
     private Label _contentLabel;
     private VisualElement _cancelButton;
+    private VisualElement _timeoutGaugeBg;
+    private VisualElement _timeoutGaugeFill;
+    private Coroutine _timeoutCoroutine;
 
     private static L2ConfirmWindow _instance;
     public static L2ConfirmWindow Instance { get { return _instance; } }
@@ -62,6 +65,8 @@ public class L2ConfirmWindow : L2PopupWindow
         });
 
         _contentLabel = GetLabelById("Content");
+        _timeoutGaugeBg = GetElementById("TimeoutGaugeBg");
+        _timeoutGaugeFill = GetElementById("TimeoutGaugeFill");
 
         _windowEle.style.left = new Length(50, LengthUnit.Percent);
         _windowEle.style.top = new Length(50, LengthUnit.Percent);
@@ -107,6 +112,9 @@ public class L2ConfirmWindow : L2PopupWindow
         _confirmAction = confirmAction;
         _cancelAction = cancelAction;
 
+        StopTimeoutGauge();
+        _timeoutGaugeBg.AddToClassList("hidden");
+
         base.ShowWindow();
 
         AudioManager.Instance.PlayUISound("window_open");
@@ -115,8 +123,47 @@ public class L2ConfirmWindow : L2PopupWindow
             L2GameUI.Instance.WindowOpened(this);
     }
 
+    // Variante avec decompte visuel (jauge bleue) - a l'expiration, ferme la
+    // fenetre et declenche cancelAction (ex. invitation de groupe refusee
+    // automatiquement si personne ne repond a temps).
+    public void ShowWindow(string content, Action confirmAction, Action cancelAction, float timeoutSeconds)
+    {
+        ShowWindow(content, confirmAction, cancelAction);
+
+        _timeoutGaugeBg.RemoveFromClassList("hidden");
+        _timeoutGaugeFill.style.width = new Length(100, LengthUnit.Percent);
+        _timeoutCoroutine = StartCoroutine(TimeoutCountdown(timeoutSeconds));
+    }
+
+    private IEnumerator TimeoutCountdown(float timeoutSeconds)
+    {
+        float elapsed = 0f;
+        while (elapsed < timeoutSeconds)
+        {
+            elapsed += Time.deltaTime;
+            float remainingRatio = Mathf.Clamp01(1f - (elapsed / timeoutSeconds));
+            _timeoutGaugeFill.style.width = new Length(remainingRatio * 100f, LengthUnit.Percent);
+            yield return null;
+        }
+
+        _timeoutCoroutine = null;
+        HideWindow(false);
+        _cancelAction?.Invoke();
+    }
+
+    private void StopTimeoutGauge()
+    {
+        if (_timeoutCoroutine != null)
+        {
+            StopCoroutine(_timeoutCoroutine);
+            _timeoutCoroutine = null;
+        }
+    }
+
     public override void HideWindow(bool silent)
     {
+        StopTimeoutGauge();
+
         if (_cancelButton != null)
         {
             _cancelButton.style.display = DisplayStyle.Flex;

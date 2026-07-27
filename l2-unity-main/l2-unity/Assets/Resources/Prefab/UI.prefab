@@ -35,6 +35,7 @@ GameObject:
   - component: {fileID: 5396724109866029305}
   - component: {fileID: 1258522509192723278}
   - component: {fileID: 6375402496107040887}
+  - component: {fileID: 8842217364501938827}
   m_Layer: 0
   m_Name: UI
   m_TagString: Untagged
@@ -91,7 +92,7 @@ MonoBehaviour:
   _uiLoaded: 0
   _mouseOverUI: 0
   _windowsLoaded: 0
-  _totalWindowsToLoad: 20
+  _totalWindowsToLoad: 21
   _mouseEnabled: 1
 --- !u!114 &1625420868165748363
 MonoBehaviour:
@@ -130,6 +131,9 @@ MonoBehaviour:
   - _tabName: System
     _autoscroll: 1
     _filteredMessages: 13000000
+  - _tabName: Groupe
+    _autoscroll: 1
+    _filteredMessages: 03000000
   _chatOpened: 0
   _chatInputCharacterLimit: 120
 --- !u!114 &5054604499374613714
@@ -471,8 +475,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: be2b3362457ac814ab6d27a18c45e37c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name:
+  m_EditorClassIdentifier:
   nameplatePrefab: {fileID: 148316939659066616, guid: 2b6e85b4695026a4c95a50b2e96d050d, type: 3}
   poolParent: {fileID: 0}
   nameplateHeightMultiplier: 2.25
@@ -481,4 +485,16 @@ MonoBehaviour:
   maxScale: 10
   farBoostPerMeter: 0.01
   gaugeScreenFactor: 0.075
+--- !u!114 &8842217364501938827
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8310766140472177322}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f7a1c9e5b2d8f4a6c0e2b4d6f8a1c35, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
   fadeStartFraction: 0.7

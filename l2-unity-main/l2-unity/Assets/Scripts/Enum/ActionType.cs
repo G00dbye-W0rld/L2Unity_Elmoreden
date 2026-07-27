@@ -9,5 +9,6 @@ public enum ActionType : int
     Assist = 6,
     PartyInvite = 7,
     PartyLeave = 8,
-    PartyKick = 9
+    PartyKick = 9,
+    PartyChangeLeader = 50
 }

@@ -133,11 +133,12 @@ public class WorldNameplate
         if (_previousServerTitleColor != Entity.Appearance.ServerTitleColor)
         {
             _previousServerTitleColor = Entity.Appearance.ServerTitleColor;
-
-            if (_previousServerTitleColor != 0)
-            {
-                _titleText.color = ColorUtils.IntegerToColor(_previousServerTitleColor);
-            }
+            // Meme bug que le nom (cf. plus bas) : toujours ecrire une
+            // couleur ici, meme la couleur par defaut, sinon un titre recycle
+            // depuis le pool garderait la couleur speciale du titre precedent.
+            _titleText.color = _previousServerTitleColor != 0
+                ? ColorUtils.IntegerToColor(_previousServerTitleColor)
+                : Nameplate.DEFAULT_TITLE_COLOR;
         }
 
         if (Entity.Stats.Karma > 0)
@@ -166,6 +167,17 @@ public class WorldNameplate
                 _lastBlinkTime = Time.time;
             }
         }
+        else if (PartyManager.Instance.IsMember(Entity) && Entity.Identity.Id != PlayerEntity.Instance.Identity.Id)
+        {
+            // Couleur des membres du groupe : priorite plus basse que
+            // karma/PvP flag (un membre PK reste visible comme tel), mais
+            // remplace la couleur serveur par defaut tant qu'aucun etat plus
+            // prioritaire n'est actif. Pas de soi-meme (deja le joueur local).
+            _lastFlag = 0;
+            _previousKarmaAmount = 0;
+            _previousServerNameColor = -1;
+            _nameText.color = Nameplate.PARTY_MEMBER_COLOR;
+        }
         else
         {
             if (_previousServerNameColor != Entity.Appearance.ServerNameColor || Entity.Stats.Karma != _previousKarmaAmount || Entity.Identity.PvpFlag != _lastFlag)
@@ -174,12 +186,17 @@ public class WorldNameplate
                 _previousKarmaAmount = 0;
 
                 _previousServerNameColor = Entity.Appearance.ServerNameColor;
-
-                if (_previousServerNameColor != 0)
-                {
-                    _previousServerNameColorValue = ColorUtils.IntegerToColor(_previousServerNameColor);
-                    _nameText.color = _previousServerNameColorValue;
-                }
+                // Toujours ecrire une couleur ici (meme la couleur par
+                // defaut) : ce nameplate peut etre une instance recyclee du
+                // pool qui affichait encore la couleur speciale (party/PK/
+                // flag) de l'entite precedente. Sans ce else, ServerNameColor
+                // == 0 (cas courant, aucune couleur serveur) ne touchait
+                // jamais _nameText.color et la teinte residuelle restait
+                // affichee jusqu'au prochain changement detecte.
+                _previousServerNameColorValue = _previousServerNameColor != 0
+                    ? ColorUtils.IntegerToColor(_previousServerNameColor)
+                    : Nameplate.DEFAULT_NAME_COLOR;
+                _nameText.color = _previousServerNameColorValue;
             }
         }
     }

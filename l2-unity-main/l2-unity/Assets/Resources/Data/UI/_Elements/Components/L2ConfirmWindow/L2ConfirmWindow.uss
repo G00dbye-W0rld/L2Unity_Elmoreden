@@ -75,3 +75,22 @@
     padding-top: 5px;
     padding-bottom: 5px;
 }
+
+/* Jauge de decompte optionnelle (cf. ShowWindow(..., timeoutSeconds) dans
+   L2ConfirmWindow.cs) - utilisee par exemple pour l'invitation de groupe,
+   qui se refuse automatiquement si personne ne repond a temps. */
+.confirm-window-timeout-bg {
+    height: 4px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 6px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-width: 1px;
+    border-color: rgba(87, 70, 35, 0.57);
+}
+
+.confirm-window-timeout-fill {
+    height: 100%;
+    width: 100%;
+    background-color: rgb(80, 160, 255);
+}

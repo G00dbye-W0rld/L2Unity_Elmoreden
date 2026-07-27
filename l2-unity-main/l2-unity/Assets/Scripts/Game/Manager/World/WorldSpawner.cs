@@ -260,6 +260,14 @@ public class WorldSpawner : MonoBehaviour
         return IsEntityPresent(id, false);
     }
 
+    // Lookup synchrone pour l'UI (ex. rafraichissement des barres HP/MP des
+    // membres du groupe a chaque frame) - GetEntityAsync/ExecuteWithEntityAsync
+    // sont bases sur des Task, mal adaptes a un sondage repete a haute frequence.
+    public bool TryGetEntity(int id, out Entity entity)
+    {
+        return _objects.TryGetValue(id, out entity);
+    }
+
     private bool IsEntityPresent(int id, bool remove)
     {
         lock (_idBag)

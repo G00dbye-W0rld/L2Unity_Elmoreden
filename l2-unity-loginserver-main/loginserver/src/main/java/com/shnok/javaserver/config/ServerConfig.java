@@ -49,6 +49,13 @@ public interface ServerConfig extends Mutable, Reloadable {
     @Key("bruteforce.lockout.minutes")
     @DefaultValue("15")
     Integer bruteforceLockoutMinutes();
+    // Coupe-circuit pour le dev/test en solo (plusieurs clients sur la meme
+    // machine, ex. tester le systeme de groupe) - desactive la limite "un
+    // compte par HWID". Reste actif (true) par defaut, a desactiver seulement
+    // en local, jamais en prod.
+    @Key("hwid.limit.enabled")
+    @DefaultValue("true")
+    Boolean hwidLimitEnabled();
     @Key("rsa.padding.mode.gameserver")
     String gameserverRsaPaddingMode();
     @Key("rsa.padding.mode.client")

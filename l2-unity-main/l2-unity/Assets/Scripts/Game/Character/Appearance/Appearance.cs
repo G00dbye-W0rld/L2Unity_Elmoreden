@@ -10,10 +10,16 @@ public class Appearance
     [SerializeField] private int _serverNameColor;
     [SerializeField] private int _serverTitleColor;
     // [SerializeField] private Color _defaultTitleColor; //= "9CE8A9FF"; // default color
+    // Niveau d'enchant de l'arme active, envoye par le serveur
+    // (Player.getEnchantEffect(), plafonne a 127) pour piloter le glow
+    // visuel de l'arme - jete jusqu'ici (ReadB() sans stocker) dans
+    // UserInfoPacket/PlayerInfoPacket.
+    [SerializeField] private int _enchantEffect;
     public float CollisionHeight { get { return _collisonHeight; } set { _collisonHeight = value; } }
     public float CollisionRadius { get { return _collisionRadius; } set { _collisionRadius = value; } }
     public int ServerTitleColor { get => _serverTitleColor; set => _serverTitleColor = value; }
     public int ServerNameColor { get => _serverNameColor; set => _serverNameColor = value; }
+    public int EnchantEffect { get => _enchantEffect; set => _enchantEffect = value; }
     public int LHand { get { return _lhand; } set { _lhand = value; } }
     public int RHand { get { return _rhand; } set { _rhand = value; } }
 
@@ -21,6 +27,7 @@ public class Appearance
     {
         _serverTitleColor = appearance.ServerTitleColor;
         _serverNameColor = appearance.ServerNameColor;
+        _enchantEffect = appearance.EnchantEffect;
         _collisonHeight = appearance.CollisionHeight;
         _collisionRadius = appearance.CollisionRadius;
         _lhand = appearance.LHand;

@@ -23,6 +23,8 @@ public static class GameSettings
     private const string GraphicCursorKey = "Settings_GraphicCursor";
     private const string ViewDistanceKey = "Settings_ViewDistanceLevel";
     private const string WaterDetailKey = "Settings_WaterDetailLevel";
+    private const string PreferredPartyLootRuleKey = "Settings_PreferredPartyLootRule";
+    private const string DenyPartyRequestsKey = "Settings_DenyPartyRequests";
 
     private static readonly int[] MsaaSamples = { 1, 2, 4, 8 };
     // Index aligne sur les choix du dropdown "Distance des ombres" (Desactivees/Proches/Moyennes/Lointaines).
@@ -61,6 +63,12 @@ public static class GameSettings
     public static bool GraphicCursorEnabled { get; private set; } = true;
     public static int ViewDistanceLevel { get; private set; } = 1;
     public static int WaterDetailLevel { get; private set; } = 1;
+    // Valeur du mode de butin utilisee comme lootRuleId lors de la toute
+    // premiere invitation (RequestJoinParty), qui cree le groupe avec ce mode.
+    // Index aligne sur l'enum PartyLootRule (0=ItemLooter...4=ItemOrderSpoil),
+    // lui-meme aligne sur les ordinaux du LootRule.java cote serveur.
+    public static int PreferredPartyLootRule { get; private set; } = 0;
+    public static bool DenyPartyRequests { get; private set; } = false;
 
     private static void Load()
     {
@@ -81,6 +89,8 @@ public static class GameSettings
         GraphicCursorEnabled = PlayerPrefs.GetInt(GraphicCursorKey, 1) == 1;
         ViewDistanceLevel = PlayerPrefs.GetInt(ViewDistanceKey, 1);
         WaterDetailLevel = PlayerPrefs.GetInt(WaterDetailKey, 1);
+        PreferredPartyLootRule = PlayerPrefs.GetInt(PreferredPartyLootRuleKey, 0);
+        DenyPartyRequests = PlayerPrefs.GetInt(DenyPartyRequestsKey, 0) == 1;
     }
 
     // Applique les valeurs sauvegardees au demarrage (audio + video). A appeler
@@ -310,5 +320,21 @@ public static class GameSettings
         PlayerPrefs.SetInt(GraphicCursorKey, GraphicCursorEnabled ? 1 : 0);
         PlayerPrefs.Save();
         CursorManager.Instance?.SetGraphicCursorEnabled(GraphicCursorEnabled);
+    }
+
+    public static void SetPreferredPartyLootRule(int value)
+    {
+        Load();
+        PreferredPartyLootRule = value;
+        PlayerPrefs.SetInt(PreferredPartyLootRuleKey, PreferredPartyLootRule);
+        PlayerPrefs.Save();
+    }
+
+    public static void SetDenyPartyRequests(bool value)
+    {
+        Load();
+        DenyPartyRequests = value;
+        PlayerPrefs.SetInt(DenyPartyRequestsKey, DenyPartyRequests ? 1 : 0);
+        PlayerPrefs.Save();
     }
 }

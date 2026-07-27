@@ -9,6 +9,7 @@ public class TargetWindow : L2PopupWindow
     private VisualElement _HPBarContainer;
     private VisualElement _HPBar;
     private VisualElement _HPBarBG;
+    private Button _partyInviteButton;
     [SerializeField] private float _targetWindowMinWidth = 175.0f;
     [SerializeField] private float _targetWindowMaxWidth = 300.0f;
 
@@ -86,6 +87,18 @@ public class TargetWindow : L2PopupWindow
             Debug.LogError("Target window _HPBarBG is null");
         }
 
+        _partyInviteButton = (Button)GetElementById("PartyInviteButton");
+        _partyInviteButton.style.backgroundImage = IconTable.Instance.LoadTextureByName("action011");
+        _partyInviteButton.AddManipulator(new ButtonClickSoundManipulator(_partyInviteButton));
+        _partyInviteButton.RegisterCallback<ClickEvent>(evt =>
+        {
+            Entity target = TargetManager.Instance.Target;
+            if (target == null) return;
+
+            int lootRuleId = PartyManager.Instance.IsInParty ? (int)PartyManager.Instance.LootRule : GameSettings.PreferredPartyLootRule;
+            GameClient.Instance.ClientPacketHandler.SendRequestJoinParty(target.Identity.Name, lootRuleId);
+        });
+
         _windowEle.style.position = Position.Absolute;
         _windowEle.style.left = Screen.width / 2f - _windowEle.resolvedStyle.width / 2f;
         _windowEle.style.top = 0;
@@ -109,6 +122,31 @@ public class TargetWindow : L2PopupWindow
 
             Entity targetData = TargetManager.Instance.Target;
             _nameLabel.text = targetData.Identity.Name;
+
+            // "+" d'invitation : uniquement pour un AUTRE joueur, et pas s'il
+            // est deja dans le groupe actuel (rien a inviter dans ce cas).
+            // BUG CORRIGE : ce code ne testait QUE EntityType.Player, or dans
+            // cette architecture EntityType.Player designe EXCLUSIVEMENT le
+            // personnage LOCAL (tag pose uniquement par PlayerSpawner.cs, qui
+            // ne sert qu'a se spawner soi-meme - PlayerEntity.Instance est
+            // d'ailleurs le raccourci partout dans le code pour "l'entite
+            // dont l'Id == CurrentPlayerId", cf. WorldSpawner.GetEntityAsync/
+            // ExecuteWithEntityAsync). Un AUTRE joueur reel recoit toujours
+            // EntityType.User (tag pose par UserSpawner.cs, qui active
+            // NetworkTransformReceive - donc bien un personnage pilote a
+            // distance). Consequence concrete : l'icone d'invitation ne
+            // pouvait quasiment jamais s'afficher pour un vrai joueur cible,
+            // exactement le symptome "icone d'invitation pas toujours
+            // affichee" remonte. PartyManager.IsMember(Entity) accepte deja
+            // les deux valeurs pour cette raison - meme logique ici.
+            // IsMember(Entity) (pas IsMember(int)) par coherence avec le
+            // reste du code : verifie l'EntityType en plus de l'Id, cf.
+            // PartyManager.IsMember pour le risque de collision d'ObjectId.
+            bool canInvite = (targetData.Identity.EntityType == EntityType.Player || targetData.Identity.EntityType == EntityType.User) &&
+                targetData != PlayerEntity.Instance &&
+                !PartyManager.Instance.IsMember(targetData);
+            _partyInviteButton.EnableInClassList("hidden", !canInvite);
+
             if (targetData.Identity.IsHpShowable)
             {
                 SetTargetColor(targetData.Stats.Level - PlayerEntity.Instance.Stats.Level);

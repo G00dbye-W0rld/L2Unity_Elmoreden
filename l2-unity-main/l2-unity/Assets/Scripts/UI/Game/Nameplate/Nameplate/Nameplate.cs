@@ -6,6 +6,11 @@ public class Nameplate
     public static Color FINAL_KARMA_COLOR = new Color(1f, 0, 0, 1f);
     public static Color DEFAULT_NAME_COLOR = new Color(1f, 1f, 1f, 1f);
     public static Color FLAG_COLOR = new Color(1f, 0f, 1f, 1f);
+    public static Color PARTY_MEMBER_COLOR = new Color(0.4f, 0.85f, 1f, 1f);
+    // Vert clair standard L2 pour les titres de PNJ sans couleur serveur
+    // explicite (ServerTitleColor == 0) - meme role que DEFAULT_NAME_COLOR
+    // pour les noms, cf. le bug de fuite de couleur sur titre recycle.
+    public static Color DEFAULT_TITLE_COLOR = ColorUtils.HexToColor("9CE8A9FF");
 
     protected VisualElement _nameplateEle;
     private VisualElement _leftBubbleEle;
@@ -52,11 +57,12 @@ public class Nameplate
         {
             // Debug.LogWarning($"Title color changed: Old:{_previousServerTitleColor} New:{_entity.Appearance.ServerTitleColor}");
             _previousServerTitleColor = _entity.Appearance.ServerTitleColor;
-
-            if (_previousServerTitleColor != 0)
-            {
-                _nameplateEntityTitle.style.color = ColorUtils.IntegerToColor(_previousServerTitleColor);
-            }
+            // Meme bug que le nom (cf. plus bas) : toujours ecrire une
+            // couleur ici, meme la couleur par defaut, sinon un titre recycle
+            // depuis un pool garderait la couleur speciale du titre precedent.
+            _nameplateEntityTitle.style.color = _previousServerTitleColor != 0
+                ? ColorUtils.IntegerToColor(_previousServerTitleColor)
+                : DEFAULT_TITLE_COLOR;
         }
 
         //PVP FLAG: 1 - Purple
@@ -89,6 +95,13 @@ public class Nameplate
                 _lastBlinkTime = Time.time;
             }
         }
+        else if (PartyManager.Instance.IsMember(_entity) && _entity.Identity.Id != PlayerEntity.Instance.Identity.Id)
+        {
+            _lastFlag = 0;
+            _previousKarmaAmount = 0;
+            _previousServerNameColor = -1;
+            _nameplateEntityName.style.color = PARTY_MEMBER_COLOR;
+        }
         else
         {
             if (_previousServerNameColor != _entity.Appearance.ServerNameColor || _entity.Stats.Karma != _previousKarmaAmount || _entity.Identity.PvpFlag != _lastFlag)
@@ -98,12 +111,14 @@ public class Nameplate
 
                 // Debug.LogWarning($"Name color changed: Old:{_previousServerNameColor} New:{_entity.Appearance.ServerNameColor}");
                 _previousServerNameColor = _entity.Appearance.ServerNameColor;
-
-                if (_previousServerNameColor != 0)
-                {
-                    _previousServerNameColorValue = ColorUtils.IntegerToColor(_previousServerNameColor);
-                    _nameplateEntityName.style.color = _previousServerNameColorValue;
-                }
+                // Toujours ecrire une couleur ici, meme la couleur par
+                // defaut : cf. WorldNameplate.ManageColors() pour le bug de
+                // teinte residuelle que ce else corrige sur les instances
+                // recyclees d'un pool.
+                _previousServerNameColorValue = _previousServerNameColor != 0
+                    ? ColorUtils.IntegerToColor(_previousServerNameColor)
+                    : DEFAULT_NAME_COLOR;
+                _nameplateEntityName.style.color = _previousServerNameColorValue;
             }
         }
     }

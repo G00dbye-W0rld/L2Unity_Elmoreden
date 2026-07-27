@@ -101,7 +101,14 @@ public class L2InputAmountWindow : L2PopupWindow
 
         Button buttonAll = GetElementById("NumberAll").Q<Button>("L2Button");
         buttonAll.AddManipulator(new ButtonClickSoundManipulator(buttonAll));
-        buttonAll.RegisterCallback<MouseUpEvent>(evt => _inputField.value = _maxAmount > 0 ? _maxAmount.ToString() : "");
+        // _maxAmount <= 0 = stock illimite (BuyList.java envoie Count=0 pour
+        // tout objet sans limite de stock, la quasi-totalite des objets de
+        // la boutique GM) - avant, le bouton "Tout" vidait le champ dans ce
+        // cas, et valider sans retaper un nombre retombait sur 1 par
+        // defaut (l'utilisateur avait l'impression qu'acheter plus d'un
+        // exemplaire etait impossible). Repli sur un gros nombre rond
+        // plutot qu'un champ vide.
+        buttonAll.RegisterCallback<MouseUpEvent>(evt => _inputField.value = (_maxAmount > 0 ? _maxAmount : 999).ToString());
         Button buttonC = GetElementById("NumberC").Q<Button>("L2Button");
         buttonC.AddManipulator(new ButtonClickSoundManipulator(buttonC));
         buttonC.RegisterCallback<MouseUpEvent>(evt => _inputField.value = "");

@@ -11,6 +11,8 @@ public class InventorySlot : L2DraggableSlot
     private ItemName _assignedItem;
     private ItemType1 _type1;
     private ItemType2 _type2;
+    private int _enchantLevel;
+    private Label _enchantLevelLabel;
     public int Count { get { return _count; } }
     public long RemainingTime { get { return _remainingTime; } }
     public ItemType1 Type1 { get { return _type1; } }
@@ -68,6 +70,7 @@ public class InventorySlot : L2DraggableSlot
 
         _count = item.Count;
         _remainingTime = item.RemainingTime;
+        _enchantLevel = item.EnchantLevel;
 
         if (_slotElement != null)
         {
@@ -75,24 +78,56 @@ public class InventorySlot : L2DraggableSlot
             _slotBg.style.backgroundImage = background;
 
             AddTooltip(item);
+            UpdateEnchantLevelLabel();
 
             _slotDragManipulator.enabled = true;
         }
     }
 
+    // "+N" en surimpression sur l'icone (coin bas-gauche, convention L2
+    // classique), construit une seule fois par slot puis reutilise -
+    // L2SlotContainer.CreateSlots reconstruit entierement les VisualElement
+    // de slot a chaque rafraichissement de la liste (cf. InventoryTab), donc
+    // pas de risque de valeur d'enchant qui "fuit" d'un objet au suivant sur
+    // un meme slot recycle (contrairement au bug de nameplates corrige plus
+    // tot - ici chaque AssignItem() reecrit explicitement le texte).
+    private void UpdateEnchantLevelLabel()
+    {
+        if (_enchantLevelLabel == null)
+        {
+            _enchantLevelLabel = new Label();
+            _enchantLevelLabel.pickingMode = PickingMode.Ignore;
+            // Position.Absolute qualifie completement (pas juste "Position.")
+            // car L2Slot.Position (int, la position du slot dans le
+            // conteneur) masque l'enum UnityEngine.UIElements.Position ici.
+            _enchantLevelLabel.style.position = UnityEngine.UIElements.Position.Absolute;
+            _enchantLevelLabel.style.left = 1;
+            _enchantLevelLabel.style.bottom = 0;
+            _enchantLevelLabel.style.fontSize = 10;
+            _enchantLevelLabel.style.color = new Color(1f, 0.85f, 0.2f);
+            _enchantLevelLabel.style.unityTextAlign = TextAnchor.LowerLeft;
+            _enchantLevelLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+            _slotElement.Add(_enchantLevelLabel);
+        }
+
+        _enchantLevelLabel.style.display = _enchantLevel > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+        _enchantLevelLabel.text = $"+{_enchantLevel}";
+    }
+
     protected virtual void AddTooltip(ItemInstance item)
     {
-        string tooltipText = _name;
+        string namePrefix = _enchantLevel > 0 ? $"+{_enchantLevel} " : "";
+        string tooltipText = $"{namePrefix}{_name}";
         if (_count > 0)
         {
-            tooltipText = $"{_name} ({_count:n0})";
+            tooltipText = $"{namePrefix}{_name} ({_count:n0})";
         }
 
         if (item.Type2 == ItemType2.TYPE2_WEAPON ||
             item.Type2 == ItemType2.TYPE2_ACCESSORY ||
             item.Type2 == ItemType2.TYPE2_SHIELD_ARMOR)
         {
-            tooltipText = _name;
+            tooltipText = $"{namePrefix}{_name}";
         }
 
         if (_tooltipManipulator != null)
@@ -114,10 +149,24 @@ public class InventorySlot : L2DraggableSlot
 
     protected override void HandleLeftClick()
     {
+        if (TryHandleEnchantClick()) return;
+
         if (_currentSlotContainer != null)
         {
             _currentSlotContainer.SelectSlot(_position);
         }
+    }
+
+    // Partage avec GearSlot (qui redefinit HandleLeftClick) : tant qu'un
+    // parchemin d'enchantement est arme (EnchantManager.IsSelecting), le
+    // clic gauche suivant sur un objet non-vide devient "choisir cet objet
+    // comme cible" au lieu du comportement normal de selection/equipement.
+    protected bool TryHandleEnchantClick()
+    {
+        if (_empty || !EnchantManager.Instance.IsSelecting) return false;
+
+        EnchantManager.Instance.SelectTarget(_objectId);
+        return true;
     }
 
     protected override void HandleRightClick()

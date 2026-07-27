@@ -79,17 +79,17 @@
 
             <!-- Panneau JEU -->
             <ui:VisualElement name="GamePanel" class="settings-panel hidden">
-                <ui:GroupBox class="settings-row settings-row-disabled">
-                    <ui:Label text="Butin de groupe (à venir)" class="settings-row-label settings-row-label-wide l2-color-3" />
-                    <ui:DropdownField name="PartyLootDropdown" choices="Aléatoire,Aléatoire incluant spoil,Par ordre de tour,Au plus proche" picking-mode="Ignore" class="l2-dropdown settings-dropdown" />
+                <ui:GroupBox class="settings-row">
+                    <ui:Label text="Butin de groupe par défaut" class="settings-row-label settings-row-label-wide l2-color-3" />
+                    <ui:DropdownField name="PartyLootDropdown" choices="Chacun pour soi,Aléatoire,Aléatoire incluant spoil,Par ordre de tour,Par ordre de tour incluant spoil" class="l2-dropdown settings-dropdown" />
                 </ui:GroupBox>
                 <ui:GroupBox class="settings-row settings-row-disabled">
                     <ui:Label text="Refuser les duels (à venir)" class="settings-row-label settings-row-label-wide l2-color-3" />
                     <ui:Toggle name="DeclineDuelsToggle" picking-mode="Ignore" class="settings-toggle" />
                 </ui:GroupBox>
-                <ui:GroupBox class="settings-row settings-row-disabled">
-                    <ui:Label text="Invitations de groupe (à venir)" class="settings-row-label settings-row-label-wide l2-color-3" />
-                    <ui:Toggle name="DenyPartyRequestToggle" picking-mode="Ignore" class="settings-toggle" />
+                <ui:GroupBox class="settings-row">
+                    <ui:Label text="Refuser les invitations de groupe" class="settings-row-label settings-row-label-wide l2-color-3" />
+                    <ui:Toggle name="DenyPartyRequestToggle" class="settings-toggle" />
                 </ui:GroupBox>
 
                 <ui:Label text="Touches" class="settings-section-label l2-color-3" />

@@ -169,7 +169,7 @@ public class PlayerInfoPacket : ServerPacket
             ReadI();
             Stats.MaxCp = ReadI();
             Status.Cp = ReadI();
-            ReadB(); //EnchantEffect
+            Appearance.EnchantEffect = ReadB(); //EnchantEffect - pilote le glow visuel de l'arme active
             ReadB(); //TeamId (Event?)
             ReadI(); //Clan Crest LongId
             ReadB(); //IsNoble

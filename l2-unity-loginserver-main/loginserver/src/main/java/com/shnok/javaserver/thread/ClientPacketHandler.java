@@ -159,7 +159,7 @@ public class ClientPacketHandler extends Thread {
         // AUTRE compte, on kicke l'ancienne session (ou qu'elle soit : encore sur
         // le loginserver, ou deja en jeu) et on laisse passer celle-ci - au cas ou
         // un bug empecherait la premiere session de se liberer proprement.
-        if ((hwid != null) && !hwid.isEmpty()) {
+        if (server.hwidLimitEnabled() && (hwid != null) && !hwid.isEmpty()) {
             String previousAccount = LoginServerController.getInstance().getAccountForHwid(hwid);
             if ((previousAccount != null) && !previousAccount.equalsIgnoreCase(account)) {
                 kickAccountEverywhere(previousAccount);

@@ -115,6 +115,33 @@
 
 }
 
+.target-window-name-row {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Icone d'invitation au groupe - visible seulement quand la cible est un
+   autre joueur (cf. TargetWindow.cs). Reutilise la meme texture que
+   l'icone d'action "Invitation" (action011, deja utilisee dans la barre
+   d'actions) plutot que d'en fabriquer une nouvelle. */
+.target-window-party-invite-btn {
+    width: 14px;
+    height: 14px;
+    min-width: 14px;
+    min-height: 14px;
+    margin-left: 3px;
+    padding: 0;
+    border-width: 1px;
+    border-color: rgb(66, 59, 41);
+    background-color: rgba(19, 19, 19, 0.83);
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.target-window-party-invite-btn:hover {
+    border-color: rgb(255, 210, 90);
+}
+
 .target-window-bar-container {
     flex-grow: 1;
 }

@@ -27,6 +27,7 @@ public enum GameClientPacketType : byte
     RequestActionUse = 0x45,
     RequestRestart = 0x46,
     ValidatePosition = 0x48,
+    RequestEnchantItem = 0x58,
     RequestDestroyItem = 0x59,
     GMCommand = 0x5b,
     RequestCharRestore = 0x62,
@@ -35,6 +36,10 @@ public enum GameClientPacketType : byte
     RequestSkillList = 0x3f,
     RequestAcquireSkillInfo = 0x6b,
     RequestAcquireSkill = 0x6c,
+    RequestJoinParty = 0x29,
+    RequestAnswerJoinParty = 0x2a,
+    RequestWithdrawParty = 0x2b,
+    RequestOustPartyMember = 0x2c,
 
 
     //deprecated

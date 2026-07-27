@@ -40,6 +40,8 @@ public class SettingsWindow : L2PopupWindow
         public bool GraphicCursor;
         public int ViewDistance;
         public int WaterDetail;
+        public int PreferredPartyLootRule;
+        public bool DenyPartyRequests;
         public string KeybindOverridesJson;
     }
 
@@ -200,6 +202,15 @@ public class SettingsWindow : L2PopupWindow
             GameSettings.SetWaterDetailLevel(waterDetailDropdown.choices.IndexOf(evt.newValue));
         });
 
+        DropdownField partyLootDropdown = (DropdownField)GetElementById("PartyLootDropdown");
+        partyLootDropdown.RegisterValueChangedCallback(evt =>
+        {
+            GameSettings.SetPreferredPartyLootRule(partyLootDropdown.choices.IndexOf(evt.newValue));
+        });
+
+        Toggle denyPartyRequestToggle = (Toggle)GetElementById("DenyPartyRequestToggle");
+        denyPartyRequestToggle.RegisterValueChangedCallback(evt => GameSettings.SetDenyPartyRequests(evt.newValue));
+
         BindAudioSlider("MasterVolumeSlider", GameSettings.SetMasterVolume, "Master");
         BindAudioSlider("MusicVolumeSlider", GameSettings.SetMusicVolume, "Music");
         BindAudioSlider("SFXVolumeSlider", GameSettings.SetSFXVolume, "SFX");
@@ -350,6 +361,11 @@ public class SettingsWindow : L2PopupWindow
         DropdownField waterDetailDropdown = (DropdownField)GetElementById("WaterDetailDropdown");
         waterDetailDropdown.SetValueWithoutNotify(waterDetailDropdown.choices[Mathf.Clamp(GameSettings.WaterDetailLevel, 0, waterDetailDropdown.choices.Count - 1)]);
 
+        DropdownField partyLootDropdown = (DropdownField)GetElementById("PartyLootDropdown");
+        partyLootDropdown.SetValueWithoutNotify(partyLootDropdown.choices[Mathf.Clamp(GameSettings.PreferredPartyLootRule, 0, partyLootDropdown.choices.Count - 1)]);
+
+        ((Toggle)GetElementById("DenyPartyRequestToggle")).SetValueWithoutNotify(GameSettings.DenyPartyRequests);
+
         DropdownField resolutionDropdown = (DropdownField)GetElementById("ResolutionDropdown");
         if (resolutionDropdown.choices != null && resolutionDropdown.choices.Count > 0)
         {
@@ -430,6 +446,8 @@ public class SettingsWindow : L2PopupWindow
             GraphicCursor = GameSettings.GraphicCursorEnabled,
             ViewDistance = GameSettings.ViewDistanceLevel,
             WaterDetail = GameSettings.WaterDetailLevel,
+            PreferredPartyLootRule = GameSettings.PreferredPartyLootRule,
+            DenyPartyRequests = GameSettings.DenyPartyRequests,
             KeybindOverridesJson = KeybindManager.CaptureOverridesJson(InputManager.Instance.Actions),
         };
     }
@@ -449,6 +467,8 @@ public class SettingsWindow : L2PopupWindow
         GameSettings.SetGraphicCursorEnabled(snap.GraphicCursor);
         GameSettings.SetViewDistanceLevel(snap.ViewDistance);
         GameSettings.SetWaterDetailLevel(snap.WaterDetail);
+        GameSettings.SetPreferredPartyLootRule(snap.PreferredPartyLootRule);
+        GameSettings.SetDenyPartyRequests(snap.DenyPartyRequests);
         KeybindManager.RestoreOverrides(InputManager.Instance.Actions, snap.KeybindOverridesJson);
     }
 

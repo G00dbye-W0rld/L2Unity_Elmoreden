@@ -88,6 +88,14 @@ public class GameClient : DefaultClient
     {
         base.OnDisconnect();
 
+        // Etat de groupe client (PartyManager, singleton statique) sinon
+        // persiste en memoire au-dela de cette session et se retrouve
+        // affiche a tort apres une reconnexion (ex. 2 instances Editeur
+        // utilisees pour tester, reconnexion sans redemarrer le process) -
+        // le serveur ne renverra rien pour corriger cet etat perime si le
+        // personnage n'est justement plus dans un groupe apres reconnexion.
+        PartyManager.Instance.Disband();
+
         L2ConfirmWindow.Instance.ShowWindow(127, () =>
         {
             GameManager.Instance.NotifyEvent(GameEvent.GAME_DISCONNECTED);

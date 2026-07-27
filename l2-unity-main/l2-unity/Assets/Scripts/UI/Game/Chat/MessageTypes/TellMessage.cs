@@ -1,9 +1,6 @@
 public class TellMessage : ChatMessage
 {
-#pragma warning disable 0414
-    private static L2MessageType Type = L2MessageType.TELL;
-#pragma warning restore 0414
-    public TellMessage(string user, string message) : base(user, message)
+    public TellMessage(string user, string message) : base(user, message, L2MessageType.TELL)
     {
     }
 

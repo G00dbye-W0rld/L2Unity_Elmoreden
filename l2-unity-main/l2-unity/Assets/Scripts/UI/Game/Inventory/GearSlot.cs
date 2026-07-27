@@ -13,6 +13,8 @@ public class GearSlot : InventorySlot
 
     protected override void HandleLeftClick()
     {
+        if (TryHandleEnchantClick()) return;
+
         if (!Empty)
             InventoryWindow.Instance.GearTab.SelectSlot(_position);
     }

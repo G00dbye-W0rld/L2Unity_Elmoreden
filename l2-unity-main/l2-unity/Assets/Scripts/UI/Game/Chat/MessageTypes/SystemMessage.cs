@@ -28,6 +28,7 @@ public class SystemMessage
             for (int i = 1; i <= _params.Length; i++)
             {
                 SMParam param = _params[i - 1];
+                if (param == null) continue;
 
                 // Debug.LogWarning($"{i}: {param.Type}");
 

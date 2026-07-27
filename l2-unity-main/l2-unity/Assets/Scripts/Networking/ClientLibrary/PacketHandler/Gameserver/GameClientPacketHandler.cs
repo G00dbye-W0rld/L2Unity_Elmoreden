@@ -103,6 +103,42 @@ public class GameClientPacketHandler : ClientPacketHandler
         SendPacket(packet);
     }
 
+    public void SendRequestJoinParty(string targetName, int lootRuleId)
+    {
+        RequestJoinPartyPacket packet = new RequestJoinPartyPacket(targetName, lootRuleId);
+        SendPacket(packet);
+    }
+
+    public void SendRequestAnswerJoinParty(bool accept)
+    {
+        RequestAnswerJoinPartyPacket packet = new RequestAnswerJoinPartyPacket(accept);
+        SendPacket(packet);
+    }
+
+    public void SendRequestWithdrawParty()
+    {
+        RequestWithdrawPartyPacket packet = new RequestWithdrawPartyPacket();
+        SendPacket(packet);
+    }
+
+    public void SendRequestOustPartyMember(string targetName)
+    {
+        RequestOustPartyMemberPacket packet = new RequestOustPartyMemberPacket(targetName);
+        SendPacket(packet);
+    }
+
+    public void SendRequestEnchantItem(int objectId)
+    {
+        RequestEnchantItemPacket packet = new RequestEnchantItemPacket(objectId);
+        SendPacket(packet);
+    }
+
+    public void SendRequestChangePartyLeader(string targetName)
+    {
+        RequestChangePartyLeaderPacket packet = new RequestChangePartyLeaderPacket(targetName);
+        SendPacket(packet);
+    }
+
     public void SendRequestSelectCharacter(int slot)
     {
         RequestCharSelectPacket packet = new RequestCharSelectPacket(slot);

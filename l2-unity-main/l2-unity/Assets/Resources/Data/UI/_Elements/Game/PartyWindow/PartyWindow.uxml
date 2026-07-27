@@ -1,0 +1,23 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:Template name="Frame_DF_Ver" src="project://database/Assets/Resources/Data/UI/_Elements/Components/Frame_DF_Ver.uxml?fileID=9197481963319205126&amp;guid=af155183079e5194eb28f9cf0305ecbb&amp;type=3#Frame_DF_Ver" />
+    <ui:Template name="L2Bar" src="project://database/Assets/Resources/Data/UI/_Elements/Components/L2Bar/L2Bar.uxml?fileID=9197481963319205126&amp;guid=e7da9ee05d38b14459d91eca9fc49926&amp;type=3#L2Bar" />
+    <Style src="project://database/Assets/Resources/Data/UI/_Elements/L2StyleSheet.uss?fileID=7433441132597879392&amp;guid=72e99cc94b130bf4ba100dceaa830b13&amp;type=3#L2StyleSheet" />
+    <!-- Reutilise TEL QUEL le cadre/fond/poignee de redimensionnement de
+         StatusWindow (meme feuille de style, memes classes) plutot que de
+         les reimplementer a cote - demande explicite de l'utilisateur
+         apres 2 tentatives d'adaptation qui n'ont pas rendu pareil. -->
+    <Style src="project://database/Assets/Resources/Data/UI/_Elements/Game/StatusWindow/StatusWindow.uss?fileID=7433441132597879392&amp;guid=c3937ba47fc202d49921ef21838f11c8&amp;type=3#StatusWindow" />
+    <Style src="project://database/Assets/Resources/Data/UI/_Elements/Game/PartyWindow/PartyWindow.uss?fileID=7433441132597879392&amp;guid=1e5b8d3a7f9c2e6b4a0d8f1c3e5a7b91&amp;type=3#PartyWindow" />
+    <ui:GroupBox name="StatusWindow" class="status-window">
+        <ui:VisualElement name="Frame_DF_Ver" template="Frame_DF_Ver" class="drag-area status-window-drag">
+            <ui:Instance template="Frame_DF_Ver" name="Frame_DF_Ver" class="frame_df_ver drag-area" />
+        </ui:VisualElement>
+        <ui:GroupBox name="CenterContainer" class="status-window-bg">
+            <ui:Label text="Butin : Chacun pour soi" name="LootRuleLabel" class="party-loot-label l2-color-3" />
+            <ui:VisualElement name="MembersContainer" class="party-members-container" />
+        </ui:GroupBox>
+        <ui:VisualElement name="SizeControl" class="status-window-size-control">
+            <ui:VisualElement name="SizeControl" class="status-window-resize-handle resize-hor" />
+        </ui:VisualElement>
+    </ui:GroupBox>
+</ui:UXML>

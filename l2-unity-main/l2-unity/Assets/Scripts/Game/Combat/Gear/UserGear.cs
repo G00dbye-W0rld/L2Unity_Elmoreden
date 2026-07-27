@@ -90,6 +90,7 @@ public class UserGear : HumanoidGear
     public override void StartTrail()
     {
         // Debug.Log("Start weapon trail");
+        ApplyEnchantTrailTint();
         _weaponTrail.gameObject.SetActive(true);
         _weaponTrail.Play();
     }
@@ -99,6 +100,44 @@ public class UserGear : HumanoidGear
         // Debug.Log("Stop weapon trail");
         _weaponTrail.Stop();
         _weaponTrail.gameObject.SetActive(false);
+    }
+
+    // Reteinte la trainee existante (deja fonctionnelle - degrade orange/
+    // rouge fixe a l'origine) selon le niveau d'enchant de l'arme active,
+    // au lieu de construire un nouvel effet de zero. Rien a faire si pas
+    // enchante (garde la teinte orange/rouge d'origine).
+    //
+    // Couleur lue depuis le MEME degrade que l'aura (EnchantAuraSettings) :
+    // trainee et aura restent ainsi toujours accordees, et se reglent au
+    // meme endroit.
+    // Mis en cache : StartTrail est appele a chaque coup porte, inutile de
+    // refaire un Resources.Load a chaque frappe.
+    private static EnchantAuraSettings _trailAuraSettings;
+
+    private void ApplyEnchantTrailTint()
+    {
+        int enchantEffect = _referenceHolder.Entity.Appearance.EnchantEffect;
+        if (enchantEffect <= 0) return;
+
+        if (_trailAuraSettings == null)
+        {
+            _trailAuraSettings = Resources.Load<EnchantAuraSettings>(EnchantAuraSettings.ResourcesPath);
+        }
+        EnchantAuraSettings settings = _trailAuraSettings;
+        if (settings == null || enchantEffect < settings.minEnchantLevel) return;
+
+        Color tint = settings.EvaluateColor(enchantEffect);
+
+        ParticleSystem.MainModule main = _weaponTrail.main;
+        main.startColor = Color.white; // neutralise le multiplicateur, le degrade ci-dessous pilote la couleur
+
+        ParticleSystem.ColorOverLifetimeModule colorOverLifetime = _weaponTrail.colorOverLifetime;
+        Gradient gradient = new Gradient();
+        gradient.SetKeys(
+            new GradientColorKey[] { new GradientColorKey(tint, 0f), new GradientColorKey(tint, 1f) },
+            new GradientAlphaKey[] { new GradientAlphaKey(0.27f, 0f), new GradientAlphaKey(0.27f, 0.85f), new GradientAlphaKey(0f, 1f) }
+        );
+        colorOverLifetime.color = gradient;
     }
 
     public override void EquipWeapon(int weaponId, Weapon weapon, bool leftSlot)

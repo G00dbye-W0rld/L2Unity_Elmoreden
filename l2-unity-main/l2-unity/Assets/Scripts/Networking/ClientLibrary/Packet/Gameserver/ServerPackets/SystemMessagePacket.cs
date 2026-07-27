@@ -70,7 +70,15 @@ public class SystemMessagePacket : ServerPacket
         }
         catch (Exception e)
         {
-            Debug.LogError(e);
+            Debug.LogError($"[SystemMessagePacket] Echec du parsing (smId={_smId}, paramCount attendu={_params?.Length}) : {e}");
+            // En cas d'echec en cours de boucle, _params reste alloue a
+            // paramCount mais partiellement rempli (les cases non atteintes
+            // restent null) - sans ca, SystemMessage.PrintMessage() plante
+            // plus tard sur un param null (NullReferenceException observee
+            // apres un enchantement reussi, cause exacte du desalignement
+            // pas identifiee avec certitude). Mieux vaut perdre les
+            // parametres et afficher le texte brut que planter.
+            _params = null;
         }
     }
 }

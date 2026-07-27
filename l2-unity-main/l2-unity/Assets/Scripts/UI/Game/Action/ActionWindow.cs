@@ -82,6 +82,11 @@ public class ActionWindow : L2PopupWindow
         partySlotContainer.Initialize(_partyContainer, SLOTS_PER_ROW, 16);
         partySlotContainer.CreateSlots(16, L2Slot.SlotType.Action);
 
+        partySlotContainer.AssignAction(0, ActionType.PartyInvite);
+        partySlotContainer.AssignAction(1, ActionType.PartyLeave);
+        partySlotContainer.AssignAction(2, ActionType.PartyKick);
+        partySlotContainer.AssignAction(3, ActionType.PartyChangeLeader);
+
         L2SlotContainer tokenSlotContainer = new L2SlotContainer();
         tokenSlotContainer.Initialize(_tokenContainer, SLOTS_PER_ROW, 16);
         tokenSlotContainer.CreateSlots(16, L2Slot.SlotType.Action);
@@ -109,8 +114,13 @@ public class ActionWindow : L2PopupWindow
 
         L2GameUI.Instance.WindowClosed(this);
     }
+}
 
-    /*
+/* Ancien systeme d'icones (pre-L2SlotContainer), mort - conserve seulement
+   dans l'historique git si besoin de retrouver le mapping id->icone.
+   Le systeme actuel (L2SlotContainer.AssignAction, cf. plus haut) resout
+   deja l'icone via ActionNameTable + IconTable, aucun cablage a la main
+   n'est necessaire.
 //icon action001| id = 0 (Sit)
         var sit = GetElementByClass("image0");
         sit.style.backgroundImage = IconManager.Instance.LoadTextureByName("action001");
@@ -428,4 +438,3 @@ public class ActionWindow : L2PopupWindow
         listForToolTips.Add(provoke_emote);
         ActionNameTable.Instance.GetAciton(88).Icon = "action078";
     */
-}

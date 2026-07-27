@@ -78,6 +78,7 @@ public class InventoryWindow : L2PopupWindow
 
     private void OnDestroy()
     {
+        EnchantManager.Instance.OnSelectionChanged -= UpdateEnchantHintVisibility;
         _instance = null;
     }
 
@@ -146,11 +147,62 @@ public class InventoryWindow : L2PopupWindow
 
         UpdateItemList(_playerItems);
 
+        EnchantManager.Instance.OnSelectionChanged += UpdateEnchantHintVisibility;
+
 #if UNITY_EDITOR
         // DebugData();
 #endif
 
         L2GameUI.Instance.WindowLoadComplete();
+    }
+
+    // Bandeau flottant affiche pendant qu'un parchemin d'enchantement est
+    // arme (EnchantManager.IsSelecting) - element independant de l'arbre de
+    // cette fenetre, directement sur la racine de l'UI (meme patron que
+    // PartyWindow._classTooltip/WorldItemTooltip), pour rester visible et
+    // centre a l'ecran peu importe la position/l'ouverture de l'inventaire.
+    private Label _enchantHintLabel;
+
+    private void EnsureEnchantHint()
+    {
+        if (_enchantHintLabel != null) return;
+        if (L2GameUI.Instance == null || L2GameUI.Instance.RootElement == null) return;
+
+        _enchantHintLabel = new Label("Sélectionnez un objet à enchanter (Échap pour annuler)");
+        _enchantHintLabel.pickingMode = PickingMode.Ignore;
+        _enchantHintLabel.style.position = Position.Absolute;
+        _enchantHintLabel.style.left = Mathf.Max(0, Screen.width / 2f - 180f);
+        _enchantHintLabel.style.top = 80;
+        _enchantHintLabel.style.color = new Color(1f, 0.85f, 0.2f);
+        _enchantHintLabel.style.backgroundColor = new Color(0f, 0f, 0f, 0.75f);
+        _enchantHintLabel.style.fontSize = 13;
+        _enchantHintLabel.style.paddingLeft = 8;
+        _enchantHintLabel.style.paddingRight = 8;
+        _enchantHintLabel.style.paddingTop = 4;
+        _enchantHintLabel.style.paddingBottom = 4;
+        _enchantHintLabel.style.borderTopWidth = 1;
+        _enchantHintLabel.style.borderBottomWidth = 1;
+        _enchantHintLabel.style.borderLeftWidth = 1;
+        _enchantHintLabel.style.borderRightWidth = 1;
+        _enchantHintLabel.style.borderTopColor = new Color(0.259f, 0.231f, 0.161f);
+        _enchantHintLabel.style.borderBottomColor = new Color(0.259f, 0.231f, 0.161f);
+        _enchantHintLabel.style.borderLeftColor = new Color(0.259f, 0.231f, 0.161f);
+        _enchantHintLabel.style.borderRightColor = new Color(0.259f, 0.231f, 0.161f);
+        _enchantHintLabel.style.display = DisplayStyle.None;
+        L2GameUI.Instance.RootElement.Add(_enchantHintLabel);
+    }
+
+    private void UpdateEnchantHintVisibility()
+    {
+        if (EnchantManager.Instance.IsSelecting)
+        {
+            EnsureEnchantHint();
+            if (_enchantHintLabel != null) _enchantHintLabel.style.display = DisplayStyle.Flex;
+        }
+        else if (_enchantHintLabel != null)
+        {
+            _enchantHintLabel.style.display = DisplayStyle.None;
+        }
     }
 
     private void OnExpandButtonPressed(MouseDownEvent evt)

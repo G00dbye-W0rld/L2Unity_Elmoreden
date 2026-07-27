@@ -35,6 +35,7 @@ public static class KeybindManager
         new RebindableAction("Inventory", "Inventaire"),
         new RebindableAction("CharacterStatus", "Statut du personnage"),
         new RebindableAction("Actions", "Actions"),
+        new RebindableAction("OpenParty", "Fenêtre de groupe"),
         new RebindableAction("CloseWindow", "Fermer une fenêtre"),
         new RebindableAction("SystemMenu", "Menu système"),
         new RebindableAction("Validate", "Valider"),

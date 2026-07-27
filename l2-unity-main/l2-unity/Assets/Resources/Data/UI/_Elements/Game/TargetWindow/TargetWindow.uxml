@@ -7,7 +7,10 @@
         <ui:Instance template="Frame_DF_Ver" name="TemplateContainer" class="target-window-drag drag-area" style="overflow: hidden;" />
         <ui:GroupBox name="CenterContainer" class="ui-bg ui-border target-window-bg">
             <ui:VisualElement class="target-window-inner">
-                <ui:Label text="Label" name="TargetName" class="target-window-target-name l2-color-4" />
+                <ui:VisualElement class="target-window-name-row">
+                    <ui:Label text="Label" name="TargetName" class="target-window-target-name l2-color-4" />
+                    <ui:Button text="" name="PartyInviteButton" class="target-window-party-invite-btn hidden" />
+                </ui:VisualElement>
                 <ui:VisualElement class="target-window-bar-container">
                     <ui:Instance template="L2Bar" name="HPBar" class="target-bar-container" />
                 </ui:VisualElement>

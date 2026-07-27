@@ -1,0 +1,59 @@
+/* ====================================================================
+   HUD de groupe — feuille de style.
+   Le cadre/fond/poignee de redimensionnement viennent DIRECTEMENT de
+   StatusWindow.uss (memes classes .status-window/-drag/-bg/-size-control/
+   -resize-handle, reference dans PartyWindow.uxml) - demande explicite de
+   l'utilisateur de copier telle quelle la fenetre de statut plutot que de
+   la reimplementer a cote. Seul le contenu (liste de membres) est propre
+   a cette fenetre, style ici.
+   ==================================================================== */
+
+.party-loot-label {
+    font-size: 10px;
+    flex-shrink: 0;
+    margin-bottom: 3px;
+}
+
+.party-members-container {
+    flex-direction: column;
+}
+
+/* ---------- Bloc de membre (niveau+nom, puis 3 jauges) ---------- */
+.party-member-block {
+    flex-direction: column;
+    margin-bottom: 5px;
+}
+
+.party-member-header {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 1px;
+}
+
+.party-member-name {
+    font-size: 11px;
+    margin-left: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    -unity-text-align: upper-left;
+}
+
+/* Icone miniature "Exclure" (meme texture que la barre d'actions,
+   affectee en C#) - juste un cadre discret autour, pas de decoupe 9-slice
+   de bouton (n'a plus de sens sur une icone). */
+.party-member-kick-btn {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    margin-left: auto;
+    padding: 0;
+    border-width: 1px;
+    border-color: rgb(66, 59, 41);
+    background-color: rgba(19, 19, 19, 0.6);
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.party-member-kick-btn:hover {
+    border-color: rgb(255, 210, 90);
+}

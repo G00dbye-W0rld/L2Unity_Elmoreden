@@ -237,10 +237,28 @@ public class ChatWindow : L2Window
             {
                 GameClient.Instance.ClientPacketHandler.SendGMCommand(text.Replace("//", ""));
             }
+            else if (text.StartsWith("/invite ", System.StringComparison.OrdinalIgnoreCase))
+            {
+                // Contrairement aux actions/clic droit, /invite vise un nom
+                // tape au clavier - pas besoin d'avoir la cible selectionnee.
+                // Le mode de butin n'a d'importance que si ce message cree un
+                // nouveau groupe (RequestJoinParty.java l'ignore sinon).
+                string targetName = text[8..].Trim().Trim('"');
+                if (targetName.Length > 0)
+                {
+                    int lootRuleId = PartyManager.Instance.IsInParty ? (int)PartyManager.Instance.LootRule : GameSettings.PreferredPartyLootRule;
+                    GameClient.Instance.ClientPacketHandler.SendRequestJoinParty(targetName, lootRuleId);
+                }
+            }
             else if (text.Length > 0)
             {
-                L2MessageType messageType = L2MessageType.ALL;
+                // L'onglet actif fixe le canal par defaut (ex. taper sans
+                // prefixe pendant que l'onglet "Groupe" est selectionne
+                // envoie en Party) - un prefixe explicite (#, !, @...) reste
+                // toujours prioritaire sur ce defaut.
+                L2MessageType messageType = GetDefaultSendType();
                 string target = null;
+                bool explicitPrefix = true;
 
                 switch (text[0])
                 {
@@ -268,10 +286,11 @@ public class ChatWindow : L2Window
                         messageType = L2MessageType.TELL;
                         break;
                     default:
+                        explicitPrefix = false;
                         break;
                 }
 
-                if (messageType != L2MessageType.ALL)
+                if (explicitPrefix)
                 {
                     text = text[1..];
                 }
@@ -279,6 +298,11 @@ public class ChatWindow : L2Window
                 GameClient.Instance.ClientPacketHandler.SendMessage(text, messageType, target);
             }
         }
+    }
+
+    private L2MessageType GetDefaultSendType()
+    {
+        return _l2TabView?.ActiveTab?.TabName == "Groupe" ? L2MessageType.PARTY : L2MessageType.ALL;
     }
 
     public void ReceiveChatMessage(ChatMessage message)
