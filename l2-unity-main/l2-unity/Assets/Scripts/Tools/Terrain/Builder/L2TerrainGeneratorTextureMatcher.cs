@@ -53,6 +53,13 @@ public class L2TerrainGeneratorTextureMatcher
         textureMatches.Add("SL_G4", "grass_and_rubble_pjwdt0_1k");
         textureMatches.Add("SL_C1", "grass_and_rubble_pjwdt0_1k");
 
+        // --- Gludio (region 17_23 et voisines) ---
+        textureMatches.Add("GUG02", "Wild_Grass_pjwgW0_1K");
+        textureMatches.Add("GUG107", "Wild_Grass_pjwgW0_1K");
+        textureMatches.Add("GUS05", "Soil_Sand_pjErQ0_1K");
+        textureMatches.Add("GUS103", "Soil_Sand_pjErQ0_1K");
+        textureMatches.Add("GUS108", "Rough_Soil_Detail_Texture_se4mcazf0_1K");
+
         scaleMatches = new Dictionary<string, float>();
         scaleMatches.Add("Base", 3);
         scaleMatches.Add("SL_G", 5);
@@ -67,6 +74,15 @@ public class L2TerrainGeneratorTextureMatcher
         scaleMatches.Add("SL_C", 1);
         scaleMatches.Add("SL_G4", 7);
         scaleMatches.Add("SL_C1", 7);
+
+        // --- Gludio (region 17_23 et voisines) ---
+        // Meme convention de nommage que Speaking Island : GUG* = herbe,
+        // GUS* = sol/sable. Valeurs alignees sur leurs equivalents SL_*.
+        scaleMatches.Add("GUG02", 5);
+        scaleMatches.Add("GUG107", 5);
+        scaleMatches.Add("GUS05", 3);
+        scaleMatches.Add("GUS103", 3);
+        scaleMatches.Add("GUS108", 2);
 
         pertexFloatMatches = new Dictionary<string, List<PerTexFloatVal>>();
         pertexFloatMatches.Add("Base", new List<PerTexFloatVal>

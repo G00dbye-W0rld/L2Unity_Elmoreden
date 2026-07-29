@@ -15,10 +15,11 @@ public class L2JSONBrushImporter : AssetImporter {
     [MenuItem("Shnok/[Brush] Import Textures")]
     static void ImportBrushTextures() {
         string title = "Select Brush list";
-        string directory = Path.Combine(Application.dataPath, "Data/Maps");
+        string directory = Path.Combine(Application.dataPath, "Resources/Data/Maps");
         string extension = "json";
 
-        string dataFolder = @"D:\Stock\Projects\L2-Unity\Tools\umodel_win32\export";
+        // Meme racine d'export umodel que L2T3DStaticMeshImporter.
+        string dataFolder = @"D:\Jeux\MAP_L2Unity\export";
         bool overwrite = false;
 
         string fileToProcess = EditorUtility.OpenFilePanel(title, directory, extension);

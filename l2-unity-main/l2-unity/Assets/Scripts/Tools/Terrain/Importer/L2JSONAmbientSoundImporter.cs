@@ -15,15 +15,16 @@ public class L2JSONAmbientSoundImporter : AssetImporter
 {
 
     // umodel export folder
-    static string dataFolder = @"D:\Stock\Projects\L2-Unity\umodel_win32\export_sound";
+    // Exports umodel des sons (separes des meshes/textures).
+    static string dataFolder = @"D:\Jeux\MAP_L2Unity\export_sound";
     // copy ambient sounds to
-    static string scriptExportFolder = @"D:\Stock\Projects\L2-Unity\umodel_win32\export_sound\unityexport";
+    static string scriptExportFolder = @"D:\Jeux\MAP_L2Unity\export_sound\unityexport";
 
     [MenuItem("Shnok/[AmbientSound] (JSON) Import sounds")]
     static void ImportSoundsMenu()
     {
         string title = "Select ambient sound list";
-        string directory = Path.Combine(Application.dataPath, "Data/Maps");
+        string directory = Path.Combine(Application.dataPath, "Resources/Data/Maps");
         string extension = "json";
 
         string fileToProcess = EditorUtility.OpenFilePanel(title, directory, extension);
@@ -41,7 +42,7 @@ public class L2JSONAmbientSoundImporter : AssetImporter
     static void ImportSoundsMenuT3D()
     {
         string title = "Select ambient sound list";
-        string directory = Path.Combine(Application.dataPath, "Data/Maps");
+        string directory = Path.Combine(Application.dataPath, "Resources/Data/Maps");
         string extension = "t3d";
 
         string fileToProcess = EditorUtility.OpenFilePanel(title, directory, extension);

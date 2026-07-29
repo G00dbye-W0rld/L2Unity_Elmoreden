@@ -9,6 +9,11 @@ using static L2TerrainGeneratorTextureMatcher;
 
 public class L2TerrainGeneratorTool : MonoBehaviour
 {
+    // Echelle appliquee aux textures absentes de scaleMatches. 3 correspond
+    // a la valeur de la couche "Base", neutre et deja utilisee par toutes les
+    // regions existantes.
+    private const float DefaultSplatUvScale = 3f;
+
     public static int UV_TEXTURE_SIZE = 256;
     public static int UV_LAYER_ALPHAMAP_SIZE = 1024;
     public static int DECO_LAYER_ALPHAMAP_SIZE = 512;
@@ -28,11 +33,122 @@ public class L2TerrainGeneratorTool : MonoBehaviour
     public static Dictionary<string, Terrain> terrainsDict;
     public List<MapGenerationData> maps;
 
+    // ================================================================
+    //  MODE BATCH — import sans interface
+    //
+    //  Les entrees de menu ci-dessous ouvrent toutes un OpenFilePanel,
+    //  qui GELE le processus en -batchmode. Ce point d'entree lit donc
+    //  le nom de la map sur la ligne de commande et appelle directement
+    //  les memes workers (GenerateMap / ConvertTerrainToMicroplat /
+    //  UpdateMicrosplatParams), sans dialogue.
+    //
+    //  Appel :
+    //    Unity.exe -batchmode -quit -projectPath <projet> \
+    //      -executeMethod L2TerrainGeneratorTool.BatchGenerateTerrain \
+    //      -mapName 17_23
+    //
+    //  Prerequis : le .t3d doit deja etre a
+    //  Assets/Resources/Data/Maps/<mapName>/Meta/<mapName>.t3d
+    //  (produit par l'outil l2-map-export).
+    // ================================================================
+    public static void BatchGenerateTerrain()
+    {
+        string mapName = GetCommandLineArg("-mapName");
+        if (string.IsNullOrEmpty(mapName))
+        {
+            Debug.LogError("[Batch] Argument -mapName manquant.");
+            EditorApplication.Exit(1);
+            return;
+        }
+
+        string t3d = Path.Combine(Application.dataPath, "Resources/Data/Maps", mapName, "Meta", mapName + ".t3d");
+        if (!File.Exists(t3d))
+        {
+            Debug.LogError($"[Batch] .t3d introuvable : {t3d}");
+            EditorApplication.Exit(1);
+            return;
+        }
+
+        Debug.Log($"[Batch] Generation du terrain pour '{mapName}'");
+
+        try
+        {
+            MapGenerationData data = new MapGenerationData();
+            data.mapName = mapName;
+            data.generateDecoLayers = true;
+            data.generateUVLayers = true;
+            data.generateHeightmaps = true;
+            data.generateStaticMeshes = false;
+            data.convertToMicrosplat = true;
+            data.generationMode = GenerationMode.Generate;
+
+            GenerateMap(new List<MapGenerationData> { data });
+            Debug.Log("[Batch] Etape 04 (terrain) terminee.");
+
+            ConvertTerrainToMicroplat(data);
+            Debug.Log("[Batch] Etape 05 (microsplat) terminee.");
+
+            UpdateMicrosplatParams(data);
+            Debug.Log("[Batch] Etape 06 (parametres microsplat) terminee.");
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Debug.Log($"[Batch] '{mapName}' : import terrain OK.");
+        }
+        catch (System.Exception e)
+        {
+            // En batch, une exception non rattrapee laisse Unity rendre 0 :
+            // le script appelant croirait a une reussite.
+            Debug.LogError($"[Batch] Echec sur '{mapName}' : {e}");
+            EditorApplication.Exit(1);
+        }
+    }
+
+    private static string GetCommandLineArg(string name)
+    {
+        string[] args = System.Environment.GetCommandLineArgs();
+        for (int i = 0; i < args.Length - 1; i++)
+        {
+            if (args[i] == name) return args[i + 1];
+        }
+        return null;
+    }
+
+    // Rattrapage pour une scene deja encombree par d'anciennes passes : les
+    // etapes 03/04 nettoient desormais derriere elles, mais ce qui a ete
+    // accumule avant reste en place. Vide tous les objets generes de la region
+    // choisie, sans toucher au reste de la scene.
+    [MenuItem("Shnok/00. [Scene] Nettoyer les objets generes")]
+    static void CleanGeneratedObjects()
+    {
+        string fileToProcess = EditorUtility.OpenFilePanel(
+            "Select terrain t3d",
+            Path.Combine(Application.dataPath, "Resources/Data/Maps"),
+            "t3d");
+
+        if (string.IsNullOrEmpty(fileToProcess))
+        {
+            return;
+        }
+
+        string mapName = Path.GetFileNameWithoutExtension(fileToProcess);
+
+        int removed = L2TerrainGenerator.DestroyContainers(
+            L2TerrainGenerator.TerrainObjectName(mapName),
+            mapName,
+            L2TerrainGenerator.StaticMeshContainerName(mapName),
+            "StaticMeshes",
+            "Brushes");
+
+        Debug.Log($"[Scene] '{mapName}' : {removed} objet(s) genere(s) supprime(s). " +
+                  "Relancez les etapes 03 a 07, puis sauvegardez la scene.");
+    }
+
     [MenuItem("Shnok/04. [Terrain] Generate terrain")]
     static void GenerateTerrain()
     {
         string title = "Select terrain t3d";
-        string directory = Path.Combine(Application.dataPath, "Data/Maps");
+        string directory = Path.Combine(Application.dataPath, "Resources/Data/Maps");
         string extension = "t3d";
 
         string fileToProcess = EditorUtility.OpenFilePanel(title, directory, extension);
@@ -62,7 +178,7 @@ public class L2TerrainGeneratorTool : MonoBehaviour
     static void ConvertTerrain()
     {
         string title = "Select terrain t3d";
-        string directory = Path.Combine(Application.dataPath, "Data/Maps");
+        string directory = Path.Combine(Application.dataPath, "Resources/Data/Maps");
         string extension = "t3d";
 
         string fileToProcess = EditorUtility.OpenFilePanel(title, directory, extension);
@@ -85,7 +201,7 @@ public class L2TerrainGeneratorTool : MonoBehaviour
     static void Update()
     {
         string title = "Select terrain t3d";
-        string directory = Path.Combine(Application.dataPath, "Data/Maps");
+        string directory = Path.Combine(Application.dataPath, "Resources/Data/Maps");
         string extension = "t3d";
 
         string fileToProcess = EditorUtility.OpenFilePanel(title, directory, extension);
@@ -106,10 +222,27 @@ public class L2TerrainGeneratorTool : MonoBehaviour
     [MenuItem("Shnok/03. [StaticMeshes] Generate staticmeshes")]
     static void GenerateStaticMeshes()
     {
+        // Demande la map, comme les etapes 04/05/06. Avant, le nom etait
+        // ecrit en dur ("l2_lobby") : quelle que soit la region sur laquelle
+        // on travaillait, cette etape regenerait les meshes du lobby, sans
+        // aucun message - elle faisait simplement autre chose que demande.
+        string title = "Select terrain t3d";
+        string directory = Path.Combine(Application.dataPath, "Resources/Data/Maps");
+        string extension = "t3d";
+
+        string fileToProcess = EditorUtility.OpenFilePanel(title, directory, extension);
+        if (string.IsNullOrEmpty(fileToProcess))
+        {
+            return;
+        }
+
+        string mapName = Path.GetFileNameWithoutExtension(fileToProcess);
+        Debug.Log("[StaticMeshes] Map selectionnee : " + mapName);
+
         List<MapGenerationData> mapsToGenerate = new List<MapGenerationData>();
         MapGenerationData data = new MapGenerationData();
 
-        data.mapName = "l2_lobby";
+        data.mapName = mapName;
         data.generateDecoLayers = false;
         data.generateUVLayers = false;
         data.generateHeightmaps = false;
@@ -118,22 +251,57 @@ public class L2TerrainGeneratorTool : MonoBehaviour
         mapsToGenerate.Add(data);
 
         GenerateMap(mapsToGenerate);
-
     }
 
+
+    // Regions a raccorder entre elles. AJOUTER ICI toute nouvelle region
+    // importee, sinon ses bords resteront non raccordes et une couture
+    // verticale sera visible entre les terrains.
+    private static readonly string[] StitchableRegions =
+    {
+        "16_24", "16_25",
+        "17_22", "17_23", "17_24", "17_25",
+    };
 
     [MenuItem("Shnok/11. [Terrain] Stitch terrain seams")]
     static void StitchTerrainSeams()
     {
         Dictionary<string, Terrain> mapTerrains = new Dictionary<string, Terrain>();
-        string mapId = "17_25";
-        mapTerrains.Add(mapId, GameObject.Find(mapId).GetComponent<Terrain>());
-        mapId = "16_25";
-        mapTerrains.Add(mapId, GameObject.Find(mapId).GetComponent<Terrain>());
-        mapId = "16_24";
-        mapTerrains.Add(mapId, GameObject.Find(mapId).GetComponent<Terrain>());
-        mapId = "17_24";
-        mapTerrains.Add(mapId, GameObject.Find(mapId).GetComponent<Terrain>());
+
+        foreach (string mapId in StitchableRegions)
+        {
+            // Region absente de la scene ouverte : on l'ignore avec un message
+            // clair. L'ancienne version enchainait des GameObject.Find() sans
+            // controle et levait une NullReferenceException des qu'une seule
+            // region manquait - ce qui arrive forcement pendant un import,
+            // quand toutes ne sont pas encore montees.
+            // Meme correction que pour les etapes 05/06 : le terrain est cree
+            // sous "terrain_<region>", pas sous "<region>".
+            GameObject go = GameObject.Find(L2TerrainGenerator.TerrainObjectName(mapId))
+                            ?? GameObject.Find(mapId);
+            if (go == null)
+            {
+                Debug.Log($"[Stitch] Region '{mapId}' absente de la scene, ignoree.");
+                continue;
+            }
+
+            Terrain terrain = go.GetComponent<Terrain>();
+            if (terrain == null)
+            {
+                Debug.LogWarning($"[Stitch] '{mapId}' trouve mais sans composant Terrain, ignore.");
+                continue;
+            }
+
+            mapTerrains.Add(mapId, terrain);
+        }
+
+        if (mapTerrains.Count < 2)
+        {
+            Debug.LogWarning($"[Stitch] {mapTerrains.Count} region(s) trouvee(s) - il en faut au moins 2 pour raccorder quoi que ce soit.");
+            return;
+        }
+
+        Debug.Log($"[Stitch] Raccord de {mapTerrains.Count} region(s) : {string.Join(", ", mapTerrains.Keys)}");
 
         L2TerrainGenerator generator = new L2TerrainGenerator();
         generator.StitchTerrainSeams(mapTerrains);
@@ -168,44 +336,76 @@ public class L2TerrainGeneratorTool : MonoBehaviour
         //   generator.StitchTerrainSeams(terrainsDict);
     }
 
-    private static void ConvertTerrainToMicroplat(MapGenerationData mapToGenerate)
+    /// Retrouve dans la scene ouverte le terrain produit par l'etape 04.
+    ///
+    /// Les etapes 05 et 06 le cherchaient sous le seul identifiant de region
+    /// ("17_23"), alors que L2TerrainGenerator le cree prefixe
+    /// ("terrain_17_23"). Elles ne le trouvaient donc jamais et retombaient
+    /// sur un Instantiate depuis Resources : a chaque lancement un terrain de
+    /// plus dans la scene, et des reglages MicroSplat appliques a cette copie
+    /// pendant que le terrain reellement affiche restait sans echelle - d'ou
+    /// l'impression d'une tuile unique a l'echelle de la region.
+    ///
+    /// On echoue franchement plutot que d'instancier : si le terrain n'est pas
+    /// la, c'est que l'etape 04 n'a pas ete lancee, et le dire vaut mieux que
+    /// de travailler en silence sur un objet que l'utilisateur ne voit pas.
+    private static Terrain ResolveTerrain(string mapName)
     {
-        GameObject terrainGo = GameObject.Find(mapToGenerate.mapName);
-        Terrain terrain;
-        if (terrainGo != null)
+        GameObject terrainGo = GameObject.Find(L2TerrainGenerator.TerrainObjectName(mapName))
+                               ?? GameObject.Find(mapName);
+
+        if (terrainGo == null)
         {
-            terrain = terrainGo.GetComponent<Terrain>();
-        }
-        else
-        {
-            terrainGo = Resources.Load<GameObject>(Path.Combine("Data", "Maps", mapToGenerate.mapName, "TerrainData", mapToGenerate.mapName));
-            GameObject newTerrain = GameObject.Instantiate(terrainGo);
-            terrain = newTerrain.GetComponent<Terrain>();
+            Debug.LogError($"[Terrain] '{mapName}' introuvable dans la scene ouverte. " +
+                           "Lancez l'etape 04 avant les etapes 05 et 06.");
+            return null;
         }
 
-        MicroSplatTerrain mst = terrainGo.AddComponent<MicroSplatTerrain>();
+        Terrain terrain = terrainGo.GetComponent<Terrain>();
+        if (terrain == null)
+        {
+            Debug.LogError($"[Terrain] '{terrainGo.name}' n'a pas de composant Terrain.");
+        }
+
+        return terrain;
+    }
+
+    private static void ConvertTerrainToMicroplat(MapGenerationData mapToGenerate)
+    {
+        Terrain terrain = ResolveTerrain(mapToGenerate.mapName);
+        if (terrain == null)
+        {
+            return;
+        }
+
+        // AddComponent etait appele sans condition : relancer l'etape 05
+        // empilait un MicroSplatTerrain de plus sur le meme objet.
+        MicroSplatTerrain mst = terrain.GetComponent<MicroSplatTerrain>();
+        if (mst == null)
+        {
+            mst = terrain.gameObject.AddComponent<MicroSplatTerrain>();
+        }
+
         MicroSplatTerrainEditor.ConvertTerrains(new Terrain[] { terrain }, terrain.terrainData.terrainLayers);
         mst.Sync();
     }
 
     private static void UpdateMicrosplatParams(MapGenerationData mapToGenerate)
     {
-        GameObject terrainGo = GameObject.Find(mapToGenerate.mapName);
-        Terrain terrain;
-        if (terrainGo != null)
+        Terrain terrain = ResolveTerrain(mapToGenerate.mapName);
+        if (terrain == null)
         {
-            terrain = terrainGo.GetComponent<Terrain>();
-        }
-        else
-        {
-            terrainGo = Resources.Load<GameObject>(Path.Combine("Data", "Maps", mapToGenerate.mapName, "TerrainData", mapToGenerate.mapName));
-            GameObject newTerrain = GameObject.Instantiate(terrainGo);
-            terrain = newTerrain.GetComponent<Terrain>();
+            return;
         }
 
         L2TerrainInfo terrainInfo = L2T3DInfoParser.LoadMetadata(mapToGenerate.mapName);
 
         MicroSplatTerrain mst = terrain.GetComponent<MicroSplatTerrain>();
+        if (mst == null)
+        {
+            Debug.LogError($"[Microsplat] '{terrain.name}' n'a pas de MicroSplatTerrain. Lancez l'etape 05 avant la 06.");
+            return;
+        }
 
         for (int layer = 0; layer < terrainInfo.uvLayers.Count; layer++)
         {
@@ -216,7 +416,14 @@ public class L2TerrainGeneratorTool : MonoBehaviour
             }
             else
             {
-                Debug.LogError("Can't find matching value in scaleMatches for textue " + texName);
+                // Table de correspondance ecrite a la main : elle ne couvre que
+                // les textures des regions deja importees. Une region neuve en
+                // apporte forcement de nouvelles - ce n'est pas une erreur, on
+                // applique une valeur par defaut et on signale quoi ajouter.
+                mst.propData.SetValue(layer, PerTexVector2.SplatUVScale,
+                    new Vector2(DefaultSplatUvScale, DefaultSplatUvScale));
+                Debug.LogWarning($"[Microsplat] '{texName}' absente de scaleMatches, echelle par defaut {DefaultSplatUvScale} appliquee. " +
+                                 $"Ajouter scaleMatches.Add(\"{texName}\", <valeur>); dans L2TerrainGeneratorTextureMatcher pour l'ajuster.");
             }
             if (L2TerrainGeneratorTextureMatcher.Instance.pertexFloatMatches.TryGetValue(texName, out List<PerTexFloatVal> ptv))
             {
@@ -231,7 +438,9 @@ public class L2TerrainGeneratorTool : MonoBehaviour
             }
             else
             {
-                Debug.LogError("Can't find matching value in pertexFloatMatches for textue " + texName);
+                // Pas de reglage colorimetrique connu : MicroSplat garde ses
+                // valeurs par defaut, le rendu reste correct.
+                Debug.LogWarning($"[Microsplat] '{texName}' absente de pertexFloatMatches, reglages colorimetriques par defaut.");
             }
             if (L2TerrainGeneratorTextureMatcher.Instance.pertextColorMatches.TryGetValue(texName, out List<PerTexColorVal> ptc))
             {
@@ -246,7 +455,8 @@ public class L2TerrainGeneratorTool : MonoBehaviour
             }
             else
             {
-                Debug.LogError("Can't find matching value in pertextColorMatches for textue " + texName);
+                // Pas de teinte connue : MicroSplat garde le blanc neutre.
+                Debug.LogWarning($"[Microsplat] '{texName}' absente de pertextColorMatches, teinte neutre conservee.");
             }
         }
 

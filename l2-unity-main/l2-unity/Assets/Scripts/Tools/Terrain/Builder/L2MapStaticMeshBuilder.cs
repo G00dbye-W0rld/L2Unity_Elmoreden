@@ -9,7 +9,7 @@ public class L2MapStaticMeshBuilder : MonoBehaviour
     static void BuildSoundsMenu()
     {
         string title = "Select ambient sound list";
-        string directory = Path.Combine(Application.dataPath, "Data/Maps");
+        string directory = Path.Combine(Application.dataPath, "Resources/Data/Maps");
         string extension = "json";
 
         string fileToProcess = EditorUtility.OpenFilePanel(title, directory, extension);

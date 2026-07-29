@@ -7,11 +7,16 @@ using UnityEngine;
 
 public class L2MetaDataUtils
 {
+    // Les .t3d ecrivent TOUJOURS les nombres avec un point decimal
+    // (format Unreal). Sans InvariantCulture, float.Parse utilise la culture
+    // du systeme : sur un Windows francais, le point est un separateur de
+    // MILLIERS et "1.000000" leve une FormatException. Le pipeline ne
+    // fonctionnait donc que sur une machine en locale anglaise.
     public static float ParseFloatFromInfo(string info)
     {
         int equalsIndex = info.IndexOf('=');
         string valueString = info.Substring(equalsIndex + 1, info.Length - equalsIndex - 1);
-        return float.Parse(valueString);
+        return float.Parse(valueString, CultureInfo.InvariantCulture);
     }
 
     public static bool ParseBoolFromInfo(string info)
@@ -119,7 +124,7 @@ public class L2MetaDataUtils
     public static float ParseFloat(string line)
     {
         string[] valueParts = line.Split('=');
-        return float.Parse(valueParts[1]);
+        return float.Parse(valueParts[1], CultureInfo.InvariantCulture);
     }
 
     public static int ParseInt(string line)

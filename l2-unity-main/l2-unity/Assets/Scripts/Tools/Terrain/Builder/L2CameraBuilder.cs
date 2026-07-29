@@ -11,7 +11,7 @@ public class L2CameraBuilder
     static void ImportBrushTexturesT3D()
     {
         string title = "Select T3D file";
-        string directory = Path.Combine(Application.dataPath, "Data/Maps");
+        string directory = Path.Combine(Application.dataPath, "Resources/Data/Maps");
         string extension = "t3d";
 
         string fileToProcess = EditorUtility.OpenFilePanel(title, directory, extension);

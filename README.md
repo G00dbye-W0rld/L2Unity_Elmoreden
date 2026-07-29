@@ -25,6 +25,7 @@ Ce guide est en deux parties : la **Partie 1** explique comment **lancer** le je
 
 ### Partie 2 — Ajouter du contenu
 8. [Ajouter un PNJ ou un monstre custom](#ajouter-un-pnj-ou-un-monstre-custom)
+9. [Importer et customiser une région de map](#importer-et-customiser-une-région-de-map)
 
 ---
 
@@ -211,6 +212,32 @@ Si le PNJ a besoin d'un modèle 3D qui **n'existe encore nulle part** dans le je
    ```
 5. **Le modèle 3D lui-même** — créer un nouveau prefab Unity avec animation et collider, une étape bien plus impliquée, hors du cadre de ce guide simple. Le point de départ le plus sûr est de partir du prefab d'un PNJ existant qui a une structure proche (mêmes composants) et de le personnaliser à partir de là.
 6. **Tester** — identique à l'étape 3 ci-dessus.
+
+---
+
+## Importer et customiser une région de map
+
+Le monde du jeu est découpé en **régions** de 32768 unités de côté. Quatre seulement sont
+présentes aujourd'hui (`16_24`, `16_25`, `17_24`, `17_25` — la zone de Talking Island),
+chacune existant en trois exemplaires qui doivent rester alignés : la scène Unity, les
+données de terrain, et la geodata côté serveur.
+
+Ajouter une région (pour un château ou des clan halls, par exemple) ou customiser une
+région existante passe par un pipeline complet, avec quelques pièges sérieux — dont
+**cinq chemins codés en dur** pointant vers la machine de l'auteur d'origine, à corriger
+avant toute exécution.
+
+> 📄 **[TUTO_IMPORT_MAP.md](TUTO_IMPORT_MAP.md)** — guide complet en 13 sections :
+> extraction depuis le client officiel, les 11 étapes du menu `Shnok`, génération de la
+> geodata, et surtout **ce qui est personnalisable sans jamais toucher à la geodata**.
+
+Deux points à connaître avant de s'y lancer :
+
+- **Il y a deux geodata**, incompatibles. Celle du client (pathfinding) est générée par le
+  projet ; celle du serveur (`.l2j`, hauteur et ligne de vue) ne l'est pas — il faut la
+  récupérer d'un pack L2J Interlude.
+- **Beaucoup de choses se customisent sans elle** : tout le visuel, plus les zones, spawns,
+  téléports, portes et contenu marchand, tous pilotés par coordonnées dans les XML serveur.
 
 ---
 

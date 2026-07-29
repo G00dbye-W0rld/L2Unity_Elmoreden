@@ -15,10 +15,11 @@ public class L2T3DStaticMeshImporter : AssetImporter
     static void ImportStaticMeshes()
     {
         string title = "Select StaticMeshes list";
-        string directory = Path.Combine(Application.dataPath, "Data/Maps");
+        string directory = Path.Combine(Application.dataPath, "Resources/Data/Maps");
         string extension = "txt,t3d";
 
-        string dataFolder = @"D:\Stock\Projects\L2-Unity\umodel_win32\export";
+        // Racine des exports umodel (meshes + textures). Voir TUTO_IMPORT_MAP.md.
+        string dataFolder = @"D:\Jeux\MAP_L2Unity\export";
         bool overwrite = false;
 
         string fileToProcess = EditorUtility.OpenFilePanel(title, directory, extension);
@@ -203,14 +204,31 @@ public class L2T3DStaticMeshImporter : AssetImporter
                             string[] texRefEntries = texRef.Split('.');
                             string textureToImport = texRefEntries[texRefEntries.Length - 1];
 
+                            // Deux dispositions coexistent dans les exports
+                            // umodel. Quand le props du materiau est range dans
+                            // un sous-dossier "Materials", la texture est un
+                            // cran au-dessus ; quand umodel l'ecrit a plat dans
+                            // le package (packages sans groupes), elle est a
+                            // cote. Ne regarder que le dossier parent faisait
+                            // chercher la texture a la racine des exports, ou
+                            // elle n'est jamais : le materiau restait sans
+                            // texture et l'objet apparaissait gris.
+                            string ownFolder = Path.GetDirectoryName(materialInfoProps);
                             string texturePath = Path.Combine(GetParentFolder(materialInfoProps), textureToImport + ".png");
+
+                            if (!File.Exists(texturePath))
+                            {
+                                texturePath = Path.Combine(ownFolder, textureToImport + ".png");
+                            }
+
                             if (File.Exists(texturePath))
                             {
                                 filesToExport.Add(texturePath);
                             }
                             else
                             {
-                                Debug.LogError("Could not find texture at " + texturePath + " props file: " + materialInfoProps);
+                                Debug.LogError("Could not find texture '" + textureToImport + "' near " + ownFolder
+                                               + " props file: " + materialInfoProps);
                             }
                         }
                     }

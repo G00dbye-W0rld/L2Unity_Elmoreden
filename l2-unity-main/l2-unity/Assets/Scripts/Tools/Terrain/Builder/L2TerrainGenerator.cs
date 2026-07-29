@@ -10,6 +10,16 @@ public class L2TerrainGenerator
     public float worldPositionOffset = 1f;
     private string terrainContainerName = "terrain_";
 
+    /// Nom de l'objet de scene portant le Terrain d'une region.
+    /// Expose parce que les etapes 05/06 doivent le retrouver : elles le
+    /// cherchaient sous le seul identifiant de region ("17_23"), alors qu'il
+    /// est cree prefixe ("terrain_17_23"). Ne le trouvant jamais, elles
+    /// instanciaient une copie depuis Resources a chaque lancement.
+    public static string TerrainObjectName(string mapName)
+    {
+        return "terrain_" + mapName;
+    }
+
     public Terrain InstantiateTerrain(MapGenerationData generationData, L2TerrainInfo terrainInfo)
     {
         string directoryPath = Path.Combine("Assets", "Resources", "Data", "Maps", generationData.mapName, "TerrainData");
@@ -28,6 +38,15 @@ public class L2TerrainGenerator
         if (!generationData.generateDecoLayers && !generationData.generateUVLayers && !generationData.generateHeightmaps)
         {
             return null;
+        }
+
+        // Meme raison que pour les static meshes : sans cette suppression,
+        // relancer l'etape 04 laissait l'ancien terrain en place et en
+        // superposait un second exactement au meme endroit.
+        int removedTerrains = DestroyContainers(TerrainObjectName(terrainInfo.mapName), terrainInfo.mapName);
+        if (removedTerrains > 0)
+        {
+            Debug.Log($"[Terrain] {removedTerrains} terrain(s) precedent(s) supprime(s) avant regeneration.");
         }
 
         // Create the terrain object
@@ -252,9 +271,22 @@ public class L2TerrainGenerator
 
         terrainData.detailPrototypes = detailPrototypes;
 
+        Debug.Log($"[DecoLayers] {terrainInfo.decoLayers.Count} couche(s) de deco a traiter.");
+
         for (int i = 0; i < terrainInfo.decoLayers.Count; i++)
         {
             Texture2D densityTexture = flippedAlphaMaps[i];
+
+            // Une couche sans carte de densite chargeable laissait une case
+            // nulle dans flippedAlphaMaps (le remplissage plus haut est sous
+            // condition), utilisee ici sans controle -> NullReferenceException.
+            // On la saute en la nommant, au lieu de faire echouer tout l'import.
+            if (densityTexture == null)
+            {
+                Debug.LogWarning($"[DecoLayers] Couche {i} ignoree : carte de densite absente " +
+                                 $"(mesh: {(terrainInfo.decoLayers[i].staticMesh != null ? terrainInfo.decoLayers[i].staticMesh.name : "aucun")}).");
+                continue;
+            }
 
             var detailHeight = densityTexture.height;
             var detailWidth = densityTexture.width;
@@ -285,14 +317,64 @@ public class L2TerrainGenerator
         AssetDatabase.Refresh();
     }
 
+    /// Nom du conteneur des static meshes d'une region.
+    /// Il porte l'identifiant de la region : sans lui, deux regions ouvertes
+    /// dans la meme scene se partageaient un unique objet "StaticMeshes" et
+    /// devenaient impossibles a distinguer ou a regenerer separement.
+    public static string StaticMeshContainerName(string mapName)
+    {
+        return "StaticMeshes_" + mapName;
+    }
+
     public void GenerateStaticMeshes(L2TerrainInfo terrainInfo)
     {
-        GameObject staticMeshesGo = new GameObject("StaticMeshes");
+        // L'ancienne version creait un "StaticMeshes" neuf a chaque appel sans
+        // jamais supprimer le precedent : relancer l'etape 03 empilait un
+        // second jeu complet d'objets par-dessus le premier. Comme la premiere
+        // passe se fait souvent avant que les textures soient en place, la
+        // scene se retrouvait avec des objets gris (ancienne passe) superposes
+        // aux objets corrects (nouvelle passe).
+        string containerName = StaticMeshContainerName(terrainInfo.mapName);
+        int removed = DestroyContainers(containerName, "StaticMeshes");
+        if (removed > 0)
+        {
+            Debug.Log($"[StaticMeshes] {removed} conteneur(s) precedent(s) supprime(s) avant regeneration.");
+        }
+
+        GameObject staticMeshesGo = new GameObject(containerName);
 
         foreach (var staticMesh in terrainInfo.staticMeshes)
         {
             L2MapStaticMeshBuilder.BuildSingleStaticMesh(staticMesh, staticMeshesGo);
         }
+
+        Debug.Log($"[StaticMeshes] {terrainInfo.staticMeshes.Count} objet(s) place(s) sous '{containerName}'.");
+    }
+
+    /// Supprime tous les objets racine portant l'un des noms donnes.
+    /// On balaie les racines plutot que d'utiliser GameObject.Find, qui ne
+    /// renvoie que la premiere correspondance et laisserait les doublons
+    /// deja accumules en place.
+    public static int DestroyContainers(params string[] names)
+    {
+        int removed = 0;
+        GameObject[] roots = UnityEngine.SceneManagement.SceneManager
+            .GetActiveScene().GetRootGameObjects();
+
+        foreach (GameObject root in roots)
+        {
+            foreach (string name in names)
+            {
+                if (root.name == name)
+                {
+                    UnityEngine.Object.DestroyImmediate(root);
+                    removed++;
+                    break;
+                }
+            }
+        }
+
+        return removed;
     }
 
     public void StitchTerrainSeams(Dictionary<string, Terrain> mapTerrains)

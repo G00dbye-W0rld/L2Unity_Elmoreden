@@ -8,8 +8,8 @@ from bpy_extras.io_utils import ImportHelper
 from bpy.types import Operator
 
 # Set the file paths
-input_folder = "G:/Stock/Projects/L2-Unity/Tools/umodel_win32/export/field_deco_S"
-output_folder = "G:/Stock/Projects/L2-Unity/Tools/umodel_win32/export/field_deco_S"
+input_folder = "D:/Jeux/MAP_L2Unity/export/field_deco_S"
+output_folder = "D:/Jeux/MAP_L2Unity/export/field_deco_S"
 
 # Ensure the output folder exists
 os.makedirs(output_folder, exist_ok=True)

@@ -12,7 +12,7 @@ public class L2AmbientSoundBuilder : MonoBehaviour
     static void BuildSoundsMenu()
     {
         string title = "Select ambient sound list";
-        string directory = Path.Combine(Application.dataPath, "Data/Maps");
+        string directory = Path.Combine(Application.dataPath, "Resources/Data/Maps");
         string extension = "json";
 
         string fileToProcess = EditorUtility.OpenFilePanel(title, directory, extension);
@@ -29,7 +29,7 @@ public class L2AmbientSoundBuilder : MonoBehaviour
     static void BuildSoundsMenuT3D()
     {
         string title = "Select ambient sound list";
-        string directory = Path.Combine(Application.dataPath, "Data/Maps");
+        string directory = Path.Combine(Application.dataPath, "Resources/Data/Maps");
         string extension = "t3d";
 
         string fileToProcess = EditorUtility.OpenFilePanel(title, directory, extension);

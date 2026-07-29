@@ -24,7 +24,7 @@ public class TerrainConverter : MonoBehaviour
     static void ConvertTerrainMenu()
     {
         string title = "Select terrain t3d";
-        string directory = Path.Combine(Application.dataPath, "Data/Maps");
+        string directory = Path.Combine(Application.dataPath, "Resources/Data/Maps");
         string extension = "t3d";
 
         string fileToProcess = EditorUtility.OpenFilePanel(title, directory, extension);
@@ -45,7 +45,7 @@ public class TerrainConverter : MonoBehaviour
     static void DecoLayers()
     {
         string title = "Select terrain t3d";
-        string directory = Path.Combine(Application.dataPath, "Data/Maps");
+        string directory = Path.Combine(Application.dataPath, "Resources/Data/Maps");
         string extension = "t3d";
 
         string fileToProcess = EditorUtility.OpenFilePanel(title, directory, extension);

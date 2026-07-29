@@ -19,6 +19,132 @@ public class L2MaterialBuilder
         ProcessProps(overwrite);
 
         CreateBaseMaterials(overwrite);
+
+        // Les materiaux textures viennent seulement d'etre crees : c'est le
+        // moment de rebrancher les modeles qui pointaient sur les coquilles
+        // vides generees a l'etape 01.
+        RebindModelMaterials();
+    }
+
+    /// Repare les modeles lies a un materiau vide.
+    ///
+    /// A l'import d'un FBX, Unity cherche un materiau du meme nom dans tout le
+    /// projet (materialSearch = Everywhere) ; s'il n'en trouve pas, il en cree
+    /// un vide a cote du modele. Or a l'etape 01 les materiaux textures
+    /// n'existent pas encore - ils sont produits par l'etape 02. Chaque modele
+    /// se retrouve donc lie a un materiau sans texture, et l'objet apparait
+    /// gris. Relancer l'import n'y change rien : le materiau vide existe
+    /// desormais et continue d'etre trouve en priorite.
+    ///
+    /// On supprime donc ces coquilles vides - uniquement lorsqu'un materiau du
+    /// meme nom, lui texture, existe sous Data/Textures - puis on force la
+    /// reimportation des modeles concernes pour qu'Unity refasse la liaison.
+    [MenuItem("Shnok/02b. [Material] Rebrancher les materiaux des modeles")]
+    static void RebindModelMaterials()
+    {
+        const string meshRoot = "Assets/Resources/Data/StaticMeshes";
+        const string textureRoot = "Assets/Resources/Data/Textures";
+
+        if (!Directory.Exists(meshRoot))
+        {
+            Debug.LogWarning($"[Materiaux] {meshRoot} introuvable.");
+            return;
+        }
+
+        string[] emptyGuids = AssetDatabase.FindAssets("t:Material", new[] { meshRoot });
+        System.Collections.Generic.HashSet<string> foldersToReimport =
+            new System.Collections.Generic.HashSet<string>();
+        int deleted = 0;
+        int keptWithoutReplacement = 0;
+
+        foreach (string guid in emptyGuids)
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            Material mat = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (mat == null || HasMainTexture(mat))
+            {
+                continue;
+            }
+
+            string name = Path.GetFileNameWithoutExtension(path);
+            if (!TexturedReplacementExists(name, textureRoot))
+            {
+                // Pas de remplacant : le supprimer laisserait le modele sans
+                // aucun materiau, ce qui serait pire. On signale et on garde.
+                keptWithoutReplacement++;
+                continue;
+            }
+
+            // <package>/Materials/<nom>.mat -> on reimportera <package>.
+            string packageFolder = Path.GetDirectoryName(Path.GetDirectoryName(path));
+            foldersToReimport.Add(packageFolder.Replace('\\', '/'));
+
+            AssetDatabase.DeleteAsset(path);
+            deleted++;
+        }
+
+        if (deleted == 0)
+        {
+            Debug.Log($"[Materiaux] Aucun materiau vide a rebrancher ({keptWithoutReplacement} sans remplacant).");
+            return;
+        }
+
+        AssetDatabase.Refresh();
+
+        int reimported = 0;
+        foreach (string folder in foldersToReimport)
+        {
+            foreach (string fbx in Directory.GetFiles(folder, "*.fbx", SearchOption.TopDirectoryOnly))
+            {
+                AssetDatabase.ImportAsset(fbx.Replace('\\', '/'), ImportAssetOptions.ForceUpdate);
+                reimported++;
+            }
+        }
+
+        AssetDatabase.Refresh();
+
+        Debug.Log($"[Materiaux] {deleted} materiau(x) vide(s) supprime(s), "
+                  + $"{reimported} modele(s) reimporte(s) dans {foldersToReimport.Count} package(s). "
+                  + (keptWithoutReplacement > 0
+                        ? $"{keptWithoutReplacement} sans remplacant, conserve(s)."
+                        : ""));
+    }
+
+    /// Vrai si le materiau porte une texture dans son slot principal.
+    /// On teste les deux noms possibles : _BaseMap (URP) et _MainTex (legacy).
+    static bool HasMainTexture(Material mat)
+    {
+        if (mat.HasProperty("_BaseMap") && mat.GetTexture("_BaseMap") != null)
+        {
+            return true;
+        }
+        return mat.HasProperty("_MainTex") && mat.GetTexture("_MainTex") != null;
+    }
+
+    static bool TexturedReplacementExists(string name, string textureRoot)
+    {
+        if (!Directory.Exists(textureRoot))
+        {
+            return false;
+        }
+
+        foreach (string guid in AssetDatabase.FindAssets($"t:Material {name}", new[] { textureRoot }))
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            if (!string.Equals(Path.GetFileNameWithoutExtension(path), name,
+                               System.StringComparison.OrdinalIgnoreCase))
+            {
+                continue; // FindAssets fait une recherche approximative.
+            }
+
+            Material candidate = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (candidate != null && HasMainTexture(candidate))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     static void ClearMaterials()
