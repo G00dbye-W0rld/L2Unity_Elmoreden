@@ -397,6 +397,71 @@ public class L2T3DInfoParser
         return terrainInfo.ambientSounds;
     }
 
+    /// Les Light du .unr n'ont ni RVB ni intensite au sens Unity : la couleur
+    /// vient de LightHue/LightSaturation (encodage roue chromatique Unreal,
+    /// 0-255 chacun) et l'intensite de LightBrightness - releve directement
+    /// sur 17_25 (seule region de reference qui en contient, 17_23 en a 0).
+    public static List<L2Light> ParseLights(string t3dPath)
+    {
+        if (terrainInfo == null)
+        {
+            terrainInfo = new L2TerrainInfo();
+        }
+        terrainInfo.lights = new List<L2Light>();
+
+        using (StreamReader reader = new StreamReader(t3dPath))
+        {
+            string line;
+            while ((line = reader.ReadLine()) != null)
+            {
+                line = line.Trim();
+                if (line.StartsWith("Begin Actor Class=Light Name="))
+                {
+                    L2Light light = new L2Light();
+                    light.name = line.Replace("Begin Actor Class=Light Name=", "");
+                    // Valeurs par defaut Unreal quand la propriete est absente
+                    // (elle ne s'ecrit que si elle differe du defaut de la classe).
+                    light.brightness = 64f;
+                    light.radius = 64f;
+                    light.hue = 0;
+                    light.saturation = 0;
+
+                    while ((line = reader.ReadLine()) != null && !line.Contains("End Actor"))
+                    {
+                        line = line.Trim();
+
+                        if (line.StartsWith("LightBrightness="))
+                        {
+                            light.brightness = L2MetaDataUtils.ParseFloatFromInfo(line);
+                        }
+                        else if (line.StartsWith("LightRadius="))
+                        {
+                            light.radius = L2MetaDataUtils.ParseFloatFromInfo(line);
+                        }
+                        else if (line.StartsWith("LightHue="))
+                        {
+                            light.hue = L2MetaDataUtils.ParseIntFromInfo(line);
+                        }
+                        else if (line.StartsWith("LightSaturation="))
+                        {
+                            light.saturation = L2MetaDataUtils.ParseIntFromInfo(line);
+                        }
+                        else if (line.StartsWith("Location="))
+                        {
+                            light.position = L2MetaDataUtils.ParseVector3(line);
+                        }
+                    }
+
+                    terrainInfo.lights.Add(light);
+                }
+            }
+        }
+
+        Debug.Log($"Loaded {terrainInfo.lights.Count} light(s).");
+
+        return terrainInfo.lights;
+    }
+
 }
 
 #endif

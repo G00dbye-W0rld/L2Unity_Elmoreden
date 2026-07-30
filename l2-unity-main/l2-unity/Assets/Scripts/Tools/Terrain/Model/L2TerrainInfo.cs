@@ -15,5 +15,6 @@ public class L2TerrainInfo {
     public List<Brush> brushes { get; set; }
     public List<L2InterpolationPoint> interpolationPoints { get; set; }
     public List<AmbientSound> ambientSounds { get; set; }
+    public List<L2Light> lights { get; set; }
 }
 #endif

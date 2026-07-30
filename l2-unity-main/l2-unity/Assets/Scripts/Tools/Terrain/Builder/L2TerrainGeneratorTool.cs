@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using JBooth.MicroSplat;
 using UnityEditor;
 using UnityEngine;
@@ -156,21 +157,25 @@ public class L2TerrainGeneratorTool : MonoBehaviour
         if (!string.IsNullOrEmpty(fileToProcess))
         {
             Debug.Log("Selected file: " + fileToProcess);
-            string mapName = Path.GetFileNameWithoutExtension(fileToProcess);
-
-            List<MapGenerationData> mapsToGenerate = new List<MapGenerationData>();
-            MapGenerationData data = new MapGenerationData();
-
-            data.mapName = mapName;
-            data.generateDecoLayers = true;
-            data.generateUVLayers = true;
-            data.generateHeightmaps = true;
-            data.generateStaticMeshes = false;
-            data.convertToMicrosplat = true;
-            data.generationMode = GenerationMode.Generate;
-            mapsToGenerate.Add(data);
-            GenerateMap(mapsToGenerate);
+            GenerateTerrainFor(Path.GetFileNameWithoutExtension(fileToProcess));
         }
+    }
+
+    /// Etape 04 sans dialogue. Voir L2MapBatchImporter.
+    public static void GenerateTerrainFor(string mapName)
+    {
+        List<MapGenerationData> mapsToGenerate = new List<MapGenerationData>();
+        MapGenerationData data = new MapGenerationData();
+
+        data.mapName = mapName;
+        data.generateDecoLayers = true;
+        data.generateUVLayers = true;
+        data.generateHeightmaps = true;
+        data.generateStaticMeshes = false;
+        data.convertToMicrosplat = true;
+        data.generationMode = GenerationMode.Generate;
+        mapsToGenerate.Add(data);
+        GenerateMap(mapsToGenerate);
     }
 
 
@@ -186,14 +191,18 @@ public class L2TerrainGeneratorTool : MonoBehaviour
         if (!string.IsNullOrEmpty(fileToProcess))
         {
             Debug.Log("Selected file: " + fileToProcess);
-            string mapName = Path.GetFileNameWithoutExtension(fileToProcess);
-
-            MapGenerationData data = new MapGenerationData();
-            data.mapName = mapName;
-            data.convertToMicrosplat = true;
-            data.generationMode = GenerationMode.Generate;
-            ConvertTerrainToMicroplat(data);
+            ConvertTerrainFor(Path.GetFileNameWithoutExtension(fileToProcess));
         }
+    }
+
+    /// Etape 05 sans dialogue. Voir L2MapBatchImporter.
+    public static void ConvertTerrainFor(string mapName)
+    {
+        MapGenerationData data = new MapGenerationData();
+        data.mapName = mapName;
+        data.convertToMicrosplat = true;
+        data.generationMode = GenerationMode.Generate;
+        ConvertTerrainToMicroplat(data);
     }
 
 
@@ -209,14 +218,18 @@ public class L2TerrainGeneratorTool : MonoBehaviour
         if (!string.IsNullOrEmpty(fileToProcess))
         {
             Debug.Log("Selected file: " + fileToProcess);
-            string mapName = Path.GetFileNameWithoutExtension(fileToProcess);
-
-            MapGenerationData data = new MapGenerationData();
-            data.mapName = mapName;
-            data.convertToMicrosplat = true;
-            data.generationMode = GenerationMode.Generate;
-            UpdateMicrosplatParams(data);
+            UpdateMicrosplatFor(Path.GetFileNameWithoutExtension(fileToProcess));
         }
+    }
+
+    /// Etape 06 sans dialogue. Voir L2MapBatchImporter.
+    public static void UpdateMicrosplatFor(string mapName)
+    {
+        MapGenerationData data = new MapGenerationData();
+        data.mapName = mapName;
+        data.convertToMicrosplat = true;
+        data.generationMode = GenerationMode.Generate;
+        UpdateMicrosplatParams(data);
     }
 
     [MenuItem("Shnok/03. [StaticMeshes] Generate staticmeshes")]
@@ -236,7 +249,12 @@ public class L2TerrainGeneratorTool : MonoBehaviour
             return;
         }
 
-        string mapName = Path.GetFileNameWithoutExtension(fileToProcess);
+        GenerateStaticMeshesFor(Path.GetFileNameWithoutExtension(fileToProcess));
+    }
+
+    /// Etape 03 sans dialogue. Voir L2MapBatchImporter.
+    public static void GenerateStaticMeshesFor(string mapName)
+    {
         Debug.Log("[StaticMeshes] Map selectionnee : " + mapName);
 
         List<MapGenerationData> mapsToGenerate = new List<MapGenerationData>();
@@ -254,21 +272,39 @@ public class L2TerrainGeneratorTool : MonoBehaviour
     }
 
 
-    // Regions a raccorder entre elles. AJOUTER ICI toute nouvelle region
-    // importee, sinon ses bords resteront non raccordes et une couture
-    // verticale sera visible entre les terrains.
-    private static readonly string[] StitchableRegions =
+    /// Regions candidates au raccord (etape 11).
+    ///
+    /// Decouverte automatique : tout dossier de Data/Maps dont le nom suit la
+    /// convention "NN_NN" (l'identifiant de region) est candidat, qu'il soit
+    /// present ou non dans la scene ouverte au moment de l'appel - c'est
+    /// StitchTerrainSeams qui filtre selon la scene. Avant, cette liste etait
+    /// un tableau code en dur : chaque region importee demandait d'y ajouter
+    /// une ligne et de recompiler, une etape facile a oublier une fois qu'on
+    /// importe beaucoup de regions.
+    private static string[] DiscoverStitchableRegions()
     {
-        "16_24", "16_25",
-        "17_22", "17_23", "17_24", "17_25",
-    };
+        string mapsRoot = Path.Combine(Application.dataPath, "Resources/Data/Maps");
+        if (!Directory.Exists(mapsRoot))
+        {
+            return new string[0];
+        }
+
+        System.Text.RegularExpressions.Regex regionName =
+            new System.Text.RegularExpressions.Regex(@"^\d+_\d+$");
+
+        return Directory.GetDirectories(mapsRoot)
+            .Select(Path.GetFileName)
+            .Where(name => regionName.IsMatch(name))
+            .OrderBy(name => name)
+            .ToArray();
+    }
 
     [MenuItem("Shnok/11. [Terrain] Stitch terrain seams")]
     static void StitchTerrainSeams()
     {
         Dictionary<string, Terrain> mapTerrains = new Dictionary<string, Terrain>();
 
-        foreach (string mapId in StitchableRegions)
+        foreach (string mapId in DiscoverStitchableRegions())
         {
             // Region absente de la scene ouverte : on l'ignore avec un message
             // clair. L'ancienne version enchainait des GameObject.Find() sans

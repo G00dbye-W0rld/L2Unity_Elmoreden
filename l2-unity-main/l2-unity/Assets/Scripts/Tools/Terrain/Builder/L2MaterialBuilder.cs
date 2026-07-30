@@ -7,7 +7,7 @@ public class L2MaterialBuilder
 {
 
     [MenuItem("Shnok/02. [Material] Generate materials")]
-    static void SetupMaterials()
+    public static void SetupMaterials()
     {
 
         bool overwrite = false;
@@ -179,9 +179,26 @@ public class L2MaterialBuilder
                        .Replace(".props", string.Empty)
                        .Replace("_sh", string.Empty) + ".mat");
 
-            if (File.Exists(materialPath))
+            // overwrite=false economise du travail deja fait CORRECTEMENT, mais
+            // sautait aussi les materiaux VIDES crees par un run anterieur au
+            // correctif du LoadTexture a deux emplacements (2026-07-30) : un
+            // materiau casse une fois restait casse pour toujours, meme apres
+            // la correction du code, puisqu'un simple File.Exists() l'ecartait
+            // avant meme de regarder son contenu. Constate sur Ru_wood0022.mat
+            // (G_Ruin_T), genere vide le 29/07 puis jamais reexamine malgre la
+            // texture RU_wood_002 existant juste a cote.
+            //
+            // Calculee une seule fois : un second garde plus bas (avant
+            // AssetDatabase.CreateAsset) doit prendre exactement la meme
+            // decision, sinon celui-la continuerait a proteger le materiau
+            // casse meme apres que celui-ci ait ete corrige ici.
+            bool materialExists = File.Exists(materialPath);
+            bool alreadyTextured = false;
+            if (materialExists)
             {
-                if (!overwrite)
+                Material existing = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
+                alreadyTextured = existing != null && HasMainTexture(existing);
+                if (!overwrite && alreadyTextured)
                 {
                     continue;
                 }
@@ -285,9 +302,14 @@ public class L2MaterialBuilder
 
             material.mainTexture = texture;
 
-            if (File.Exists(materialPath))
+            if (materialExists)
             {
-                if (!isTransparent && !overwrite)
+                // Meme decision qu'en tete de boucle (materialExists /
+                // alreadyTextured) : sans reprendre exactement les memes
+                // conditions ici, ce garde continuerait a proteger un
+                // materiau vide que le premier avait pourtant laisse passer
+                // pour correction.
+                if (!isTransparent && !overwrite && alreadyTextured)
                 {
                     continue;
                 }
@@ -306,9 +328,21 @@ public class L2MaterialBuilder
 
     static Texture2D LoadTexture(string materialPath, string textureName)
     {
+        // Deux dispositions coexistent selon le package umodel : le .props.txt
+        // (et donc le .mat construit ici) est soit dans un sous-dossier
+        // "Materials/" du package de textures (la texture est alors un cran
+        // au-dessus), soit ecrit directement a la racine du package (la
+        // texture est alors a cote). Remonter systematiquement d'un niveau
+        // fonctionne pour le premier cas mais atterrit un cran trop haut pour
+        // le second - la recherche se faisait dans "Textures/" au lieu de
+        // "Textures/<package>/", et le materiau restait sans texture (blanc).
         string materialDirectory = Path.GetDirectoryName(materialPath);
         string parentFolder = Directory.GetParent(materialDirectory).FullName;
-        string texturePath = Path.Combine(parentFolder, textureName + ".png");
+
+        string texture1 = Path.Combine(parentFolder, textureName + ".png");
+        string texture2 = Path.Combine(materialDirectory, textureName + ".png");
+        string texturePath = File.Exists(texture1) ? texture1 : texture2;
+
         texturePath = Path.Combine("Assets", Path.GetRelativePath(Application.dataPath, texturePath));
 
         Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(texturePath);

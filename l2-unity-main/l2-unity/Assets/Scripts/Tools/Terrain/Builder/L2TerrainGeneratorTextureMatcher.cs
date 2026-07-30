@@ -59,6 +59,12 @@ public class L2TerrainGeneratorTextureMatcher
         textureMatches.Add("GUS05", "Soil_Sand_pjErQ0_1K");
         textureMatches.Add("GUS103", "Soil_Sand_pjErQ0_1K");
         textureMatches.Add("GUS108", "Rough_Soil_Detail_Texture_se4mcazf0_1K");
+        // GUG102/GUS110 : vues pour la premiere fois sur 17_22. Sans entree
+        // ici, la couche correspondante n'a aucun .terrainlayer genere -
+        // c'etait la cause du sol rose sur cette region (case de texture vide
+        // dans le tableau lu par le shader MicroSplat).
+        textureMatches.Add("GUG102", "Wild_Grass_pjwgW0_1K");
+        textureMatches.Add("GUS110", "Soil_Sand_pjErQ0_1K");
 
         scaleMatches = new Dictionary<string, float>();
         scaleMatches.Add("Base", 3);
@@ -77,12 +83,21 @@ public class L2TerrainGeneratorTextureMatcher
 
         // --- Gludio (region 17_23 et voisines) ---
         // Meme convention de nommage que Speaking Island : GUG* = herbe,
-        // GUS* = sol/sable. Valeurs alignees sur leurs equivalents SL_*.
-        scaleMatches.Add("GUG02", 5);
-        scaleMatches.Add("GUG107", 5);
-        scaleMatches.Add("GUS05", 3);
-        scaleMatches.Add("GUS103", 3);
-        scaleMatches.Add("GUS108", 2);
+        // GUS* = sol/sable.
+        //
+        // Valeur 64 retenue apres calage visuel sur 17_23. Elle est coherente
+        // avec les donnees d'origine : dans le .t3d officiel, ces cinq
+        // textures partagent toutes le meme champ Scale=32, la ou un premier
+        // jet les avait dispersees entre 2 et 5 - d'ou des tuiles enormes et
+        // desaccordees entre elles. Les regions Gludio suivantes reprennent
+        // donc ces valeurs sans reglage manuel.
+        scaleMatches.Add("GUG02", 64);
+        scaleMatches.Add("GUG107", 64);
+        scaleMatches.Add("GUS05", 64);
+        scaleMatches.Add("GUS103", 64);
+        scaleMatches.Add("GUS108", 64);
+        scaleMatches.Add("GUG102", 64);
+        scaleMatches.Add("GUS110", 64);
 
         pertexFloatMatches = new Dictionary<string, List<PerTexFloatVal>>();
         pertexFloatMatches.Add("Base", new List<PerTexFloatVal>
@@ -255,4 +270,67 @@ public class L2TerrainGeneratorTextureMatcher
         });
     }
 
+    /// Verifie, AVANT de generer quoi que ce soit, que chaque texture de
+    /// couche du terrain a une entree dans textureMatches.
+    ///
+    /// Sans entree, aucun .terrainlayer n'est genere pour cette couche : la
+    /// case correspondante reste vide dans le tableau de textures lu par le
+    /// shader MicroSplat, et le terrain rend rose a cet endroit (constate sur
+    /// 17_22 avec GUG102/GUS110, deux textures Gludio jamais vues avant). Le
+    /// symptome n'apparaissait qu'a l'inspection visuelle, une fois le
+    /// pipeline termine. Cette methode le signale des le debut de l'import.
+    ///
+    /// scaleMatches est verifiee separement : son absence ne provoque qu'une
+    /// echelle par defaut (DefaultSplatUvScale), un defaut cosmetique, pas une
+    /// case vide - donc un simple avertissement, pas une alerte.
+    public static List<string> FindMissingTextureMatches(L2TerrainInfo terrainInfo)
+    {
+        List<string> missing = new List<string>();
+        if (terrainInfo?.uvLayers == null)
+        {
+            return missing;
+        }
+
+        foreach (var layer in terrainInfo.uvLayers)
+        {
+            string texName = layer.texture != null ? layer.texture.name : null;
+            if (string.IsNullOrEmpty(texName))
+            {
+                continue;
+            }
+
+            if (!Instance.textureMatches.ContainsKey(texName) && !missing.Contains(texName))
+            {
+                missing.Add(texName);
+            }
+        }
+
+        return missing;
+    }
+
+    /// Meme verification pour scaleMatches (defaut cosmetique, pas critique).
+    public static List<string> FindMissingScaleMatches(L2TerrainInfo terrainInfo)
+    {
+        List<string> missing = new List<string>();
+        if (terrainInfo?.uvLayers == null)
+        {
+            return missing;
+        }
+
+        foreach (var layer in terrainInfo.uvLayers)
+        {
+            string texName = layer.texture != null ? layer.texture.name : null;
+            if (string.IsNullOrEmpty(texName))
+            {
+                continue;
+            }
+
+            if (!Instance.scaleMatches.ContainsKey(texName) && !missing.Contains(texName))
+            {
+                missing.Add(texName);
+            }
+        }
+
+        return missing;
+    }
 }

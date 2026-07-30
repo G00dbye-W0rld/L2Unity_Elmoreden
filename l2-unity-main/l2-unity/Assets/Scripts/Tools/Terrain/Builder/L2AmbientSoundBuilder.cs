@@ -37,9 +37,15 @@ public class L2AmbientSoundBuilder : MonoBehaviour
         if (!string.IsNullOrEmpty(fileToProcess))
         {
             Debug.Log("Selected file: " + fileToProcess);
-            AmbientSound[] sounds = L2T3DInfoParser.ParseAmbientSounds(fileToProcess).ToArray();
-            BuildAmbientSounds(sounds);
+            BuildAmbientSoundsFrom(fileToProcess);
         }
+    }
+
+    /// Etape 10 sans dialogue. Voir L2MapBatchImporter.
+    public static void BuildAmbientSoundsFrom(string fileToProcess)
+    {
+        AmbientSound[] sounds = L2T3DInfoParser.ParseAmbientSounds(fileToProcess).ToArray();
+        BuildAmbientSounds(sounds);
     }
 
     private static void BuildAmbientSounds(AmbientSound[] sounds)

@@ -11,6 +11,9 @@ public class L2T3DStaticMeshImporter : AssetImporter
 
     private static int missingTexturesCount = 0;
 
+    /// Racine des exports umodel (meshes + textures). Voir TUTO_IMPORT_MAP.md.
+    public const string ExportRoot = @"D:\Jeux\MAP_L2Unity\export";
+
     [MenuItem("Shnok/01. [StaticMeshes] Import Textures and models")]
     static void ImportStaticMeshes()
     {
@@ -18,20 +21,27 @@ public class L2T3DStaticMeshImporter : AssetImporter
         string directory = Path.Combine(Application.dataPath, "Resources/Data/Maps");
         string extension = "txt,t3d";
 
-        // Racine des exports umodel (meshes + textures). Voir TUTO_IMPORT_MAP.md.
-        string dataFolder = @"D:\Jeux\MAP_L2Unity\export";
-        bool overwrite = false;
-
         string fileToProcess = EditorUtility.OpenFilePanel(title, directory, extension);
 
         if (!string.IsNullOrEmpty(fileToProcess))
         {
             Debug.Log("Selected file: " + fileToProcess);
-            L2TerrainInfo terrainInfo = L2T3DInfoParser.LoadStaticMeshInfo(fileToProcess);
-            List<string> files = ProcessStaticMeshInfo(dataFolder, terrainInfo.staticMeshes);
-            //List<string> files = ProcessDataFile(dataFolder, fileToProcess);
-            ImportFiles(dataFolder, files, overwrite);
+            ImportStaticMeshesFrom(fileToProcess);
         }
+    }
+
+    /// Coeur de l'etape 01, sans dialogue.
+    ///
+    /// Separe de l'entree de menu pour que l'import complet d'une region
+    /// puisse l'enchainer sans intervention : EditorUtility.OpenFilePanel gele
+    /// Unity en -batchmode, il ne peut donc pas exister sur le chemin
+    /// automatise. Voir L2MapBatchImporter.
+    public static void ImportStaticMeshesFrom(string t3dPath)
+    {
+        bool overwrite = false;
+        L2TerrainInfo terrainInfo = L2T3DInfoParser.LoadStaticMeshInfo(t3dPath);
+        List<string> files = ProcessStaticMeshInfo(ExportRoot, terrainInfo.staticMeshes);
+        ImportFiles(ExportRoot, files, overwrite);
     }
 
     private static List<string> ProcessStaticMeshInfo(string dataFolder, List<L2StaticMesh> staticMeshes)

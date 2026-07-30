@@ -38,61 +38,67 @@ public class L2BrushBuilder
         if (!string.IsNullOrEmpty(fileToProcess))
         {
             Debug.Log("Selected file: " + fileToProcess);
-            Brush[] brushes = L2T3DInfoParser.ParseBrushInfo(fileToProcess).ToArray();
-
-            // Selon l'outil qui a produit le .t3d, la geometrie des brushes est
-            // soit ecrite inline (blocs "Begin Polygon"), soit laissee dans un
-            // objet Model separe et seulement referencee - auquel cas le
-            // parser ne recupere que des coquilles vides. Dans ce second cas
-            // on bascule sur le Brushes.json depose a cote par
-            // l2-brush-export, qui contient bien les polygones.
-            bool hasGeometry = false;
-            foreach (Brush b in brushes)
-            {
-                if (b.model != null && b.model.poly != null && b.model.poly.polyData != null
-                    && b.model.poly.polyData.Length > 0)
-                {
-                    hasGeometry = true;
-                    break;
-                }
-            }
-
-            if (!hasGeometry)
-            {
-                // Le .t3d peut etre choisi soit dans le projet, soit dans le
-                // dossier de travail des maps, ou le fichier de brushes porte
-                // le nom de la region ("17_23.json") et non "Brushes.json".
-                // On accepte les trois emplacements plutot que d'exiger que
-                // l'utilisateur devine lequel designer.
-                string mapName = Path.GetFileNameWithoutExtension(fileToProcess);
-                string beside = Path.GetDirectoryName(fileToProcess);
-
-                string[] candidates =
-                {
-                    Path.Combine(beside, "Brushes.json"),
-                    Path.Combine(beside, mapName + ".json"),
-                    Path.Combine(Application.dataPath, "Resources/Data/Maps", mapName, "Meta", "Brushes.json"),
-                };
-
-                string json = null;
-                foreach (string c in candidates)
-                {
-                    if (File.Exists(c)) { json = c; break; }
-                }
-
-                if (json == null)
-                {
-                    Debug.LogError("[Brush] Le .t3d ne contient aucun polygone et aucun fichier de brushes "
-                                   + "n'a ete trouve. Cherche : " + string.Join(" | ", candidates));
-                    return;
-                }
-
-                Debug.Log($"[Brush] Le .t3d ne contient aucun polygone, bascule sur {json}");
-                brushes = L2JSONBrushImporter.ParseBrushFile(json);
-            }
-
-            Build(brushes);
+            BuildBrushesFrom(fileToProcess);
         }
+    }
+
+    /// Etape 07 sans dialogue. Voir L2MapBatchImporter.
+    public static void BuildBrushesFrom(string fileToProcess)
+    {
+        Brush[] brushes = L2T3DInfoParser.ParseBrushInfo(fileToProcess).ToArray();
+
+        // Selon l'outil qui a produit le .t3d, la geometrie des brushes est
+        // soit ecrite inline (blocs "Begin Polygon"), soit laissee dans un
+        // objet Model separe et seulement referencee - auquel cas le
+        // parser ne recupere que des coquilles vides. Dans ce second cas
+        // on bascule sur le Brushes.json depose a cote par
+        // l2-brush-export, qui contient bien les polygones.
+        bool hasGeometry = false;
+        foreach (Brush b in brushes)
+        {
+            if (b.model != null && b.model.poly != null && b.model.poly.polyData != null
+                && b.model.poly.polyData.Length > 0)
+            {
+                hasGeometry = true;
+                break;
+            }
+        }
+
+        if (!hasGeometry)
+        {
+            // Le .t3d peut etre choisi soit dans le projet, soit dans le
+            // dossier de travail des maps, ou le fichier de brushes porte
+            // le nom de la region ("17_23.json") et non "Brushes.json".
+            // On accepte les trois emplacements plutot que d'exiger que
+            // l'utilisateur devine lequel designer.
+            string mapName = Path.GetFileNameWithoutExtension(fileToProcess);
+            string beside = Path.GetDirectoryName(fileToProcess);
+
+            string[] candidates =
+            {
+                Path.Combine(beside, "Brushes.json"),
+                Path.Combine(beside, mapName + ".json"),
+                Path.Combine(Application.dataPath, "Resources/Data/Maps", mapName, "Meta", "Brushes.json"),
+            };
+
+            string json = null;
+            foreach (string c in candidates)
+            {
+                if (File.Exists(c)) { json = c; break; }
+            }
+
+            if (json == null)
+            {
+                Debug.LogError("[Brush] Le .t3d ne contient aucun polygone et aucun fichier de brushes "
+                               + "n'a ete trouve. Cherche : " + string.Join(" | ", candidates));
+                return;
+            }
+
+            Debug.Log($"[Brush] Le .t3d ne contient aucun polygone, bascule sur {json}");
+            brushes = L2JSONBrushImporter.ParseBrushFile(json);
+        }
+
+        Build(brushes);
     }
 
     static void Build(Brush[] brushes)
