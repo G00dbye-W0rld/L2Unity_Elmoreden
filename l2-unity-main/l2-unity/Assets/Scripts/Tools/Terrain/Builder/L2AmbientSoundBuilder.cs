@@ -54,13 +54,13 @@ public class L2AmbientSoundBuilder : MonoBehaviour
 
         foreach (AmbientSound ambientSound in sounds)
         {
-            Debug.Log(ambientSound);
-
+            // Log par son retire : jusqu'a ~1500 appels par region, et le
+            // ToString() d'AmbientSound est verbeux. Le total suffit.
             GameObject soundObject = BuildAmbientSoundGameObject(ambientSound);
             soundObject.transform.parent = container.transform;
         }
 
-        Debug.Log($"Need to {sounds.Length} load ambient sounds.");
+        Debug.Log($"[AmbientSound] {sounds.Length} son(s) d'ambiance construit(s).");
     }
 
     private static GameObject BuildAmbientSoundGameObject(AmbientSound ambientSound)

@@ -217,6 +217,20 @@ public class L2MaterialBuilder
                 while ((line = reader.ReadLine()) != null)
                 {
                     string[] parts = line.Split("=");
+
+                    // Tous les .props.txt ne sont PAS de simples "cle=valeur"
+                    // a plat : certains meshes multi-materiaux utilisent un
+                    // format par blocs, avec des lignes ne contenant qu'une
+                    // accolade. Sans ce garde, parts[1] levait une
+                    // IndexOutOfRangeException qui faisait echouer TOUTE la
+                    // region - constate le 04/08/2026 sur les 9 regions de
+                    // 24_18 a 24_26, a cause de Textures/deco01/frame0*.
+                    // Une ligne vide produit le meme effet.
+                    if (parts.Length < 2)
+                    {
+                        continue;
+                    }
+
                     string key = parts[0].Trim();
                     string value = parts[1].Trim();
 

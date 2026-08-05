@@ -114,6 +114,16 @@ public static class L2MapBatchImporter
         DateTime started = DateTime.Now;
         Debug.Log($"[Import] === {mapName} : debut ===");
 
+        // Unity attache une trace de pile COMPLETE (~30 lignes, capturees via
+        // StackWalker) a CHAQUE Debug.Log. Mesure sur 22_19 le 03/08/2026 :
+        // 13 469 appels pour une seule region, soit un journal de 204 Mo.
+        // On coupe la trace pour les logs informatifs seulement : les
+        // avertissements et les erreurs gardent la leur, qui est justement ce
+        // qui sert a diagnostiquer.
+        StackTraceLogType previousLogTrace =
+            Application.GetStackTraceLogType(LogType.Log);
+        Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
+
         try
         {
             // Verification en tete de log : une texture de couche sans entree
@@ -136,6 +146,8 @@ public static class L2MapBatchImporter
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,
                                                       NewSceneMode.Single);
             Debug.Log($"[Import] {mapName} : scene vierge creee.");
+
+            CleanPreviousTerrainData(mapName);
 
             Step(1, "import des modeles et textures");
             L2T3DStaticMeshImporter.ImportStaticMeshesFrom(t3d);
@@ -238,6 +250,13 @@ public static class L2MapBatchImporter
             // et le script appelant croirait a une reussite.
             Debug.LogError($"[Import] {mapName} : echec - {e}");
             return false;
+        }
+        finally
+        {
+            // Indispensable : lance depuis le menu Shnok, l'editeur resterait
+            // sinon sans trace de pile sur les logs pour le reste de la
+            // session, y compris apres une exception.
+            Application.SetStackTraceLogType(LogType.Log, previousLogTrace);
         }
     }
 
@@ -412,6 +431,28 @@ public static class L2MapBatchImporter
     {
         L2TerrainInfo terrainInfo = L2T3DInfoParser.LoadMetadata(mapName);
 
+        // Donnees carrement absentes du client, signalees AVANT les ~4 min
+        // d'import plutot qu'a mi-parcours. Les deux cas ci-dessous ont chacun
+        // fait echouer des regions entieres avant d'etre rendus tolerables
+        // (19_11 sans heightmap, 18_17/19_16/19_17 avec une couche morte) ;
+        // ils restent signales, car sur une region qui n'est PAS une tuile
+        // d'ocean ils trahiraient une extraction incomplete.
+        if (terrainInfo != null)
+        {
+            if (string.IsNullOrEmpty(terrainInfo.terrainMapPath)
+                || !File.Exists(terrainInfo.terrainMapPath))
+            {
+                Debug.LogWarning($"[Import] {mapName} : AUCUNE heightmap dans le client "
+                                 + "-> terrain plat. Attendu sur une tuile d'ocean seulement.");
+            }
+
+            if (terrainInfo.uvLayers != null && terrainInfo.uvLayers.Count == 0)
+            {
+                Debug.LogWarning($"[Import] {mapName} : AUCUNE couche de terrain exploitable "
+                                 + "-> terrain sans texture.");
+            }
+        }
+
         var missingCritical = L2TerrainGeneratorTextureMatcher.FindMissingTextureMatches(terrainInfo);
         if (missingCritical.Count > 0)
         {
@@ -432,6 +473,45 @@ public static class L2MapBatchImporter
     /// Sauvegarde Terrain, StaticMeshes et Brushes en prefabs sous
     /// Data/Maps/{region}/, et reconnecte les objets de la scene a ces
     /// prefabs (au lieu de laisser des copies detachees).
+    /// Supprime les donnees de terrain d'un import precedent avant d'en
+    /// regenerer de nouvelles.
+    ///
+    /// POURQUOI C'EST NECESSAIRE
+    /// MicroSplat cree ses assets via AssetDatabase.GenerateUniqueAssetPath()
+    /// (verifie dans MicroSplatShaderGUI_Compiler.cs et
+    /// TextureArrayConfigEditor.cs du plugin). Cette API n'ECRASE PAS un
+    /// fichier existant : elle en cree un a cote suffixe " 1", " 2"...
+    /// Reimporter une region par-dessus elle-meme produisait donc un jeu
+    /// complet de doublons - "MicroSplat 1.mat", "MicroSplatConfig 1.asset",
+    /// et surtout "MicroSplatConfig 1_*_tarray.asset" a 27 Mo piece, orphelins
+    /// mais bien presents sur le disque. Constate sur l'ancien 17_23, qui
+    /// portait 16 assets MicroSplat au lieu de 9.
+    ///
+    /// On ne supprime QUE TerrainData/ : entierement regeneree par les etapes
+    /// 04 a 06. Les .prefab de la region sont volontairement preserves, car
+    /// certains portent du travail manuel que le pipeline ne sait pas
+    /// reproduire (MusicArea, BoxVolumes, Marker des regions de reference).
+    private static void CleanPreviousTerrainData(string mapName)
+    {
+        string terrainDataFolder = $"Assets/Resources/Data/Maps/{mapName}/TerrainData";
+        if (!AssetDatabase.IsValidFolder(terrainDataFolder))
+        {
+            return;
+        }
+
+        if (AssetDatabase.DeleteAsset(terrainDataFolder))
+        {
+            AssetDatabase.Refresh();
+            Debug.Log($"[Import] {mapName} : TerrainData precedent supprime "
+                      + "(evite les doublons MicroSplat ' 1').");
+        }
+        else
+        {
+            Debug.LogWarning($"[Import] {mapName} : echec de suppression de {terrainDataFolder}. "
+                             + "Des doublons MicroSplat ' 1' peuvent apparaitre.");
+        }
+    }
+
     private static void SaveGeneratedPrefabs(string mapName)
     {
         string mapFolder = $"Assets/Resources/Data/Maps/{mapName}";

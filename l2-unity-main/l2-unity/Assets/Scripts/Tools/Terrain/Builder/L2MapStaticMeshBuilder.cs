@@ -39,6 +39,17 @@ public class L2MapStaticMeshBuilder : MonoBehaviour
 
     public static void BuildSingleStaticMesh(L2StaticMesh staticMesh, GameObject container)
     {
+        // Filet de securite : le parseur ecarte deja les acteurs sans mesh
+        // (vestiges bDeleteMe des .unr officiels), mais un seul null arrivant
+        // jusqu'ici levait une NullReferenceException qui faisait echouer
+        // l'import de la region entiere - constate sur 16_21 le 01/08/2026.
+        // Sur 153 regions a importer, aucun acteur isole ne doit pouvoir
+        // couter une region complete.
+        if (staticMesh == null || string.IsNullOrEmpty(staticMesh.staticMesh))
+        {
+            return;
+        }
+
         Vector3 basePosition = Vector3.zero;
         string meshPath = StaticMeshUtils.GetMeshPath(staticMesh.staticMesh);
         GameObject go = AssetDatabase.LoadAssetAtPath<GameObject>(meshPath);

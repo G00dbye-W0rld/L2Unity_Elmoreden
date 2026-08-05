@@ -46,6 +46,8 @@ public class L2T3DInfoParser
             path = givenpath;
         }
 
+        int skipped = 0;
+
         using (StreamReader reader = new StreamReader(path))
         {
             string line;
@@ -85,9 +87,29 @@ public class L2T3DInfoParser
                             mesh.scaleZ = float.Parse(parts[1], CultureInfo.InvariantCulture);
                         }
                     }
+
+                    // Un StaticMeshActor SANS propriete StaticMesh existe
+                    // reellement dans les .unr officiels : c'est un vestige
+                    // marque bDeleteMe=True, que le moteur Unreal ignorait.
+                    // Releve sur 16_21 (StaticMeshActor1093, 1 acteur sur 141).
+                    // Sans ce filtre, GetFolderAndFileFromInfo recevait null et
+                    // une NullReferenceException faisait echouer l'import de
+                    // TOUTE la region a cause d'un seul acteur fantome.
+                    if (string.IsNullOrEmpty(mesh.staticMesh))
+                    {
+                        skipped++;
+                        continue;
+                    }
+
                     terrainInfo.staticMeshes.Add(mesh);
                 }
             }
+        }
+
+        if (skipped > 0)
+        {
+            Debug.LogWarning($"[StaticMesh] {skipped} acteur(s) sans mesh ignore(s) "
+                             + "(vestiges bDeleteMe du .unr d'origine).");
         }
 
         Debug.Log($"Loaded {terrainInfo.staticMeshes.Count} staticmeshes data.");
@@ -98,6 +120,8 @@ public class L2T3DInfoParser
         terrainInfo.mapName = mapName;
         terrainInfo.uvLayers = new List<L2TerrainLayer>();
         terrainInfo.decoLayers = new List<L2DecoLayer>();
+
+        int skippedLayers = 0;
 
         using (StreamReader reader = new StreamReader(t3dPath))
         {
@@ -131,6 +155,30 @@ public class L2T3DInfoParser
                             L2TerrainLayer layer = L2TerrainInfoParser.ParseL2TerrainLayer(line);
                             if (layer != null)
                             {
+                                // Une couche dont la texture n'a pas pu etre
+                                // chargee est ecartee ICI, et pas plus loin.
+                                // GenerateUVLayers dimensionne a la fois le
+                                // tableau de TerrainLayer ET le splatmap 3D sur
+                                // uvLayers.Count, puis les parcourt en
+                                // parallele : neutraliser la couche cote
+                                // generateur decalerait les poids de splatmap.
+                                //
+                                // Cas reel : 18_17, 19_16 et 19_17 ont une
+                                // couche "mer" pointant sur
+                                // T_themepark.17_16BG, package ABSENT du client
+                                // Interlude. La texture etant nulle,
+                                // GenerateUVLayers plantait sur .texture.name
+                                // et faisait echouer toute la region.
+                                // Ces 3 regions sont les seules a avoir une
+                                // couche mer ; sans elle, elles se comportent
+                                // comme toutes les autres regions cotieres,
+                                // dont l'eau vient du plan Water (etape 11).
+                                if (layer.texture == null)
+                                {
+                                    skippedLayers++;
+                                    continue;
+                                }
+
                                 terrainInfo.uvLayers.Add(layer);
                             }
                         }
@@ -145,6 +193,13 @@ public class L2T3DInfoParser
                     }
                 }
             }
+        }
+
+        if (skippedLayers > 0)
+        {
+            Debug.LogWarning($"[Terrain] {mapName} : {skippedLayers} couche(s) de terrain ignoree(s), "
+                             + "texture introuvable (package absent du client). "
+                             + "Le terrain sera genere avec les couches restantes.");
         }
 
         Debug.Log($"Loaded {terrainInfo.uvLayers.Count} uv layers data.");
@@ -341,8 +396,11 @@ public class L2T3DInfoParser
 
                         if (line.StartsWith("AmbientRandom="))
                         {
+                            // Log de debogage retire : appele une fois par son
+                            // d'ambiance (jusqu'a ~1500 par region), il pesait
+                            // lourd dans le journal pour aucune information
+                            // exploitable - le total est deja resume en sortie.
                             ambientSound.ambientRandom = L2MetaDataUtils.ParseIntFromInfo(line);
-                            Debug.Log(ambientSound.ambientRandom);
                         }
                         else if (line.StartsWith("AmbientSoundStartTime="))
                         {

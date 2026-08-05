@@ -7,6 +7,23 @@ using UnityEngine.ProBuilder;
 
 public class L2BrushBuilder
 {
+    // Layer 8 = "Brush" dans TagManager, un layer dedie. Verifie sur la
+    // region de reference 17_25 : ses 193 objets de brush y sont tous.
+    // Le pipeline les laissait sur le layer 0 (Default), donc invisibles
+    // pour le GeodataGenerator qui filtre par layer - meme classe de bug
+    // que celui corrige sur les static meshes, mais oublie pour les brushes.
+    private const int LayerBrush = 8;
+
+    // Materiau de repli quand la texture d'un brush n'a pas de materiau.
+    // ATTENTION : ce chemin, deja code en dur avant cette session, pointe
+    // vers un asset qui N'EXISTE PAS dans le projet - le repli rendait donc
+    // null et les brushes concernes se retrouvaient litteralement sans
+    // materiau. Voir GetMaterialForTexture.
+    private const string FallbackMaterialPath = "Assets/Prefab/Red.mat";
+
+    private static Material _fallbackMaterial;
+    private static readonly HashSet<string> _missingTextures = new HashSet<string>();
+
     [MenuItem("Shnok/[Debug][Brush] (JSON) Build brushes")]
     static void ImportBrushTextures()
     {
@@ -143,7 +160,8 @@ public class L2BrushBuilder
             brush.transform.parent = brushContainer.transform;
             brush.transform.position = VectorUtils.ConvertPosToUnity(b.position) - VectorUtils.ConvertPosToUnity(b.prePivot);
 
-            Debug.Log(b.name);
+            // Log par brush retire (jusqu'a ~190 par region) : le bilan de fin
+            // de construction et le resume des textures manquantes suffisent.
             Model model = b.model;
             Poly poly = model.poly;
 
@@ -178,9 +196,11 @@ public class L2BrushBuilder
                 GameObject mesh = createProbuilderMesh(b.csgOper, polyData, i);
                 mesh.transform.parent = brush.transform;
                 mesh.transform.localPosition = Vector3.zero;
+                mesh.layer = LayerBrush;
             }
         }
 
+        ReportMissingTextures();
     }
 
     static GameObject createProbuilderMesh(string csgOper, PolyData polyData, int index)
@@ -313,11 +333,78 @@ public class L2BrushBuilder
         Material material = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
         if (material == null)
         {
-            material = AssetDatabase.LoadAssetAtPath<Material>("Assets/Prefab/Red.mat");
-            Debug.LogError("Missing material for " + texture);
+            // Un LogError par polygone noyait le journal (plus de 600 lignes
+            // sur un seul lot du 01/08, log de 100 Mo). On accumule et on
+            // resume une fois en fin de construction.
+            _missingTextures.Add(string.IsNullOrEmpty(texture) ? "(sans texture)" : texture);
+            material = GetFallbackMaterial();
         }
 
         return material;
+    }
+
+    /// Materiau de repli, cree a la volee s'il n'existe pas.
+    ///
+    /// Le chemin Red.mat etait code en dur de longue date mais l'asset n'a
+    /// jamais existe dans le projet : le repli rendait donc null, et les
+    /// brushes concernes se retrouvaient SANS materiau du tout (rendu casse,
+    /// signale par le bilan de sante comme "renderer sans materiau"). Le
+    /// creer restaure l'intention d'origine - un rouge franc qui rend le
+    /// probleme visible - au lieu d'un rendu silencieusement casse.
+    private static Material GetFallbackMaterial()
+    {
+        if (_fallbackMaterial != null)
+        {
+            return _fallbackMaterial;
+        }
+
+        _fallbackMaterial = AssetDatabase.LoadAssetAtPath<Material>(FallbackMaterialPath);
+        if (_fallbackMaterial != null)
+        {
+            return _fallbackMaterial;
+        }
+
+        Shader shader = Shader.Find("Universal Render Pipeline/Lit");
+        if (shader == null)
+        {
+            shader = Shader.Find("Standard");
+        }
+
+        _fallbackMaterial = new Material(shader);
+        _fallbackMaterial.color = Color.red;
+
+        Directory.CreateDirectory(Path.GetDirectoryName(FallbackMaterialPath));
+        AssetDatabase.CreateAsset(_fallbackMaterial, FallbackMaterialPath);
+        AssetDatabase.SaveAssets();
+        Debug.Log($"[Brush] Materiau de repli cree : {FallbackMaterialPath}");
+
+        return _fallbackMaterial;
+    }
+
+    /// Resume des textures introuvables, appele en fin de Build.
+    ///
+    /// Beaucoup de ces references sont MORTES dans le client lui-meme :
+    /// verifie le 01/08/2026, SSQ_ground_broken / SSQ_ground01 /
+    /// dark_dgn_009 n'existent dans AUCUN .utx du client Interlude. Il n'y a
+    /// donc rien a re-extraire - c'est le .unr qui pointe vers des textures
+    /// jamais livrees. Le repli rouge est le comportement correct.
+    private static void ReportMissingTextures()
+    {
+        if (_missingTextures.Count == 0)
+        {
+            return;
+        }
+
+        var sample = new List<string>(_missingTextures);
+        sample.Sort();
+        int shown = Mathf.Min(10, sample.Count);
+
+        Debug.LogWarning($"[Brush] {_missingTextures.Count} texture(s) distincte(s) sans materiau, "
+                         + $"repli rouge applique. Premieres : {string.Join(", ", sample.GetRange(0, shown))}"
+                         + (sample.Count > shown ? " ..." : "")
+                         + " - certaines de ces textures n'existent dans aucun .utx du client.");
+
+        _missingTextures.Clear();
     }
 }
 #endif

@@ -206,7 +206,22 @@ public class L2T3DStaticMeshImporter : AssetImporter
                 {
                     if (line.StartsWith("Diffuse") || line.StartsWith("Material"))
                     {
-                        string value = line.Split("=")[1].Trim();
+                        // Meme prudence que dans L2MaterialBuilder.ProcessProps :
+                        // les .props.txt ne sont pas tous du "cle=valeur" a plat
+                        // (format par blocs sur les meshes multi-materiaux).
+                        // Ici le StartsWith rend le cas improbable, mais un
+                        // seul acces non garde suffit a faire tomber une region
+                        // entiere - ca vient d'arriver a 9 d'un coup.
+                        // Nom distinct de "parts" : une variable de ce nom
+                        // existe deja plus haut dans cette methode (boucle des
+                        // textures), et C# interdit de la masquer.
+                        string[] keyValue = line.Split("=");
+                        if (keyValue.Length < 2)
+                        {
+                            continue;
+                        }
+
+                        string value = keyValue[1].Trim();
                         if (value.StartsWith("Texture"))
                         {
                             string texRef = value.Substring(8);
@@ -246,8 +261,9 @@ public class L2T3DStaticMeshImporter : AssetImporter
             }
         }
 
-        Debug.Log($"Found {filesToExport.Count} texture(s) for props file {path}.");
-
+        // Log par fichier props retire : ~2800 appels par region sur les
+        // grosses (mesure sur 22_19). Les totaux sont deja affiches par
+        // ImportStaticMeshesFrom en fin d'etape 01.
         return filesToExport;
     }
 

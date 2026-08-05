@@ -9,3 +9,26 @@
 /l2-unity-gameserver-master/gameserver/conf/server.properties
 /l2-unity-loginserver-main/loginserver/conf/server.properties
 /l2-unity-gameserver-master/gameserver/conf/hexid.txt
+
+# --- Donnees de terrain generees par le pipeline d'import de maps ---------
+#
+# Le client Interlude compte 153 regions importables. Mesure sur une region
+# fraichement importee : ~114 Mo, dont ~99 Mo de TerrainData (17 Mo de
+# heightmap/splatmaps + 81 Mo de texture arrays MicroSplat) et ~6 Mo de Meta.
+# Sur 153 regions cela ferait ~16 Go de binaire qui se compresse mal, recopie
+# integralement par git a chaque modification, dans un depot qui fait 1,9 Go.
+#
+# Ces deux dossiers sont ENTIEREMENT regeneres par le pipeline a partir du
+# client L2 (voir GUIDE_IMPORT_MASSE.md) : rien d'irremplacable n'est perdu.
+#
+# Les .prefab des regions ne sont VOLONTAIREMENT PAS ignores : ils portent le
+# travail manuel des regions de reference (MusicArea, BoxVolumes, Marker,
+# reglages d'eau sur 16_24/16_25/17_24/17_25), qui lui n'est pas regenerable.
+# Ils ne pesent que ~9 Mo par region.
+#
+# Le motif ne cible que les dossiers de region (nn_nn) : l2_lobby/ vit au meme
+# endroit sans etre une region, il doit rester versionne.
+/l2-unity-main/l2-unity/Assets/Resources/Data/Maps/[0-9][0-9]_[0-9][0-9]/TerrainData/
+/l2-unity-main/l2-unity/Assets/Resources/Data/Maps/[0-9][0-9]_[0-9][0-9]/TerrainData.meta
+/l2-unity-main/l2-unity/Assets/Resources/Data/Maps/[0-9][0-9]_[0-9][0-9]/Meta/
+/l2-unity-main/l2-unity/Assets/Resources/Data/Maps/[0-9][0-9]_[0-9][0-9]/Meta.meta

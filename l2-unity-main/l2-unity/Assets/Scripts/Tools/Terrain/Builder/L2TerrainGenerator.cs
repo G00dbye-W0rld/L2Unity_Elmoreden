@@ -121,8 +121,39 @@ public class L2TerrainGenerator
     }
 
 
+    /// Resolution d'une tuile plate quand aucune heightmap n'est disponible.
+    /// Valeur observee sur toutes les regions du client : les .bmp G16 font
+    /// 256x256, l'algorithme ci-dessous en deduit donc 256.
+    private const int FlatTerrainResolution = 256;
+
     private void GenerateHeightmaps(TerrainData terrainData, L2TerrainInfo terrainInfo)
     {
+        // Certaines regions n'ont PAS de package de heightmap dans le client :
+        // verifie sur les 153 .unr, seules 19_11 et 20_11 sont dans ce cas, et
+        // ce sont des tuiles d'ocean. L'etape 4 du pipeline le signalait deja
+        // ("Package de textures introuvable"), mais l'import continuait et
+        // File.ReadAllBytes levait une FileNotFoundException qui faisait
+        // echouer toute la region.
+        //
+        // On genere un terrain PLAT plutot que d'abandonner : un trou dans la
+        // grille se verrait davantage qu'une tuile d'ocean a plat, et la
+        // region reste raccordable a ses voisines par l'etape 11.
+        if (string.IsNullOrEmpty(terrainInfo.terrainMapPath) || !File.Exists(terrainInfo.terrainMapPath))
+        {
+            Debug.LogWarning($"[Terrain] {terrainInfo.mapName} : aucune heightmap "
+                             + $"({terrainInfo.terrainMapPath}) - terrain PLAT genere a la place. "
+                             + "Normal pour une tuile d'ocean, suspect sinon.");
+
+            // Meme sequence que le chemin normal ci-dessous, qui fonctionne sur
+            // les 45 regions deja importees : on affecte la resolution "brute"
+            // (Unity la ramene a 2^n+1, soit 257) puis on ecrit un tableau
+            // 257x257. Tout a zero = terrain parfaitement plat.
+            terrainData.heightmapResolution = FlatTerrainResolution;
+            terrainData.SetHeights(0, 0,
+                new float[FlatTerrainResolution + 1, FlatTerrainResolution + 1]);
+            return;
+        }
+
         byte[] terrainMap = File.ReadAllBytes(terrainInfo.terrainMapPath);
 
         // Calculate the resolution based on the file size
