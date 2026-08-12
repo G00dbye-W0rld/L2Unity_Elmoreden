@@ -1,5 +1,6 @@
 #if (UNITY_EDITOR)
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEditor;
@@ -258,6 +259,798 @@ public static class L2MapBatchImporter
             // session, y compris apres une exception.
             Application.SetStackTraceLogType(LogType.Log, previousLogTrace);
         }
+    }
+
+    /// Re-applique les substitutions de textures de terrain (textureMatches /
+    /// scaleMatches) sur des regions DEJA importees, SANS reimport.
+    ///
+    /// POURQUOI C'EST POSSIBLE SANS TOUT REFAIRE
+    /// Les substitutions PBR sont appliquees a l'etape 06
+    /// (UpdateMicrosplatParams), qui ecrit dans la config MicroSplat - PAS
+    /// dans le TerrainData. Or la separation sur disque est nette :
+    ///
+    ///   TerrainData/
+    ///     {region}.asset          <- hauteurs (stitch) + splatmaps (peinture)
+    ///     {region}_layer_*.asset  <- couches de terrain
+    ///     MicroSplatData/         <- config + texture arrays  (SEUL supprime)
+    ///
+    /// On ne supprime donc que MicroSplatData/ avant de rejouer 05 et 06.
+    /// **Le raccord de terrain, la peinture manuelle et les objets ajoutes a
+    /// la main sont preserves.** C'est la difference majeure avec un reimport,
+    /// qui recree le TerrainData de zero (AssetDatabase.CreateAsset) et efface
+    /// tout ca.
+    ///
+    /// La suppression prealable est indispensable : MicroSplat cree ses assets
+    /// via GenerateUniqueAssetPath(), qui n'ecrase pas mais cree un doublon
+    /// suffixe " 1" (cf. CleanPreviousTerrainData).
+    /// Vide MicroSplatData de sa config, de son materiau et de son shader, mais
+    /// PRESERVE les fichiers .terrainlayer.
+    ///
+    /// POURQUOI CETTE PRECAUTION
+    /// La version precedente supprimait le dossier entier avant de relancer
+    /// l'etape 05. Or l'etape 05 reconstruit la config a partir de
+    /// terrain.terrainData.terrainLayers - et ces couches sont justement des
+    /// assets .terrainlayer stockes DANS MicroSplatData. On detruisait donc la
+    /// source de verite, puis on reconstruisait a partir d'elle : la config
+    /// ressortait avec le bon nombre d'entrees mais toutes vides
+    /// (terrainLayer et diffuse a fileID 0).
+    ///
+    /// Degats constates le 2026-08-07 : 6 regions videes de leurs textures, dont
+    /// les 4 regions de reference de Talking Island. Recuperees par git, mais
+    /// les 147 autres ne sont pas suivies - la meme operation aurait ete
+    /// definitive.
+    ///
+    /// La documentation MicroSplat le dit d'ailleurs explicitement : les
+    /// fichiers de couches ajoutes au terrain vivent dans MicroSplatData, et il
+    /// faut les mettre a l'abri avant de supprimer le dossier.
+    ///
+    /// Supprimer la config et le materiau suffit a obtenir ce qu'on cherchait au
+    /// depart : eviter que MicroSplat n'empile des doublons " 1" via
+    /// AssetDatabase.GenerateUniqueAssetPath.
+    private static void CleanMicroSplatKeepingLayers(string mapName)
+    {
+        string folder = $"Assets/Resources/Data/Maps/{mapName}/TerrainData/MicroSplatData";
+        if (!AssetDatabase.IsValidFolder(folder))
+        {
+            return;
+        }
+
+        int deleted = 0, kept = 0;
+        foreach (string guid in AssetDatabase.FindAssets("", new[] { folder }))
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+
+            // Le seul type a ne jamais toucher : c'est lui que le terrain
+            // reference, et donc la source de la reconstruction.
+            if (path.EndsWith(".terrainlayer", System.StringComparison.OrdinalIgnoreCase))
+            {
+                kept++;
+                continue;
+            }
+
+            if (AssetDatabase.DeleteAsset(path))
+            {
+                deleted++;
+            }
+        }
+
+        AssetDatabase.Refresh();
+        Debug.Log($"[Textures] {mapName} : MicroSplatData nettoye - "
+                  + $"{deleted} asset(s) supprime(s), {kept} couche(s) preservee(s).");
+    }
+
+    public static bool ReapplySubstitutionsFor(string mapName)
+    {
+        string scenePath = $"{ScenesFolder}/{mapName}.unity";
+        if (!File.Exists(scenePath))
+        {
+            Debug.LogError($"[Textures] Scene introuvable pour {mapName} : {scenePath}");
+            return false;
+        }
+
+        // Le matcher est un singleton construit une fois par session : sans
+        // cette relecture, une modification de l'asset de reglages resterait
+        // sans effet jusqu'au redemarrage d'Unity.
+        L2TerrainGeneratorTextureMatcher.Reload();
+
+        try
+        {
+            Scene scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+
+            CleanMicroSplatKeepingLayers(mapName);
+
+            L2TerrainGeneratorTool.ConvertTerrainFor(mapName);   // etape 05
+            L2TerrainGeneratorTool.UpdateMicrosplatFor(mapName); // etape 06
+
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
+            Debug.Log($"[Textures] {mapName} : substitutions re-appliquees "
+                      + "(stitch et peinture preserves).");
+            return true;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[Textures] {mapName} : echec - {e}");
+            return false;
+        }
+    }
+
+    /// Version lot : enchaine ReapplySubstitutionsFor sur plusieurs regions
+    /// dans le meme processus Unity.
+    public static bool ReapplySubstitutionsBatch(string[] mapNames)
+    {
+        StackTraceLogType previous = Application.GetStackTraceLogType(LogType.Log);
+        Application.SetStackTraceLogType(LogType.Log, StackTraceLogType.None);
+
+        int ok = 0, done = 0;
+        bool aborted = false;
+        try
+        {
+            for (int i = 0; i < mapNames.Length; i++)
+            {
+                // Sans ce test, la boucle etait ININTERRUPTIBLE : un simple
+                // foreach synchrone, sans barre de progression. Lancee sur 149
+                // regions a ~1 min piece, elle bloquait l'editeur pendant des
+                // heures et il fallait tuer Unity pour l'arreter. Constate le
+                // 2026-08-09.
+                //
+                // L'interruption est sans risque : chaque region est sauvegardee
+                // au fur et a mesure, et le nettoyage preserve les .terrainlayer.
+                // Seule la region en cours au moment de l'arret reste sans
+                // MicroSplatData - la retraiter seule suffit a la reparer.
+                if (EditorUtility.DisplayCancelableProgressBar(
+                        "Re-application des substitutions",
+                        $"{mapNames[i]} ({i + 1}/{mapNames.Length}) - {ok} reussie(s)",
+                        (float)i / mapNames.Length))
+                {
+                    aborted = true;
+                    break;
+                }
+
+                done++;
+                if (ReapplySubstitutionsFor(mapNames[i])) { ok++; }
+            }
+        }
+        finally
+        {
+            EditorUtility.ClearProgressBar();
+            Application.SetStackTraceLogType(LogType.Log, previous);
+        }
+
+        if (aborted)
+        {
+            Debug.LogWarning($"[Textures] Interrompu : {ok}/{done} region(s) traitee(s) avec succes "
+                             + $"sur {mapNames.Length} prevues. Relancer reprend tout depuis le debut, "
+                             + "sans dommage.");
+            return false;
+        }
+
+        Debug.Log($"[Textures] {ok}/{mapNames.Length} region(s) mise(s) a jour avec succes.");
+        return ok == mapNames.Length;
+    }
+
+    /// Cree l'asset de reglages des textures, pre-rempli avec les tables
+    /// actuellement codees en dur.
+    ///
+    /// Ecrire ce YAML a la main serait fragile (references de script, GUIDs) :
+    /// on laisse Unity le creer, puis on le peuple depuis le matcher. Une fois
+    /// l'asset present, c'est LUI qui fait autorite et tout se regle dans
+    /// l'Inspector, sans recompilation.
+    /// Supprime les .terrainlayer qu'aucun terrain ne reference plus.
+    ///
+    /// POURQUOI ILS S'ACCUMULENT
+    /// Le nettoyage d'avant substitution preserve TOUS les .terrainlayer - c'est
+    /// ce qui empeche de detruire la source de verite du terrain (incident du
+    /// 2026-08-07, 6 regions videes). Mais chaque passage cree de nouvelles
+    /// couches aux noms des nouveaux packs, sans effacer les anciennes.
+    ///
+    /// Sur 22_21 apres deux passages :
+    ///   microsplat_layer_Soil_Sand_pjErQ0_1K_BaseColor_2       <- passage 1
+    ///   microsplat_layer_Thai_Beach_Sand_tefnah1q_1K_..._2     <- passage 2
+    ///
+    /// Le terrain n'en reference qu'une ; l'autre est morte. Mesure du
+    /// 2026-08-10 : 211 fichiers pour 186 indices reels, soit ~25 orphelins.
+    ///
+    /// Aucune scene n'est ouverte : le TerrainData se lit directement comme un
+    /// asset, et c'est lui qui fait autorite sur les couches utilisees.
+    // ================================================================
+    //  LOT PAS A PAS — une region par tick de l'editeur
+    //
+    //  POURQUOI CE DETOUR
+    //  MicroSplat cree les TerrainLayer en DIFFERE (MicroSplatTerrain.cs:405) :
+    //
+    //      protos[i] = sp;
+    //      EditorApplication.delayCall += () => AssetDatabase.CreateAsset(sp, path);
+    //      terrain.terrainData.terrainLayers = protos;
+    //
+    //  Le terrain recoit donc des couches encore EN MEMOIRE, enregistrees
+    //  seulement au tick suivant de l'editeur. Une boucle foreach synchrone ne
+    //  rend jamais la main : les delayCall ne partent pas, les objets finissent
+    //  detruits, et la region suivante trouve un terrain sans couches - d'ou la
+    //  NullReferenceException de ConvertTerrains.
+    //
+    //  C'est ce qui explique le symptome central : une region traitee SEULE
+    //  passe (l'editeur tick apres l'entree de menu), un lot de 148 echoue.
+    //  Mesure du 2026-08-11 : 114 echecs sur 148, et aucun rattrapage possible
+    //  en amont ni par nouvelle tentative.
+    //
+    //  On traite donc UNE region par tick. L'editeur reprend la main entre
+    //  chaque, les delayCall s'executent, et le lot devient exactement ce qui
+    //  fonctionne deja : une succession de traitements isoles.
+    // ================================================================
+    private static string[] _stepMaps;
+    private static int _stepIndex, _stepOk;
+    private static Func<string, bool> _stepAction;
+    private static string _stepTitle, _stepTag;
+
+    private static void StartSteppedBatch(string[] mapNames)
+    {
+        StartSteppedBatch(mapNames, ReapplySubstitutionsFor,
+            "Re-application des substitutions", "[Textures]");
+    }
+
+    /// Le traitement applique a chaque region est un parametre : la mecanique
+    /// pas-a-pas sert aussi bien a la substitution complete qu'a la re-application
+    /// des seules echelles.
+    private static void StartSteppedBatch(string[] mapNames, Func<string, bool> action,
+                                          string title, string tag)
+    {
+        _stepMaps = mapNames;
+        _stepAction = action;
+        _stepTitle = title;
+        _stepTag = tag;
+        _stepIndex = 0;
+        _stepOk = 0;
+        EditorApplication.update += StepOneRegion;
+    }
+
+    private static void StepOneRegion()
+    {
+        if (_stepIndex >= _stepMaps.Length)
+        {
+            FinishSteppedBatch($"{_stepTag} {_stepOk}/{_stepMaps.Length} region(s) mise(s) a jour avec succes.");
+            return;
+        }
+
+        string mapName = _stepMaps[_stepIndex];
+
+        if (EditorUtility.DisplayCancelableProgressBar(
+                _stepTitle,
+                $"{mapName} ({_stepIndex + 1}/{_stepMaps.Length}) - {_stepOk} reussie(s)",
+                (float)_stepIndex / _stepMaps.Length))
+        {
+            FinishSteppedBatch($"{_stepTag} Interrompu : {_stepOk}/{_stepIndex} region(s) traitee(s) "
+                               + "avec succes. Relancer reprend depuis le debut, sans dommage.");
+            return;
+        }
+
+        _stepIndex++;
+
+        try
+        {
+            if (_stepAction(mapName)) { _stepOk++; }
+        }
+        catch (Exception e)
+        {
+            // Une region ne doit jamais interrompre le lot ni laisser le
+            // callback abonne dans un etat incoherent.
+            Debug.LogError($"{_stepTag} {mapName} : echec inattendu - {e}");
+        }
+    }
+
+    private static void FinishSteppedBatch(string message)
+    {
+        EditorApplication.update -= StepOneRegion;
+        EditorUtility.ClearProgressBar();
+        AssetDatabase.SaveAssets();
+        Debug.Log(message);
+    }
+
+    /// Reapplique les echelles UV sans reconstruire MicroSplatData.
+    ///
+    /// A privilegier chaque fois que SEULE une echelle a change dans l'asset de
+    /// reglages : quelques secondes par region au lieu d'une minute, puisqu'on
+    /// n'efface rien et qu'aucun texture array n'est recompile.
+    /// Voir L2TerrainGeneratorTool.ReapplyScalesFor.
+    [MenuItem("Shnok/[Textures] Re-appliquer les ECHELLES seules (TOUTES les regions)")]
+    public static void ReapplyScalesAll()
+    {
+        string[] regions = EnumerateRegionScenes()
+            .Where(r => !L2MicroSplatReference.ReferenceRegions.Contains(r))
+            .ToArray();
+
+        if (regions.Length == 0)
+        {
+            Debug.LogWarning("[Echelles] Aucune region trouvee.");
+            return;
+        }
+
+        if (!EditorUtility.DisplayDialog("Re-appliquer les echelles seules",
+                $"{regions.Length} region(s) vont etre traitees.\n\n"
+                + "Operation LEGERE : seul le propdata est reecrit.\n"
+                + "MicroSplatData, les materiaux et les texture arrays ne sont\n"
+                + "ni supprimes ni recompiles.\n\n"
+                + "A utiliser quand SEULE une echelle a change dans l'asset de reglages.\n\n"
+                + "Continuer ?",
+                "Lancer", "Annuler"))
+        {
+            return;
+        }
+
+        // Une seule relecture de l'asset pour tout le lot : sans elle, les
+        // modifications faites dans l'Inspector resteraient invisibles.
+        L2TerrainGeneratorTextureMatcher.Reload();
+
+        StartSteppedBatch(regions, ScaleStep, "Re-application des echelles", "[Echelles]");
+    }
+
+    /// Meme traitement sur la seule region ouverte, pour juger un reglage avant
+    /// de le propager.
+    [MenuItem("Shnok/[Textures] Re-appliquer les ECHELLES seules (scene ouverte)")]
+    public static void ReapplyScalesCurrentScene()
+    {
+        Scene active = EditorSceneManager.GetActiveScene();
+        string mapName = Path.GetFileNameWithoutExtension(active.path);
+
+        if (string.IsNullOrEmpty(mapName)
+            || !System.Text.RegularExpressions.Regex.IsMatch(mapName, @"^\d+_\d+$"))
+        {
+            Debug.LogError("[Echelles] Ouvrez d'abord la scene d'une region (ex. 21_23.unity).");
+            return;
+        }
+
+        L2TerrainGeneratorTextureMatcher.Reload();
+
+        if (L2TerrainGeneratorTool.ReapplyScalesFor(mapName))
+        {
+            EditorSceneManager.MarkSceneDirty(active);
+            EditorSceneManager.SaveScene(active);
+            AssetDatabase.SaveAssets();
+        }
+    }
+
+    private static bool ScaleStep(string mapName)
+    {
+        Scene scene = EditorSceneManager.OpenScene($"{ScenesFolder}/{mapName}.unity", OpenSceneMode.Single);
+
+        if (!L2TerrainGeneratorTool.ReapplyScalesFor(mapName))
+        {
+            return false;
+        }
+
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorSceneManager.SaveScene(scene);
+        return true;
+    }
+
+    [MenuItem("Shnok/[Textures] Nettoyer les couches orphelines")]
+    public static void CleanOrphanTerrainLayers()
+    {
+        string[] regions = EnumerateRegionScenes();
+        if (regions.Length == 0)
+        {
+            Debug.LogWarning("[Textures] Aucune region trouvee.");
+            return;
+        }
+
+        if (!EditorUtility.DisplayDialog("Nettoyer les couches orphelines",
+                $"{regions.Length} region(s) vont etre examinees.\n\n"
+                + "Seuls les fichiers .terrainlayer qu'AUCUN terrain ne reference\n"
+                + "seront supprimes. Les couches utilisees ne sont pas touchees.\n\n"
+                + "Continuer ?",
+                "Analyser et nettoyer", "Annuler"))
+        {
+            return;
+        }
+
+        int deleted = 0, kept = 0, skipped = 0;
+        try
+        {
+            for (int i = 0; i < regions.Length; i++)
+            {
+                if (EditorUtility.DisplayCancelableProgressBar("Nettoyage des couches",
+                        $"{regions[i]} ({i + 1}/{regions.Length}) - {deleted} supprimee(s)",
+                        (float)i / regions.Length))
+                {
+                    Debug.LogWarning("[Textures] Nettoyage interrompu.");
+                    break;
+                }
+
+                string folder = $"Assets/Resources/Data/Maps/{regions[i]}/TerrainData/MicroSplatData";
+                string terrainDataPath = $"Assets/Resources/Data/Maps/{regions[i]}/TerrainData/{regions[i]}.asset";
+
+                var terrainData = AssetDatabase.LoadAssetAtPath<TerrainData>(terrainDataPath);
+                if (terrainData == null || !AssetDatabase.IsValidFolder(folder))
+                {
+                    skipped++;
+                    continue;
+                }
+
+                // Les couches que le terrain utilise reellement. Tout le reste
+                // du dossier est orphelin.
+                var used = new HashSet<string>();
+                foreach (TerrainLayer layer in terrainData.terrainLayers)
+                {
+                    if (layer != null)
+                    {
+                        used.Add(AssetDatabase.GetAssetPath(layer));
+                    }
+                }
+
+                // Un terrain sans aucune couche est anormal : on s'abstient
+                // plutot que de vider le dossier sur une lecture douteuse.
+                if (used.Count == 0)
+                {
+                    Debug.LogWarning($"[Textures] {regions[i]} : aucune couche referencee, region ignoree par prudence.");
+                    skipped++;
+                    continue;
+                }
+
+                foreach (string guid in AssetDatabase.FindAssets("t:TerrainLayer", new[] { folder }))
+                {
+                    string path = AssetDatabase.GUIDToAssetPath(guid);
+                    if (used.Contains(path))
+                    {
+                        kept++;
+                    }
+                    else if (AssetDatabase.DeleteAsset(path))
+                    {
+                        deleted++;
+                    }
+                }
+            }
+        }
+        finally
+        {
+            EditorUtility.ClearProgressBar();
+            AssetDatabase.Refresh();
+        }
+
+        Debug.Log($"[Textures] Nettoyage termine : {deleted} couche(s) orpheline(s) supprimee(s), "
+                  + $"{kept} conservee(s), {skipped} region(s) ignoree(s).");
+    }
+
+    /// Recense les textures L2 du monde et le nombre de regions ou chacune
+    /// apparait.
+    ///
+    /// La source est le nom des fichiers de couche produits a l'import,
+    /// "{region}_layer_{index}_{nomL2}.asset" : c'est le seul endroit ou le nom
+    /// L2 d'ORIGINE survit. Les textures posees dans la config MicroSplat sont
+    /// deja substituees et ne conviendraient pas.
+    private static Dictionary<string, int> CountTextureUsage()
+    {
+        var usage = new Dictionary<string, int>();
+
+        foreach (string guid in AssetDatabase.FindAssets(
+                     "t:TerrainLayer", new[] { "Assets/Resources/Data/Maps" }))
+        {
+            string file = Path.GetFileNameWithoutExtension(AssetDatabase.GUIDToAssetPath(guid));
+
+            int marker = file.IndexOf("_layer_", System.StringComparison.Ordinal);
+            if (marker < 0)
+            {
+                continue;
+            }
+
+            // "22_21_layer_10_GI_S3" -> on saute l'index pour isoler "GI_S3".
+            string rest = file.Substring(marker + "_layer_".Length);
+            int sep = rest.IndexOf('_');
+            if (sep <= 0 || !int.TryParse(rest.Substring(0, sep), out _))
+            {
+                continue;
+            }
+
+            string l2Texture = rest.Substring(sep + 1);
+            usage.TryGetValue(l2Texture, out int count);
+            usage[l2Texture] = count + 1;
+        }
+
+        return usage;
+    }
+
+    [MenuItem("Shnok/[Textures] Creer l'asset de reglages (pre-rempli)")]
+    public static void CreateTextureSettingsAsset()
+    {
+        if (File.Exists(L2TerrainTextureSettings.AssetPath)
+            && !EditorUtility.DisplayDialog("L'asset existe deja",
+                    "Le recreer ECRASERA tous tes reglages actuels.\n\n"
+                    + L2TerrainTextureSettings.AssetPath,
+                    "Ecraser", "Annuler"))
+        {
+            return;
+        }
+
+        var settings = ScriptableObject.CreateInstance<L2TerrainTextureSettings>();
+        var matcher = L2TerrainGeneratorTextureMatcher.Instance;
+
+        foreach (var kv in matcher.packDefaultScales)
+        {
+            settings.packDefaults.Add(new L2TerrainTextureSettings.PackDefault
+            {
+                pbrPack = kv.Key,
+                scale = kv.Value
+            });
+        }
+
+        // TOUTES les textures reellement utilisees par le monde, pas seulement
+        // les correspondances ecrites en dur.
+        //
+        // POURQUOI
+        // Les 20 entrees codees en dur ne couvrent que 18% des couches ; le
+        // reste est resolu par des REGLES automatiques, invisibles et non
+        // editables. Pre-remplir l'asset avec le resultat de ces regles rend
+        // chaque texture du monde visible et modifiable dans l'Inspector :
+        // c'est la seule facon de reprendre la main texture par texture.
+        //
+        // Les entrees sont triees par nombre de regions concernees : les plus
+        // structurantes apparaissent en tete de liste.
+        var usage = CountTextureUsage();
+
+        foreach (var kv in usage.OrderByDescending(u => u.Value).ThenBy(u => u.Key))
+        {
+            string l2Texture = kv.Key;
+
+            // On n'ecrit que ce qui se resout : une texture sans pack (neige
+            // sans equivalent, texture unique a une region) resterait une ligne
+            // vide et trompeuse dans l'Inspector.
+            if (!matcher.TryGetTextureMatch(null, l2Texture, out string pbrPack)
+                || string.IsNullOrEmpty(pbrPack))
+            {
+                continue;
+            }
+
+            // Echelle laissee a 0 si la texture n'en a pas en propre : elle
+            // heritera de celle de son pack.
+            float scale = matcher.scaleMatches.TryGetValue(l2Texture, out float s) ? s : 0f;
+
+            settings.substitutions.Add(new L2TerrainTextureSettings.Substitution
+            {
+                l2Texture = l2Texture,
+                pbrPack = pbrPack,
+                scale = scale
+            });
+        }
+
+        foreach (var region in matcher.regionTextureMatches)
+        {
+            foreach (var tex in region.Value)
+            {
+                float scale = 0f;
+                if (matcher.regionScaleMatches.TryGetValue(region.Key, out var scales))
+                {
+                    scales.TryGetValue(tex.Key, out scale);
+                }
+
+                settings.regionOverrides.Add(new L2TerrainTextureSettings.RegionOverride
+                {
+                    region = region.Key,
+                    l2Texture = tex.Key,
+                    pbrPack = tex.Value,
+                    scale = scale
+                });
+            }
+        }
+
+        if (File.Exists(L2TerrainTextureSettings.AssetPath))
+        {
+            AssetDatabase.DeleteAsset(L2TerrainTextureSettings.AssetPath);
+        }
+
+        AssetDatabase.CreateAsset(settings, L2TerrainTextureSettings.AssetPath);
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+
+        L2TerrainGeneratorTextureMatcher.Reload();
+        Selection.activeObject = settings;
+        EditorGUIUtility.PingObject(settings);
+
+        Debug.Log($"[Textures] Asset cree : {L2TerrainTextureSettings.AssetPath} — "
+                  + $"{settings.substitutions.Count} substitution(s), "
+                  + $"{settings.packDefaults.Count} pack(s). "
+                  + "Tout se regle desormais dans l'Inspector.");
+    }
+
+    /// La region de la scene ouverte, pour iterer vite : regarder le rendu,
+    /// ajuster le matcher, re-appliquer, regarder de nouveau.
+    [MenuItem("Shnok/[Textures] Re-appliquer les substitutions (scene ouverte)")]
+    public static void ReapplySubstitutionsCurrentScene()
+    {
+        Scene active = EditorSceneManager.GetActiveScene();
+        string mapName = Path.GetFileNameWithoutExtension(active.path);
+
+        if (string.IsNullOrEmpty(mapName)
+            || !System.Text.RegularExpressions.Regex.IsMatch(mapName, @"^\d+_\d+$"))
+        {
+            Debug.LogError("[Textures] Ouvrez d'abord la scene d'une region (ex. 17_23.unity).");
+            return;
+        }
+
+        // La scene est rouverte par ReapplySubstitutionsFor : on previent, car
+        // toute modification non sauvegardee serait perdue.
+        if (active.isDirty && !EditorUtility.DisplayDialog("Modifications non sauvegardees",
+                $"La scene {mapName} a des modifications non sauvegardees.\n\n"
+                + "Elle va etre rechargee : ces modifications seront PERDUES.",
+                "Continuer quand meme", "Annuler"))
+        {
+            return;
+        }
+
+        ReapplySubstitutionsFor(mapName);
+    }
+
+    /// Aligne la region ouverte sur les regions de reference : active les
+    /// reglages par texture et sement des valeurs saines, ce qui corrige au
+    /// passage le terrain blanc et miroitant.
+    ///
+    /// Operation non destructrice : MicroSplatData/ n'est pas regenere, la
+    /// peinture et le raccord sont intacts.
+    [MenuItem("Shnok/[Textures] Aligner MicroSplat sur les references (scene ouverte)")]
+    public static void MattifyCurrentScene()
+    {
+        Scene active = EditorSceneManager.GetActiveScene();
+        string mapName = Path.GetFileNameWithoutExtension(active.path);
+
+        if (string.IsNullOrEmpty(mapName)
+            || !System.Text.RegularExpressions.Regex.IsMatch(mapName, @"^\d+_\d+$"))
+        {
+            Debug.LogError("[Textures] Ouvrez d'abord la scene d'une region (ex. 18_19.unity).");
+            return;
+        }
+
+        if (L2MicroSplatReference.AlignFor(mapName))
+        {
+            EditorSceneManager.MarkSceneDirty(active);
+            EditorSceneManager.SaveScene(active);
+            AssetDatabase.SaveAssets();
+            Debug.Log($"[Textures] {mapName} : aligne sur les references et sauvegarde.");
+        }
+    }
+
+    /// Le meme alignement sur toutes les regions ayant une scene.
+    [MenuItem("Shnok/[Textures] Aligner MicroSplat sur les references (TOUTES les regions)")]
+    public static void MattifyAll()
+    {
+        string[] regions = EnumerateRegionScenes();
+        if (regions.Length == 0)
+        {
+            Debug.LogWarning("[Textures] Aucune region trouvee.");
+            return;
+        }
+
+        if (!EditorUtility.DisplayDialog("Aligner MicroSplat sur les references",
+                $"{regions.Length} region(s) vont etre traitees.\n\n"
+                + $"Les regions de reference ({string.Join(", ", L2MicroSplatReference.ReferenceRegions)})\n"
+                + "servent de modele et ne sont PAS modifiees.\n\n"
+                + "Operation NON destructrice : MicroSplatData/ n'est pas regenere,\n"
+                + "la peinture et le raccord sont conserves.\n\n"
+                + "Continuer ?",
+                "Lancer", "Annuler"))
+        {
+            return;
+        }
+
+        int done = 0, failed = 0;
+        try
+        {
+            for (int i = 0; i < regions.Length; i++)
+            {
+                if (EditorUtility.DisplayCancelableProgressBar("Alignement MicroSplat",
+                        $"{regions[i]} ({i + 1}/{regions.Length})", (float)i / regions.Length))
+                {
+                    Debug.LogWarning($"[Textures] Interrompu apres {done} region(s).");
+                    break;
+                }
+
+                Scene scene = EditorSceneManager.OpenScene($"{ScenesFolder}/{regions[i]}.unity", OpenSceneMode.Single);
+                if (L2MicroSplatReference.AlignFor(regions[i]))
+                {
+                    EditorSceneManager.MarkSceneDirty(scene);
+                    EditorSceneManager.SaveScene(scene);
+                    done++;
+                }
+                else
+                {
+                    failed++;
+                }
+            }
+        }
+        finally
+        {
+            EditorUtility.ClearProgressBar();
+            AssetDatabase.SaveAssets();
+        }
+
+        Debug.Log($"[Textures] Correction de brillance terminee : {done} region(s) traitee(s), {failed} en echec.");
+    }
+
+    /// Les regions possedant une scene, triees. Partage par les operations de
+    /// masse pour qu'elles couvrent toutes exactement le meme ensemble.
+    private static string[] EnumerateRegionScenes()
+    {
+        if (!Directory.Exists(ScenesFolder))
+        {
+            Debug.LogError($"[Textures] Dossier de scenes introuvable : {ScenesFolder}");
+            return new string[0];
+        }
+
+        return Directory.GetFiles(ScenesFolder, "*.unity")
+            .Select(Path.GetFileNameWithoutExtension)
+            .Where(n => System.Text.RegularExpressions.Regex.IsMatch(n, @"^\d+_\d+$"))
+            .OrderBy(n => n)
+            .ToArray();
+    }
+
+    /// Toutes les regions ayant une scene, d'un coup.
+    [MenuItem("Shnok/[Textures] Re-appliquer les substitutions (TOUTES les regions)")]
+    public static void ReapplySubstitutionsAll()
+    {
+        // Les regions de reference sont ECARTEES du traitement de masse.
+        //
+        // Ce sont elles qui servent de modele a l'alignement : leur rendu a ete
+        // valide a la main et doit le rester. Les regenerer les ferait repasser
+        // par la substitution automatique, qui ne reproduirait pas fidelement ce
+        // reglage manuel - et on perdrait la reference elle-meme.
+        //
+        // Elles restent traitables une par une via l'entree "scene ouverte",
+        // pour le jour ou on voudra deliberement les refaire.
+        string[] regions = EnumerateRegionScenes()
+            .Where(r => !L2MicroSplatReference.ReferenceRegions.Contains(r))
+            .ToArray();
+
+        if (regions.Length == 0)
+        {
+            Debug.LogWarning("[Textures] Aucune region trouvee.");
+            return;
+        }
+
+        if (!EditorUtility.DisplayDialog("Re-appliquer les substitutions",
+                $"{regions.Length} region(s) vont etre traitees.\n\n"
+                + $"Les regions de reference ({string.Join(", ", L2MicroSplatReference.ReferenceRegions)})\n"
+                + "sont ECARTEES et ne seront pas modifiees.\n\n"
+                + "Le raccord de terrain, la peinture manuelle et les objets ajoutes\n"
+                + "a la main sont PRESERVES (les .terrainlayer aussi).\n\n"
+                + "L'operation peut durer longtemps. Continuer ?",
+                "Lancer", "Annuler"))
+        {
+            return;
+        }
+
+        // Pas a pas, pour que l'editeur reprenne la main entre chaque region.
+        // Voir StartSteppedBatch : sans ca, MicroSplat n'enregistre jamais les
+        // TerrainLayer qu'il vient de creer.
+        StartSteppedBatch(regions);
+    }
+
+    /// Point d'entree -batchmode. Lit -mapNames (separees par des virgules),
+    /// ou traite toutes les regions si l'argument est absent.
+    public static void BatchReapplySubstitutions()
+    {
+        string[] mapNames = null;
+
+        string namesArg = GetCommandLineArg("-mapNames");
+        if (!string.IsNullOrEmpty(namesArg))
+        {
+            mapNames = namesArg.Split(',')
+                .Select(s => s.Trim())
+                .Where(s => s.Length > 0)
+                .ToArray();
+        }
+
+        if (mapNames == null || mapNames.Length == 0)
+        {
+            // Meme protection que l'entree de menu : sans -mapNames explicite,
+            // les regions de reference sont ecartees. Les nommer explicitement
+            // reste possible, c'est alors un choix delibere.
+            mapNames = EnumerateRegionScenes()
+                .Where(r => !L2MicroSplatReference.ReferenceRegions.Contains(r))
+                .ToArray();
+        }
+
+        bool ok = ReapplySubstitutionsBatch(mapNames);
+        EditorApplication.Exit(ok ? 0 : 1);
     }
 
     /// Ajoute l'eau et le filet de securite a une region DEJA importee et

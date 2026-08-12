@@ -307,17 +307,112 @@ Chaque arête est couverte **exactement une fois**.
 `DiscoverStitchableRegions()` scanne automatiquement `Data/Maps`, aucune liste à
 maintenir à la main.
 
-### Si une passe est trop lourde
+### D'où vient le lag
 
-Les colonnes 23+24 font 34 régions, soit **~3,4 Go de `TerrainData`** en
-mémoire. Si Unity peine, coupe la passe en **bandes de rangées avec une rangée
-de recouvrement** :
+Ce n'est pas le `TerrainData`, et ce ne sont pas les décors : le
+`{région}.prefab` ne référence **ni** `StaticMeshes.prefab`, **ni**
+`Brushes.prefab`, **ni** `Lights.prefab` (vérifié par GUID — aucune référence).
 
-- bande A : rangées 10 → 18
-- bande B : rangées **18** → 26
+Mesure sur les colonnes 15+16, soit 18 régions :
 
-La rangée 18 présente dans les deux garantit que la couture 17↔18 est traitée.
-Ça ramène à ~18 régions par passe.
+| | Poids |
+|---|---|
+| `TerrainData` | 132 Mo |
+| **Texture arrays MicroSplat** | **262 Mo** |
+
+Chaque région possède son **propre** shader, matériau et jeu de texture arrays —
+`16_25` à elle seule fait 30 Mo de diffuse + 30 Mo de normales. Charger 18
+régions, c'est donc compiler et garder résidents **18 shaders MicroSplat
+distincts**. C'est là que passe le temps, et ça croît linéairement avec le
+nombre de régions chargées.
+
+**Conclusion : réduire le nombre de régions par passe est la bonne réponse.**
+
+### Pourquoi on peut découper librement
+
+L'algorithme (`StitchTerrainSeams`) est plus permissif qu'il n'y paraît. Pour
+chaque région `colonne_rangée`, il ne regarde que **deux** voisins :
+
+| Voisin | Ce qui est copié |
+|---|---|
+| `(colonne-1)_rangée` | sa **dernière colonne** → dans la **colonne 0** de la cible |
+| `colonne_(rangée-1)` | sa **dernière rangée** → dans la **rangée 0** de la cible |
+
+Le point décisif : **les lectures portent sur les arêtes *hautes* du voisin, les
+écritures sur les arêtes *basses* de la cible**. Une écriture ne peut donc jamais
+corrompre une lecture ultérieure.
+
+> **Trois conséquences pratiques** :
+> - l'**ordre des passes n'a aucune importance** ;
+> - une passe **rejouée** donne exactement le même résultat (idempotente) ;
+> - les **recouvrements sont gratuits** — dans le doute, recouvre plus.
+>
+> Tu peux donc découper aussi finement que tu veux sans rien risquer.
+
+Le minimum absolu pour raccorder une région est de **3 régions** chargées :
+elle-même, celle de gauche, celle du dessous.
+
+### Plan détaillé — 41 passes, 12 régions maximum
+
+Chaque ligne donne les **identifiants exacts à glisser** dans la scène jetable.
+Ce sont les régions qui **existent réellement** — les trous de la grille sont
+déjà retirés, il n'y a rien à interpréter.
+
+En **gras** : les régions déjà chargées à la passe précédente. C'est le
+recouvrement, qui garantit la couture entre deux bandes.
+
+> **Couverture vérifiée par programme.** Le monde compte **266 coutures** entre
+> régions voisines. Ce plan les couvre **toutes les 266** — contrôlé
+> automatiquement, pas à l'œil.
+
+| # | Régions à glisser | Nb |
+|---|---|---|
+| 1 | 15_20 15_21 15_22 15_23 15_24 15_25 | 6 |
+| 2 | **15_25** 15_26 | 2 |
+| 3 | 16_10 16_11 16_12 | 3 |
+| 4 | 16_19 15_20 16_20 15_21 16_21 15_22 16_22 15_23 16_23 15_24 16_24 | 11 |
+| 5 | **15_24** **16_24** 15_25 16_25 15_26 16_26 | 6 |
+| 6 | 16_10 17_10 16_11 17_11 16_12 17_12 | 6 |
+| 7 | 17_18 16_19 17_19 16_20 17_20 16_21 17_21 16_22 17_22 16_23 17_23 | 11 |
+| 8 | **16_23** **17_23** 16_24 17_24 16_25 17_25 16_26 17_26 | 8 |
+| 9 | 17_10 18_10 17_11 18_11 17_12 18_12 18_13 18_14 18_15 | 9 |
+| 10 | 18_17 17_18 18_18 17_19 18_19 17_20 18_20 17_21 18_21 17_22 18_22 | 11 |
+| 11 | **17_22** **18_22** 17_23 18_23 17_24 18_24 17_25 18_25 17_26 18_26 | 10 |
+| 12 | 18_10 19_10 18_11 19_11 18_12 18_13 19_13 18_14 19_14 18_15 19_15 | 11 |
+| 13 | **18_15** **19_15** 19_16 18_17 19_17 18_18 19_18 18_19 19_19 18_20 19_20 | 11 |
+| 14 | **18_20** **19_20** 18_21 19_21 18_22 19_22 18_23 19_23 18_24 19_24 18_25 19_25 | 12 |
+| 15 | **18_25** **19_25** 18_26 | 3 |
+| 16 | 19_10 20_10 19_11 20_11 | 4 |
+| 17 | 19_13 20_13 19_14 20_14 19_15 20_15 19_16 20_16 19_17 20_17 19_18 20_18 | 12 |
+| 18 | **19_18** **20_18** 19_19 20_19 19_20 20_20 19_21 20_21 19_22 20_22 19_23 20_23 | 12 |
+| 19 | **19_23** **20_23** 19_24 20_24 19_25 20_25 | 6 |
+| 20 | 20_10 20_11 | 2 |
+| 21 | 20_13 21_13 20_14 21_14 20_15 21_15 20_16 21_16 20_17 21_17 20_18 21_18 | 12 |
+| 22 | **20_18** **21_18** 20_19 21_19 20_20 21_20 20_21 21_21 20_22 21_22 20_23 21_23 | 12 |
+| 23 | **20_23** **21_23** 20_24 21_24 20_25 21_25 | 6 |
+| 24 | 21_13 22_13 21_14 22_14 21_15 22_15 21_16 22_16 21_17 22_17 21_18 22_18 | 12 |
+| 25 | **21_18** **22_18** 21_19 22_19 21_20 22_20 21_21 22_21 21_22 22_22 21_23 22_23 | 12 |
+| 26 | **21_23** **22_23** 21_24 22_24 21_25 22_25 22_26 | 7 |
+| 27 | 23_10 23_11 23_12 22_13 23_13 22_14 23_14 22_15 23_15 | 9 |
+| 28 | **22_15** **23_15** 22_16 23_16 22_17 23_17 22_18 23_18 22_19 23_19 22_20 23_20 | 12 |
+| 29 | **22_20** **23_20** 22_21 23_21 22_22 23_22 22_23 23_23 22_24 23_24 22_25 23_25 | 12 |
+| 30 | **22_25** **23_25** 22_26 23_26 | 4 |
+| 31 | 23_10 24_10 23_11 24_11 23_12 24_12 23_13 24_13 23_14 24_14 23_15 24_15 | 12 |
+| 32 | **23_15** **24_15** 23_16 24_16 23_17 24_17 23_18 24_18 23_19 24_19 23_20 24_20 | 12 |
+| 33 | **23_20** **24_20** 23_21 24_21 23_22 24_22 23_23 24_23 23_24 24_24 23_25 24_25 | 12 |
+| 34 | **23_25** **24_25** 23_26 24_26 | 4 |
+| 35 | 24_10 25_10 24_11 25_11 24_12 25_12 24_13 24_14 25_14 24_15 25_15 | 11 |
+| 36 | **24_15** **25_15** 24_16 25_16 24_17 25_17 24_18 25_18 24_19 25_19 24_20 25_20 | 12 |
+| 37 | **24_20** **25_20** 24_21 25_21 24_22 24_23 24_24 24_25 | 8 |
+| 38 | **24_25** 24_26 | 2 |
+| 39 | 25_10 25_11 26_11 25_12 26_12 | 5 |
+| 40 | 25_14 26_14 25_15 26_15 25_16 26_16 25_17 25_18 25_19 | 9 |
+| 41 | **25_19** 25_20 25_21 | 3 |
+
+**Encore trop lourd ?** Coupe n'importe quelle passe en deux, en gardant dans
+les deux moitiés les régions de la **rangée charnière**. Le découpage reste
+valide : la seule règle est qu'une région et ses deux voisins d'indice inférieur
+se retrouvent ensemble au moins une fois.
 
 ### Textures aux jonctions
 

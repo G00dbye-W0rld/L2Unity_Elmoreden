@@ -32,3 +32,19 @@
 /l2-unity-main/l2-unity/Assets/Resources/Data/Maps/[0-9][0-9]_[0-9][0-9]/TerrainData.meta
 /l2-unity-main/l2-unity/Assets/Resources/Data/Maps/[0-9][0-9]_[0-9][0-9]/Meta/
 /l2-unity-main/l2-unity/Assets/Resources/Data/Maps/[0-9][0-9]_[0-9][0-9]/Meta.meta
+
+# ---------------------------------------------------------------------------
+# Geodata serveur (packs L2J Interlude)
+# ---------------------------------------------------------------------------
+# 166 fichiers, 549 Mo. Ce sont des packs TIERS recuperes tels quels, pas du
+# travail du projet : ils se retelechargent, contrairement au code.
+#
+# Les commiter les graverait definitivement dans l'historique git - meme
+# supprimes ensuite, ils resteraient dans les objets du depot et chaque clone
+# les traînerait. Git LFS serait la seule facon propre de les versionner, et
+# c'est une infrastructure a part entiere.
+#
+# Ce qui est versionne, en revanche : geoengine.properties, qui declare le
+# format (GeoDataType = L2J) et les 140 regions activees. C'est la que vit la
+# configuration ; les donnees se redeposent dans data/geodata/.
+/l2-unity-gameserver-master/gameserver/data/geodata/*.l2j
