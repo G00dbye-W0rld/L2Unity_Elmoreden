@@ -14,7 +14,7 @@ public class L2T3DStaticMeshImporter : AssetImporter
     /// Racine des exports umodel (meshes + textures). Voir TUTO_IMPORT_MAP.md.
     public const string ExportRoot = @"D:\Jeux\MAP_L2Unity\export";
 
-    [MenuItem("Shnok/01. [StaticMeshes] Import Textures and models")]
+    [MenuItem("L2/Import/01 StaticMeshes - Import Textures and models", false, 21)]
     static void ImportStaticMeshes()
     {
         string title = "Select StaticMeshes list";

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class RescaleMeshes : MonoBehaviour
 {
-    [MenuItem("Shnok/[Debug] Rescale Meshes")]
+    [MenuItem("L2/Debug/Rescale Meshes", false, 920)]
     static void GenerateTerrain() {
         Transform t = GameObject.Find("StaticMeshes").transform;
 
@@ -17,7 +17,7 @@ public class RescaleMeshes : MonoBehaviour
 
     }
 
-    [MenuItem("Shnok/[Debug] Rescale Trunks")]
+    [MenuItem("L2/Debug/Rescale Trunks", false, 921)]
     static void RescaleTrunks() {
         GameObject[] foundObjects = GameObject.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
         foreach (var gameObj in foundObjects) {
@@ -33,7 +33,7 @@ public class RescaleMeshes : MonoBehaviour
 
     }
 
-    [MenuItem("Shnok/[Debug] Rescale Decos")]
+    [MenuItem("L2/Debug/Rescale Decos", false, 922)]
     static void RescaleDeco() {
         Transform t = GameObject.Find("DecoLayer").transform;
         for (int i = 0; i < t.childCount; i++) {

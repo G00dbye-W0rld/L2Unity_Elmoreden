@@ -5,7 +5,7 @@ using UnityEngine;
 #if UNITY_EDITOR
 public class L2MapStaticMeshBuilder : MonoBehaviour
 {
-    [MenuItem("Shnok/[Debug][StaticMeshes] (JSON) Build static meshes")]
+    [MenuItem("L2/Debug/StaticMeshes - (JSON) Build static meshes", false, 900)]
     static void BuildSoundsMenu()
     {
         string title = "Select ambient sound list";

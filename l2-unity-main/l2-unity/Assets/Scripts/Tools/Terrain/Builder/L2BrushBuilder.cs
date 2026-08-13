@@ -24,7 +24,7 @@ public class L2BrushBuilder
     private static Material _fallbackMaterial;
     private static readonly HashSet<string> _missingTextures = new HashSet<string>();
 
-    [MenuItem("Shnok/[Debug][Brush] (JSON) Build brushes")]
+    [MenuItem("L2/Debug/Brush - (JSON) Build brushes", false, 901)]
     static void ImportBrushTextures()
     {
         string title = "Select Brush list";
@@ -43,7 +43,7 @@ public class L2BrushBuilder
         }
     }
 
-    [MenuItem("Shnok/07. [Brush] (T3D) Build brushes")]
+    [MenuItem("L2/Import/07 Brush - (T3D) Build brushes", false, 28)]
     static void ImportBrushTexturesT3D()
     {
         string title = "Select T3D file";

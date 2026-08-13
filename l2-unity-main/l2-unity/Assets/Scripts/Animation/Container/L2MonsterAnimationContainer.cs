@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "Monster", menuName = "Shnok/Animations/Monster")]
+[CreateAssetMenu(fileName = "Monster", menuName = "L2/Animations/Monster")]
 public class L2MonsterAnimationContainer : ScriptableObject
 {
     [SerializeField]

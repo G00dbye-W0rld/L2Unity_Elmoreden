@@ -243,7 +243,7 @@ des lots plus courts, coupe-les en deux — ça ne change rien au résultat.
 
 ### Comprendre l'algorithme — le point qui change tout
 
-`Shnok/11` ne traite **pas une région et ses voisins**. Il boucle sur
+`L2/Import/11` ne traite **pas une région et ses voisins**. Il boucle sur
 **TOUTES les régions présentes dans la scène** et traite les coutures de
 chacune, en un seul appel (`L2TerrainGenerator.StitchTerrainSeams`, la boucle
 `for (int i = 0; i < keys.Length; ++i)` ligne 385).
@@ -295,7 +295,7 @@ Chaque arête est couverte **exactement une fois**.
    `AmbientSounds.prefab` — le stitch ne touche qu'au composant `Terrain`, le
    reste ne ferait qu'alourdir la scène. Les prefabs portent déjà leur position
    monde, aucun placement manuel.
-3. Lancer **`Shnok/11. [Terrain] Stitch terrain seams`**.
+3. Lancer **`L2/Import/11 Terrain - Stitch terrain seams`**.
 4. Vérifier la Console : `[Stitch] Raccord de N region(s) : …`. Les lignes
    `Region 'X' absente de la scene, ignoree` sont normales (toutes les autres
    colonnes).
@@ -416,7 +416,7 @@ se retrouvent ensemble au moins une fois.
 
 ### Textures aux jonctions
 
-`Shnok/11` ne touche **ni aux textures ni au LOD** : il n'ajuste que les
+`L2/Import/11` ne touche **ni aux textures ni au LOD** : il n'ajuste que les
 hauteurs. La transition de peinture entre deux terrains reste manuelle.
 
 **Ne la fais pas systématiquement.** Beaucoup de jonctions (océan, forêt

@@ -20,7 +20,7 @@ public class TerrainConverter : MonoBehaviour
     private static Terrain terrainToConvert;
 
 
-    [MenuItem("Shnok/[Debug][Terrain] Convert terrain to mesh")]
+    [MenuItem("L2/Debug/Terrain - Convert terrain to mesh", false, 907)]
     static void ConvertTerrainMenu()
     {
         string title = "Select terrain t3d";
@@ -41,7 +41,7 @@ public class TerrainConverter : MonoBehaviour
         }
     }
 
-    [MenuItem("Shnok/[Debug][Terrain] Generate deco layer mesh")]
+    [MenuItem("L2/Debug/Terrain - Generate deco layer mesh", false, 908)]
     static void DecoLayers()
     {
         string title = "Select terrain t3d";

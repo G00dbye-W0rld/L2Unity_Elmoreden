@@ -20,7 +20,7 @@ public class L2JSONAmbientSoundImporter : AssetImporter
     // copy ambient sounds to
     static string scriptExportFolder = @"D:\Jeux\MAP_L2Unity\export_sound\unityexport";
 
-    [MenuItem("Shnok/[AmbientSound] (JSON) Import sounds")]
+    [MenuItem("L2/Outils/AmbientSound - (JSON) Import sounds", false, 401)]
     static void ImportSoundsMenu()
     {
         string title = "Select ambient sound list";
@@ -38,7 +38,7 @@ public class L2JSONAmbientSoundImporter : AssetImporter
     }
 
 
-    [MenuItem("Shnok/09. [AmbientSound] (T3D) Import sounds")]
+    [MenuItem("L2/Import/09 AmbientSound - (T3D) Import sounds", false, 30)]
     static void ImportSoundsMenuT3D()
     {
         string title = "Select ambient sound list";

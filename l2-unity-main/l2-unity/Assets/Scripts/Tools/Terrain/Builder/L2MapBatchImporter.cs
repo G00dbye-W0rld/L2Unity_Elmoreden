@@ -11,7 +11,7 @@ using UnityEngine.SceneManagement;
 /// Enchaine d'un seul tenant les etapes Unity de l'import d'une region.
 ///
 /// POURQUOI CE FICHIER
-/// Les entrees du menu Shnok ouvrent chacune un EditorUtility.OpenFilePanel.
+/// Les entrees du menu L2 ouvrent chacune un EditorUtility.OpenFilePanel.
 /// C'est acceptable pour une region isolee, mais pas pour en importer
 /// plusieurs : sept dialogues par region, un ordre a respecter de tete, et
 /// une seule erreur de selection suffit a produire une scene silencieusement
@@ -39,7 +39,7 @@ public static class L2MapBatchImporter
 {
     private const string ScenesFolder = "Assets/Resources/Scenes";
 
-    [MenuItem("Shnok/Import complet d'une region (01 a 07)")]
+    [MenuItem("L2/Import/Import complet d'une region", false, 0)]
     static void ImportCompleteRegionFromMenu()
     {
         string fileToProcess = EditorUtility.OpenFilePanel(
@@ -186,7 +186,7 @@ public static class L2MapBatchImporter
             // Phase 2 : le .t3d contient desormais aussi les AmbientSoundObject
             // (jusqu'a ~1500 par region) - construit ici l'objet "AmbientSounds"
             // que SaveGeneratedPrefabs empaquette juste apres, comme le fait deja
-            // Shnok 09/10 a la main.
+            // les etapes 09/10 a la main.
             Step(9, "sons d'ambiance");
             L2AmbientSoundBuilder.BuildAmbientSoundsFrom(t3d);
 
@@ -213,7 +213,7 @@ public static class L2MapBatchImporter
             // Light NI ReflectionProbe du tout. Seule 17_25 en a (5 sondes
             // posees a la main pres de points d'interet precis). Une grille
             // automatique ne correspond donc pas a la convention majoritaire -
-            // disponible en manuel via Shnok/[Debug][Light] si besoin au cas
+            // disponible en manuel via L2/Debug/Light si besoin au cas
             // par cas, mais plus enchainee par defaut.
 
             if (packageAsPrefabs)
@@ -254,7 +254,7 @@ public static class L2MapBatchImporter
         }
         finally
         {
-            // Indispensable : lance depuis le menu Shnok, l'editeur resterait
+            // Indispensable : lance depuis le menu L2, l'editeur resterait
             // sinon sans trace de pile sur les logs pour le reste de la
             // session, y compris apres une exception.
             Application.SetStackTraceLogType(LogType.Log, previousLogTrace);
@@ -495,9 +495,19 @@ public static class L2MapBatchImporter
     /// Le traitement applique a chaque region est un parametre : la mecanique
     /// pas-a-pas sert aussi bien a la substitution complete qu'a la re-application
     /// des seules echelles.
-    private static void StartSteppedBatch(string[] mapNames, Func<string, bool> action,
-                                          string title, string tag)
+    internal static void StartSteppedBatch(string[] mapNames, Func<string, bool> action,
+                                           string title, string tag)
     {
+        // Un second lot lance par-dessus le premier doublerait l'abonnement a
+        // EditorApplication.update : deux regions traitees par tick, un index
+        // partage, et un etat dont on ne sort qu'en tuant Unity.
+        if (_stepMaps != null)
+        {
+            Debug.LogWarning($"{tag} Un lot est deja en cours "
+                             + $"({_stepIndex}/{_stepMaps.Length}). Annulez-le avant d'en lancer un autre.");
+            return;
+        }
+
         _stepMaps = mapNames;
         _stepAction = action;
         _stepTitle = title;
@@ -547,6 +557,11 @@ public static class L2MapBatchImporter
         EditorUtility.ClearProgressBar();
         AssetDatabase.SaveAssets();
         Debug.Log(message);
+
+        // Libere le verrou pose par StartSteppedBatch : sans cette remise a
+        // null, plus aucun lot ne pourrait etre lance de la session.
+        _stepMaps = null;
+        _stepAction = null;
     }
 
     /// Reapplique les echelles UV sans reconstruire MicroSplatData.
@@ -555,7 +570,7 @@ public static class L2MapBatchImporter
     /// reglages : quelques secondes par region au lieu d'une minute, puisqu'on
     /// n'efface rien et qu'aucun texture array n'est recompile.
     /// Voir L2TerrainGeneratorTool.ReapplyScalesFor.
-    [MenuItem("Shnok/[Textures] Re-appliquer les ECHELLES seules (TOUTES les regions)")]
+    [MenuItem("L2/Terrain/Textures/Re-appliquer les ECHELLES seules (TOUTES les regions)", false, 123)]
     public static void ReapplyScalesAll()
     {
         string[] regions = EnumerateRegionScenes()
@@ -589,7 +604,7 @@ public static class L2MapBatchImporter
 
     /// Meme traitement sur la seule region ouverte, pour juger un reglage avant
     /// de le propager.
-    [MenuItem("Shnok/[Textures] Re-appliquer les ECHELLES seules (scene ouverte)")]
+    [MenuItem("L2/Terrain/Textures/Re-appliquer les ECHELLES seules (scene ouverte)", false, 122)]
     public static void ReapplyScalesCurrentScene()
     {
         Scene active = EditorSceneManager.GetActiveScene();
@@ -626,7 +641,113 @@ public static class L2MapBatchImporter
         return true;
     }
 
-    [MenuItem("Shnok/[Textures] Nettoyer les couches orphelines")]
+    /// Reapplique les reglages de rendu du terrain, sans rien reconstruire.
+    ///
+    /// POURQUOI CETTE PASSE EXISTE
+    /// L2TerrainGenerator.ApplyTerrainSettings n'est appelee qu'a la CREATION du
+    /// terrain. Les 153 regions deja importees gardaient donc leurs anciennes
+    /// valeurs - notamment basemapDistance a 99999, qui empechait toute bascule
+    /// vers le shader allege et a fait tomber le pilote graphique pendant les
+    /// essais de streaming.
+    ///
+    /// Les corriger par un reimport detruirait le raccord et la peinture. Cette
+    /// passe se contente d'ouvrir chaque scene et d'ecrire quelques champs sur
+    /// le composant Terrain : aucune texture, aucun array, aucune couche n'est
+    /// touche.
+    [MenuItem("L2/Terrain/Rendu - Corriger les reglages de rendu (TOUTES les regions)", false, 160)]
+    public static void ReapplyTerrainSettingsAll()
+    {
+        string[] regions = EnumerateRegionScenes();
+        if (regions.Length == 0)
+        {
+            Debug.LogWarning("[Terrain] Aucune region trouvee.");
+            return;
+        }
+
+        if (!EditorUtility.DisplayDialog("Corriger les reglages de rendu",
+                $"{regions.Length} region(s) vont etre traitees.\n\n"
+                + "Operation LEGERE : seuls les champs du composant Terrain sont\n"
+                + "reecrits (basemapDistance, pixel error, distance des details).\n"
+                + "Aucune texture ni couche n'est touchee.\n\n"
+                + "Les regions de reference sont INCLUSES : ce reglage est un\n"
+                + "correctif de performance, pas un choix artistique.\n\n"
+                + "Continuer ?",
+                "Lancer", "Annuler"))
+        {
+            return;
+        }
+
+        // Pas besoin du mecanisme pas-a-pas : aucune scene n'est ouverte, donc
+        // pas de delayCall a laisser passer. Une simple boucle suffit et va
+        // beaucoup plus vite.
+        int ok = 0;
+        try
+        {
+            for (int i = 0; i < regions.Length; i++)
+            {
+                if (EditorUtility.DisplayCancelableProgressBar("Reglages de terrain",
+                        $"{regions[i]} ({i + 1}/{regions.Length})", (float)i / regions.Length))
+                {
+                    break;
+                }
+
+                if (ApplyTerrainSettingsTo(regions[i])) { ok++; }
+            }
+        }
+        finally
+        {
+            EditorUtility.ClearProgressBar();
+            AssetDatabase.SaveAssets();
+        }
+
+        Debug.Log($"[Terrain] {ok}/{regions.Length} region(s) corrigee(s).");
+    }
+
+    /// ON CORRIGE LE PREFAB, PAS LA SCENE.
+    ///
+    /// Le terrain vit dans "{region}.prefab" ; la scene ne fait que
+    /// l'instancier. Corriger l'instance creerait une surcharge de prefab,
+    /// enregistree dans la seule scene - le prefab resterait fautif, et toute
+    /// nouvelle instance aussi.
+    ///
+    /// En editant directement le prefab, on n'ouvre aucune scene : l'operation
+    /// passe de ~1 minute par region a une fraction de seconde.
+    private static bool ApplyTerrainSettingsTo(string mapName)
+    {
+        string prefabPath = $"Assets/Resources/Data/Maps/{mapName}/{mapName}.prefab";
+
+        if (!File.Exists(prefabPath))
+        {
+            Debug.LogWarning($"[Terrain] Prefab introuvable pour '{mapName}'.");
+            return false;
+        }
+
+        GameObject root = PrefabUtility.LoadPrefabContents(prefabPath);
+        try
+        {
+            Terrain terrain = root.GetComponentInChildren<Terrain>(true);
+            if (terrain == null)
+            {
+                Debug.LogWarning($"[Terrain] '{mapName}' n'a pas de composant Terrain.");
+                return false;
+            }
+
+            float before = terrain.basemapDistance;
+            L2TerrainGenerator.ApplyTerrainSettings(terrain);
+            PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
+
+            Debug.Log($"[Terrain] {mapName} : basemapDistance {before} -> {terrain.basemapDistance}.");
+            return true;
+        }
+        finally
+        {
+            // Indispensable : sans cette liberation, chaque prefab charge reste
+            // en memoire et le lot finit par saturer.
+            PrefabUtility.UnloadPrefabContents(root);
+        }
+    }
+
+    [MenuItem("L2/Terrain/Textures/Nettoyer les couches orphelines", false, 140)]
     public static void CleanOrphanTerrainLayers()
     {
         string[] regions = EnumerateRegionScenes();
@@ -751,7 +872,7 @@ public static class L2MapBatchImporter
         return usage;
     }
 
-    [MenuItem("Shnok/[Textures] Creer l'asset de reglages (pre-rempli)")]
+    [MenuItem("L2/Terrain/Textures/Creer l'asset de reglages (pre-rempli)", false, 100)]
     public static void CreateTextureSettingsAsset()
     {
         if (File.Exists(L2TerrainTextureSettings.AssetPath)
@@ -855,7 +976,7 @@ public static class L2MapBatchImporter
 
     /// La region de la scene ouverte, pour iterer vite : regarder le rendu,
     /// ajuster le matcher, re-appliquer, regarder de nouveau.
-    [MenuItem("Shnok/[Textures] Re-appliquer les substitutions (scene ouverte)")]
+    [MenuItem("L2/Terrain/Textures/Re-appliquer les substitutions (scene ouverte)", false, 120)]
     public static void ReapplySubstitutionsCurrentScene()
     {
         Scene active = EditorSceneManager.GetActiveScene();
@@ -887,7 +1008,7 @@ public static class L2MapBatchImporter
     ///
     /// Operation non destructrice : MicroSplatData/ n'est pas regenere, la
     /// peinture et le raccord sont intacts.
-    [MenuItem("Shnok/[Textures] Aligner MicroSplat sur les references (scene ouverte)")]
+    [MenuItem("L2/Terrain/Textures/Aligner MicroSplat sur les references (scene ouverte)", false, 124)]
     public static void MattifyCurrentScene()
     {
         Scene active = EditorSceneManager.GetActiveScene();
@@ -910,7 +1031,7 @@ public static class L2MapBatchImporter
     }
 
     /// Le meme alignement sur toutes les regions ayant une scene.
-    [MenuItem("Shnok/[Textures] Aligner MicroSplat sur les references (TOUTES les regions)")]
+    [MenuItem("L2/Terrain/Textures/Aligner MicroSplat sur les references (TOUTES les regions)", false, 125)]
     public static void MattifyAll()
     {
         string[] regions = EnumerateRegionScenes();
@@ -968,7 +1089,7 @@ public static class L2MapBatchImporter
 
     /// Les regions possedant une scene, triees. Partage par les operations de
     /// masse pour qu'elles couvrent toutes exactement le meme ensemble.
-    private static string[] EnumerateRegionScenes()
+    internal static string[] EnumerateRegionScenes()
     {
         if (!Directory.Exists(ScenesFolder))
         {
@@ -984,7 +1105,7 @@ public static class L2MapBatchImporter
     }
 
     /// Toutes les regions ayant une scene, d'un coup.
-    [MenuItem("Shnok/[Textures] Re-appliquer les substitutions (TOUTES les regions)")]
+    [MenuItem("L2/Terrain/Textures/Re-appliquer les substitutions (TOUTES les regions)", false, 121)]
     public static void ReapplySubstitutionsAll()
     {
         // Les regions de reference sont ECARTEES du traitement de masse.
@@ -1069,7 +1190,7 @@ public static class L2MapBatchImporter
     ///
     /// Prerequis : la scene de la region doit etre ouverte (le Terrain doit
     /// etre trouvable par GameObject.Find(mapName) dans la scene active).
-    [MenuItem("Shnok/[Retrofit] Ajouter eau + safenet")]
+    [MenuItem("L2/Retrofit/Ajouter eau + safenet", false, 300)]
     public static void AddWaterAndSafenetToOpenScene()
     {
         Scene scene = EditorSceneManager.GetActiveScene();

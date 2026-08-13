@@ -10,7 +10,7 @@ public class L2WaterBuilder
     // recommandait deja le tuto pour un ajout manuel region par region.
     private const string ReferenceRegion = "17_25";
 
-    [MenuItem("Shnok/[Debug][Water] Build water")]
+    [MenuItem("L2/Debug/Water - Build water", false, 905)]
     static void BuildWaterMenu()
     {
         GameObject selected = Selection.activeGameObject;

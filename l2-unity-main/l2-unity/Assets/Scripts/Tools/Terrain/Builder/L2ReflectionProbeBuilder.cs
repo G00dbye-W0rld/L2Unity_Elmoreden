@@ -18,7 +18,7 @@ public class L2ReflectionProbeBuilder
     private const float ProbeHeightAboveGround = 8f;
     private static readonly Vector3 ProbeBoxSize = new Vector3(45f, 30f, 45f);
 
-    [MenuItem("Shnok/[Debug][Light] (Terrain) Build reflection probe grid")]
+    [MenuItem("L2/Debug/Light - (Terrain) Build reflection probe grid", false, 904)]
     static void BuildGridMenu()
     {
         GameObject selected = Selection.activeGameObject;

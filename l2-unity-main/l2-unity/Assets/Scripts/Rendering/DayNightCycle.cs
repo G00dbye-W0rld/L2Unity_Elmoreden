@@ -1,4 +1,3 @@
-using AtmosphericHeightFog;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -201,44 +200,56 @@ public class DayNightCycle : MonoBehaviour
         _mainLight.colorTemperature = temperature;
     }
 
+    /// Fait varier la couleur du brouillard selon l'heure.
+    ///
+    /// POURQUOI ON N'UTILISE PLUS Atmospheric Height Fog
+    /// Ce plugin rend son brouillard par un MeshRenderer, et n'affecte les
+    /// autres surfaces que si LEURS shaders lisent ses variables globales
+    /// (_IsHeightFogShader). Or MicroSplat genere 153 shaders autonomes, un par
+    /// region, qui ne les lisent pas.
+    ///
+    /// Resultat constate le 2026-08-12 : le brouillard n'affectait aucun
+    /// terrain, et il ne restait que son maillage - un ovale flottant au-dessus
+    /// de Talking Island. Le faire cooperer aurait demande de modifier le
+    /// generateur de shaders de MicroSplat.
+    ///
+    /// Le brouillard integre a URP, lui, est applique par le pipeline : TOUS
+    /// les shaders en beneficient sans avoir a cooperer. Il est moins riche
+    /// qu'un brouillard volumetrique, mais il fonctionne partout.
+    ///
+    /// Les variations par zone viendront du Volume framework, et les brumes
+    /// ponctuelles de systemes de particules poses dans les prefabs de region.
     private void UpdateFogColor()
     {
-        if (HeightFogGlobal.Instance == null)
+        if (!RenderSettings.fog)
         {
             return;
         }
 
-        Color fogColorStart = HeightFogGlobal.Instance.fogColorStart;
-        Color fogColorEnd = HeightFogGlobal.Instance.fogColorEnd;
-        float directionalIntensity = HeightFogGlobal.Instance.directionalIntensity;
+        // On ne conserve que la couleur : la notion de degrade start/end et
+        // l'intensite directionnelle etaient propres au plugin et n'ont pas
+        // d'equivalent URP. Les champs restent serialises pour ne pas perdre
+        // les teintes reglees a la main.
+        Color fogColor = RenderSettings.fogColor;
+
         if (_clock.Clock.dawnRatio > 0 && _clock.Clock.dawnRatio < 1)
         {
-            fogColorStart = Color.Lerp(fogColorStart, _dayFogColorStart, _clock.Clock.dawnRatio);
-            fogColorEnd = Color.Lerp(fogColorEnd, _dayFogColorEnd, _clock.Clock.dawnRatio);
-            directionalIntensity = Mathf.Lerp(directionalIntensity, _dayDirectionalIntensity, _clock.Clock.dawnRatio);
+            fogColor = Color.Lerp(fogColor, _dayFogColorStart, _clock.Clock.dawnRatio);
         }
         if (_clock.Clock.brightRatio > 0 && _clock.Clock.brightRatio < 1)
         {
-            fogColorStart = _dayFogColorStart;
-            fogColorEnd = _dayFogColorEnd;
-            directionalIntensity = _dayDirectionalIntensity;
+            fogColor = _dayFogColorStart;
         }
         if (_clock.Clock.duskRatio > 0 && _clock.Clock.duskRatio < 1)
         {
-            fogColorStart = Color.Lerp(_dayFogColorStart, _nightFogColorStart, _clock.Clock.duskRatio);
-            fogColorEnd = Color.Lerp(_dayFogColorEnd, _nightFogColorEnd, _clock.Clock.duskRatio);
-            directionalIntensity = Mathf.Lerp(directionalIntensity, _nightDirectionalIntensity, _clock.Clock.duskRatio);
+            fogColor = Color.Lerp(_dayFogColorStart, _nightFogColorStart, _clock.Clock.duskRatio);
         }
         if (_clock.Clock.darkRatio > 0 && _clock.Clock.darkRatio < 1)
         {
-            fogColorStart = _nightFogColorStart;
-            fogColorEnd = _nightFogColorEnd;
-            directionalIntensity = _nightDirectionalIntensity;
+            fogColor = _nightFogColorStart;
         }
 
-        HeightFogGlobal.Instance.fogColorStart = fogColorStart;
-        HeightFogGlobal.Instance.fogColorEnd = fogColorEnd;
-        HeightFogGlobal.Instance.directionalIntensity = directionalIntensity;
+        RenderSettings.fogColor = fogColor;
     }
 
     private void UpdateAmbientLightIntensity()

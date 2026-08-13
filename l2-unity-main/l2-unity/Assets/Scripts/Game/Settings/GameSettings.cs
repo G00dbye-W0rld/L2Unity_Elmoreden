@@ -1,4 +1,3 @@
-using AtmosphericHeightFog;
 using Bitgem.VFX.StylisedWater;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
@@ -46,6 +45,10 @@ public static class GameSettings
     private static float _cachedFarClipPlane = -1f;
     private static float _cachedFogDistanceStart = -1f;
     private static float _cachedFogDistanceEnd = -1f;
+
+    /// Densite d'origine, pour les modes exponentiels. Capturee une seule fois :
+    /// la relire apres coup rendrait le reglage cumulatif.
+    private static float _cachedFogDensity = -1f;
 
     public static float MasterVolume { get; private set; } = 1f;
     public static float MusicVolume { get; private set; } = 1f;
@@ -159,15 +162,48 @@ public static class GameSettings
             mainCamera.farClipPlane = _cachedFarClipPlane * viewScale;
         }
 
-        if (HeightFogGlobal.Instance != null)
+        // La distance de vue etire aussi le brouillard, pour qu'il reste
+        // coherent avec la portee de la camera.
+        //
+        // Le plugin Atmospheric Height Fog a ete retire : il n'affectait aucun
+        // terrain (les shaders MicroSplat ne lisaient pas ses variables) et ne
+        // laissait qu'un maillage flottant. On pilote desormais le brouillard
+        // integre a URP, applique par le pipeline a toutes les surfaces.
+        // Modes exponentiels : pas de distance de fin, c'est la densite qui
+        // porte le reglage. Une vue plus lointaine amincit le brouillard, mais
+        // jamais au point de depasser la fenetre de streaming.
+        if (RenderSettings.fog && RenderSettings.fogMode != FogMode.Linear)
+        {
+            if (_cachedFogDensity < 0f)
+            {
+                _cachedFogDensity = RenderSettings.fogDensity;
+            }
+
+            RenderSettings.fogDensity = Mathf.Max(
+                _cachedFogDensity / viewScale,
+                RegionStreamer.MinFogDensity(RenderSettings.fogMode));
+        }
+
+        if (RenderSettings.fog && RenderSettings.fogMode == FogMode.Linear)
         {
             if (_cachedFogDistanceStart < 0f)
             {
-                _cachedFogDistanceStart = HeightFogGlobal.Instance.fogDistanceStart;
-                _cachedFogDistanceEnd = HeightFogGlobal.Instance.fogDistanceEnd;
+                _cachedFogDistanceStart = RenderSettings.fogStartDistance;
+                _cachedFogDistanceEnd = RenderSettings.fogEndDistance;
             }
-            HeightFogGlobal.Instance.fogDistanceStart = _cachedFogDistanceStart * viewScale;
-            HeightFogGlobal.Instance.fogDistanceEnd = _cachedFogDistanceEnd * viewScale;
+            // Le brouillard ne doit JAMAIS porter plus loin que la fenetre de
+            // streaming : au-dela, le terrain n'existe pas et le joueur voit le
+            // vide a travers un brouillard encore transparent. Le plafond est
+            // donc celui du streamer, pas un choix esthetique.
+            //
+            // Consequence assumee : passe un certain niveau, augmenter la
+            // distance de vue n'eloigne plus le brouillard. Seule la portee de
+            // la camera continue de croitre. Tant que le cout par region n'aura
+            // pas baisse (LOD, imposteurs), c'est la contrainte reelle.
+            float end = Mathf.Min(_cachedFogDistanceEnd * viewScale, RegionStreamer.MaxHorizon);
+
+            RenderSettings.fogStartDistance = Mathf.Min(_cachedFogDistanceStart * viewScale, end * 0.6f);
+            RenderSettings.fogEndDistance = end;
         }
 
         ApplyWaterDetail();

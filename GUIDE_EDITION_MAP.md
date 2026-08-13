@@ -65,7 +65,7 @@ ensuite là où ça ne suffit pas.
 Tout se pilote depuis un asset éditable dans l'Inspector — **sans toucher au
 code ni recompiler**.
 
-**Première fois :** `Shnok/[Textures] Créer l'asset de réglages (pré-rempli)`
+**Première fois :** `L2/Terrain/Textures/Creer l'asset de reglages (pre-rempli)`
 
 Il crée `L2TerrainTextureSettings.asset` rempli avec les réglages existants.
 
@@ -104,11 +104,11 @@ problème d'échelle sur Icelandic (`SL_C` était à 1).
 
 1. Ouvre la scène d'une région
 2. Modifie une valeur dans l'asset
-3. `Shnok/[Textures] Re-appliquer les substitutions (scène ouverte)`
+3. `L2/Terrain/Textures/Re-appliquer les substitutions (scene ouverte)`
 4. Regarde, ajuste, recommence
 
 Quelques secondes par essai. Quand tes choix sont figés :
-`Shnok/[Textures] Re-appliquer les substitutions (TOUTES les régions)`.
+`L2/Terrain/Textures/Re-appliquer les substitutions (TOUTES les regions)`.
 
 ### 1.5 Améliorer une texture existante
 
@@ -163,7 +163,7 @@ Les dix manquants sont exactement les réglages par texture : `_PERTEXSMOOTHSTR`
 
 **Le correctif** :
 
-`Shnok/[Textures] Aligner MicroSplat sur les références (scène ouverte)`
+`L2/Terrain/Textures/Aligner MicroSplat sur les references (scene ouverte)`
 
 ou, pour tout traiter d'un coup, la variante `(TOUTES les régions)`.
 
@@ -287,7 +287,7 @@ une vallée : parfaitement faisable.
 > visiblement plusieurs. Aucun script ne ferait mieux que ton œil.
 
 ⚠️ **Le nom `Water` est réservé** : l'outil de rattrapage
-`Shnok/[Retrofit] Ajouter eau + safenet` écrase l'objet portant ce nom exact.
+`L2/Retrofit/Ajouter eau + safenet` écrase l'objet portant ce nom exact.
 Tes copies renommées ne risquent rien.
 
 ### 2.5 Le piège `RealtimeUpdates`
@@ -367,12 +367,21 @@ détruit ce travail.
 
 ## 6. Aide-mémoire des entrées de menu
 
+> Le menu s'appelait `Shnok` jusqu'au 12/08/2026. Il a été renommé `L2` et
+> réorganisé en sections (`Import`, `Terrain`, `Navigation`, `Retrofit`,
+> `Outils`, `Debug`). Les libellés sont **sans accents**, comme dans le code.
+
 | Menu | Effet |
 |---|---|
-| `Shnok/[Textures] Créer l'asset de réglages` | crée la table éditable, pré-remplie |
-| `Shnok/[Textures] Aligner MicroSplat sur les références (scène ouverte)` | active les réglages par texture, sème les valeurs des régions de référence |
-| `Shnok/[Textures] Aligner MicroSplat sur les références (TOUTES les régions)` | idem sur tout le monde |
-| `Shnok/[Textures] Re-appliquer… (scène ouverte)` | applique tes réglages à la région ouverte |
-| `Shnok/[Textures] Re-appliquer… (TOUTES les régions)` | idem sur tout le monde |
-| `Shnok/[Retrofit] Ajouter eau + safenet` | repose `Water` et `Safenet` (écrase ces noms) |
-| `Shnok/11. [Terrain] Stitch terrain seams` | raccorde les régions chargées dans la scène |
+| `L2/Terrain/Textures/Creer l'asset de reglages (pre-rempli)` | crée la table éditable, pré-remplie |
+| `L2/Terrain/Textures/Re-appliquer les substitutions (scene ouverte)` | applique tes réglages à la région ouverte |
+| `L2/Terrain/Textures/Re-appliquer les substitutions (TOUTES les regions)` | idem sur tout le monde |
+| `L2/Terrain/Textures/Re-appliquer les ECHELLES seules (scene ouverte)` | ne rejoue que les échelles — quelques secondes par région |
+| `L2/Terrain/Textures/Aligner MicroSplat sur les references (scene ouverte)` | active les réglages par texture, sème les valeurs des régions de référence |
+| `L2/Terrain/Textures/Aligner MicroSplat sur les references (TOUTES les regions)` | idem sur tout le monde |
+| `L2/Terrain/Textures/Nettoyer les couches orphelines` | supprime les `.terrainlayer` sans diffuse |
+| `L2/Terrain/Rendu - Corriger les reglages de rendu (TOUTES les regions)` | remet `basemapDistance` et les réglages de terrain sur les prefabs |
+| `L2/Navigation/Cuire le NavMesh (scene ouverte)` | cuit le NavMesh de la région ouverte |
+| `L2/Navigation/Cuire le NavMesh (TOUTES les regions)` | idem sur les 153 régions — ~25 min, annulable |
+| `L2/Retrofit/Ajouter eau + safenet` | repose `Water` et `Safenet` (écrase ces noms) |
+| `L2/Import/11 Terrain - Stitch terrain seams` | raccorde les régions chargées dans la scène |

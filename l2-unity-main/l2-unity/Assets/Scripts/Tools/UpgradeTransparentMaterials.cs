@@ -7,7 +7,7 @@ public class UpgradeTransparentMaterials : MonoBehaviour
     public static string oldShaderName = "Universal Render Pipeline/Nature/SpeedTree8_PBRLit";
     public static string newShaderName = "Universal Render Pipeline/Lit";
 
-    [MenuItem("Shnok/[Debug] Upgrade unity2022 transparent mats")]
+    [MenuItem("L2/Debug/Upgrade unity2022 transparent mats", false, 940)]
     public static void ReplaceShaders()
     {
         if (string.IsNullOrEmpty(oldShaderName) || string.IsNullOrEmpty(newShaderName))

@@ -34,7 +34,7 @@ public class AddTrunks
         "rionsctgart_tree_s",
     };
 
-    [MenuItem("Shnok/[Debug] Add trunks to trees")]
+    [MenuItem("L2/Debug/Add trunks to trees", false, 923)]
     private static void AddTrunksToTreesMenu()
     {
         int count = AddTrunksToTrees();

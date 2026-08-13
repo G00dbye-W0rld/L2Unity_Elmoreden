@@ -19,7 +19,7 @@ sur **l2pe**, jamais réellement utilisé : il a été remplacé par un outil ma
 
 **Partie III — Exécuter**
 6. [Import en une commande](#6-import-en-une-commande)
-7. [Les étapes du menu Shnok, en détail](#7-les-étapes-du-menu-shnok-en-détail)
+7. [Les étapes du menu L2, en détail](#7-les-étapes-du-menu-l2-en-détail)
 8. [Raccorder deux régions (étape 11)](#8-raccorder-deux-régions-étape-11)
 9. [Générer la geodata client](#9-générer-la-geodata-client)
 10. [Déclarer la région côté serveur](#10-déclarer-la-région-côté-serveur)
@@ -133,7 +133,7 @@ Deux phases bien séparées :
 7. Copie du tout vers `Assets/Resources/Data/Maps/{région}/Meta/`
 
 **Phase 2 (Unity, en mode batch ou via le menu)** — les 7 premières étapes du menu
-`Shnok`, enchaînées automatiquement par `L2MapBatchImporter`.
+`L2`, enchaînées automatiquement par `L2MapBatchImporter`.
 
 Le script PowerShell peut piloter les deux phases d'un coup avec `-RunUnity`.
 
@@ -186,7 +186,7 @@ et refuse de continuer si cette version précise n'est pas installée — voir �
 « mauvaise version d'Unity ».
 
 **Sans `-RunUnity`**, seule la phase 1 (extraction) s'exécute ; les étapes Unity restent
-à faire à la main (§7) ou via le menu `Shnok > Import complet d'une region (01 a 07)`,
+à faire à la main (§7) ou via le menu `L2 > Import > Import complet d'une region`,
 qui fait exactement la même chose que `L2MapBatchImporter` mais depuis l'éditeur, avec un
 retour plus lisible en cas de problème.
 
@@ -196,7 +196,7 @@ de code sans changement des données sources.
 
 ### Nettoyer une région avant de la réimporter
 
-`Shnok/00. [Scene] Nettoyer les objets generes` vide les objets déjà générés (terrain,
+`L2/Import/00 Scene - Nettoyer les objets generes` vide les objets déjà générés (terrain,
 static meshes, brushes) d'une région dans la scène ouverte, sans toucher au reste. Utile
 après un import interrompu ou pour repartir d'un état propre sans recréer la scène.
 
@@ -206,7 +206,7 @@ avec d'autres — voir §13, piège « suppression imprécise ».
 
 ---
 
-## 7. Les étapes du menu Shnok, en détail
+## 7. Les étapes du menu L2, en détail
 
 Chaque étape a désormais un double visage : une entrée de menu avec sélecteur de fichier
 (pour un usage manuel, région par région), et un *worker* public sans dialogue (appelé
@@ -295,7 +295,7 @@ n'ont pas d'automatisation dédiée pour l'instant, contrairement aux sons (09) 
 
 ## 8. Raccorder deux régions (étape 11)
 
-`Shnok/11` copie la ligne de hauteurs de la bordure d'une région vers celle de sa voisine
+`L2/Import/11` copie la ligne de hauteurs de la bordure d'une région vers celle de sa voisine
 d'indice supérieur, pour supprimer la fissure verticale entre deux terrains générés
 indépendamment. Deux points de mécanique à connaître :
 
@@ -304,13 +304,13 @@ indépendamment. Deux points de mécanique à connaître :
   de **17_23** qui est modifié pour épouser 17_22, jamais l'inverse.
 - **Le voisin n'a besoin d'être présent que le temps de l'opération.** L'écriture va dans
   le `TerrainData` (un asset), pas dans la scène. Glissez le prefab de la région voisine
-  dans la scène ouverte, lancez `Shnok/11`, vérifiez la jointure, puis retirez le prefab
+  dans la scène ouverte, lancez `L2/Import/11`, vérifiez la jointure, puis retirez le prefab
   de la hiérarchie et sauvegardez — la correction reste gravée dans l'asset.
 
 Avant de lancer, ajoutez la région à la liste `StitchableRegions` dans
 `L2TerrainGeneratorTool.cs` si elle n'y figure pas encore.
 
-`Shnok/11` ne touche **ni aux textures ni au LOD** : la transition de peinture entre deux
+`L2/Import/11` ne touche **ni aux textures ni au LOD** : la transition de peinture entre deux
 régions reste à faire à la main (peinture manuelle du terrain), et `Terrain.SetNeighbors`
 n'est appelé nulle part dans le projet — un défaut de LOD aux jointures resterait
 possible à distance.
@@ -446,7 +446,7 @@ travail est la génération de l'empreinte `byte[][]`.
 
 À l'import d'un FBX, Unity crée un matériau vide s'il n'en trouve pas de même nom dans le
 projet. Comme les matériaux texturés n'existent qu'après l'étape 02, l'étape 01 lie les
-modèles à des coquilles vides. **Corrigé** par `Shnok/02b`, appelé automatiquement en fin
+modèles à des coquilles vides. **Corrigé** par `L2/Import/02b`, appelé automatiquement en fin
 d'étape 02 : il supprime ces coquilles quand un remplaçant texturé existe, et réimporte
 les modèles concernés.
 
@@ -553,7 +553,7 @@ matériaux déjà **texturés** — un matériau vide est désormais toujours re
 des deux n'est donc pas anormale : c'est la situation de la **majorité** des régions
 propres, pas une région inachevée. Poser une grille automatique de sondes sur chaque
 région importée ne correspondrait pas à cette convention — `L2ReflectionProbeBuilder`
-existe (menu `Shnok/[Debug][Light] (Terrain) Build reflection probe grid`) mais n'est
+existe (menu `L2/Debug/Light - (Terrain) Build reflection probe grid`) mais n'est
 **plus appelé par défaut** dans `RunImport`, à réserver aux cas où on juge, au cas par
 cas, qu'une région en tirerait un vrai bénéfice.
 
@@ -578,7 +578,7 @@ cette erreur et produisait une eau bien trop grande sur 17_23.
 `Terrain` de la région ciblée — aucun calcul à partir du `WaterVolume` du `.unr` ou de la
 taille du terrain. Un ajustement fin en X/Z peut rester nécessaire selon la position de la
 région dans la grille (une région voisine dans une direction différente peut avoir besoin
-d'un léger décalage, comme pour le raccord de terrain de l'étape 11 du menu Shnok).
+d'un léger décalage, comme pour le raccord de terrain de l'étape 11 du menu L2).
 
 Le composant `WaterVolumeBase` du plugin StylisedWater a un champ `RealtimeUpdates` :
 coché, il reconstruit le mesh de l'eau **à chaque image** (et journalise à chaque fois)
@@ -587,7 +587,7 @@ même hors Play Mode — normal pendant le réglage, à décocher une fois la fo
 **Automatisé depuis peu, y compris pour les régions déjà importées.** `RunImport`
 enchaîne désormais l'eau et le safenet pour toute **nouvelle** région. Pour une région
 importée *avant* que ces étapes existent (17_23), ouvrez sa scène puis lancez
-**`Shnok/[Retrofit] Ajouter eau + safenet`** : ça n'ajoute que ces deux objets sans
+**`L2/Retrofit/Ajouter eau + safenet`** : ça n'ajoute que ces deux objets sans
 rejouer tout `RunImport` (donc sans régénérer terrain/static meshes/matériaux déjà
 valides), et ne resauvegarde que le prefab du Terrain (Water/Safenet y sont enfants).
 

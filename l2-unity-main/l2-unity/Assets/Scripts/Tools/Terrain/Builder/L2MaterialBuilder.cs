@@ -6,7 +6,7 @@ using UnityEngine;
 public class L2MaterialBuilder
 {
 
-    [MenuItem("Shnok/02. [Material] Generate materials")]
+    [MenuItem("L2/Import/02 Material - Generate materials", false, 22)]
     public static void SetupMaterials()
     {
 
@@ -39,7 +39,7 @@ public class L2MaterialBuilder
     /// On supprime donc ces coquilles vides - uniquement lorsqu'un materiau du
     /// meme nom, lui texture, existe sous Data/Textures - puis on force la
     /// reimportation des modeles concernes pour qu'Unity refasse la liaison.
-    [MenuItem("Shnok/02b. [Material] Rebrancher les materiaux des modeles")]
+    [MenuItem("L2/Import/02b Material - Rebrancher les materiaux des modeles", false, 23)]
     static void RebindModelMaterials()
     {
         const string meshRoot = "Assets/Resources/Data/StaticMeshes";

@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class L2ParticleEmitterParser
 {
-    [MenuItem("Shnok/[SkillEffects] (UC) Build ambient skilleffect")]
+    [MenuItem("L2/Outils/SkillEffects - (UC) Build ambient skilleffect", false, 402)]
     static void BuildSkillMenu()
     {
         string title = "Select ambient sound list";

@@ -16,7 +16,7 @@ public class L2LightBuilder
     private const float RadiusToUnrealUnits = 25f;
     private const float BrightnessToIntensity = 1f / 64f;
 
-    [MenuItem("Shnok/[Debug][Light] (T3D) Build lights")]
+    [MenuItem("L2/Debug/Light - (T3D) Build lights", false, 903)]
     static void BuildLightsMenu()
     {
         string title = "Select T3D file";

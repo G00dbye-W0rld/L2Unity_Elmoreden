@@ -127,7 +127,7 @@ public class L2TerrainGeneratorTool : MonoBehaviour
     // etapes 03/04 nettoient desormais derriere elles, mais ce qui a ete
     // accumule avant reste en place. Vide tous les objets generes de la region
     // choisie, sans toucher au reste de la scene.
-    [MenuItem("Shnok/00. [Scene] Nettoyer les objets generes")]
+    [MenuItem("L2/Import/00 Scene - Nettoyer les objets generes", false, 20)]
     static void CleanGeneratedObjects()
     {
         string fileToProcess = EditorUtility.OpenFilePanel(
@@ -153,7 +153,7 @@ public class L2TerrainGeneratorTool : MonoBehaviour
                   "Relancez les etapes 03 a 07, puis sauvegardez la scene.");
     }
 
-    [MenuItem("Shnok/04. [Terrain] Generate terrain")]
+    [MenuItem("L2/Import/04 Terrain - Generate terrain", false, 25)]
     static void GenerateTerrain()
     {
         string title = "Select terrain t3d";
@@ -187,7 +187,7 @@ public class L2TerrainGeneratorTool : MonoBehaviour
     }
 
 
-    [MenuItem("Shnok/05. [Terrain] Convert terrain to microsplat")]
+    [MenuItem("L2/Import/05 Terrain - Convert terrain to microsplat", false, 26)]
     static void ConvertTerrain()
     {
         string title = "Select terrain t3d";
@@ -214,7 +214,7 @@ public class L2TerrainGeneratorTool : MonoBehaviour
     }
 
 
-    [MenuItem("Shnok/06. [Terrain] Update microsplat params")]
+    [MenuItem("L2/Import/06 Terrain - Update microsplat params", false, 27)]
     static void Update()
     {
         string title = "Select terrain t3d";
@@ -240,7 +240,7 @@ public class L2TerrainGeneratorTool : MonoBehaviour
         UpdateMicrosplatParams(data);
     }
 
-    [MenuItem("Shnok/03. [StaticMeshes] Generate staticmeshes")]
+    [MenuItem("L2/Import/03 StaticMeshes - Generate staticmeshes", false, 24)]
     static void GenerateStaticMeshes()
     {
         // Demande la map, comme les etapes 04/05/06. Avant, le nom etait
@@ -307,7 +307,7 @@ public class L2TerrainGeneratorTool : MonoBehaviour
             .ToArray();
     }
 
-    [MenuItem("Shnok/11. [Terrain] Stitch terrain seams")]
+    [MenuItem("L2/Import/11 Terrain - Stitch terrain seams", false, 32)]
     static void StitchTerrainSeams()
     {
         Dictionary<string, Terrain> mapTerrains = new Dictionary<string, Terrain>();

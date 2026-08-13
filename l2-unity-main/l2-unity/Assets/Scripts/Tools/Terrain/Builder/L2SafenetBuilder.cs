@@ -9,7 +9,7 @@ using UnityEngine;
 /// 17_24, 17_25) - un objet fixe a cloner tel quel, comme Water.
 public class L2SafenetBuilder
 {
-    [MenuItem("Shnok/[Debug][Safenet] Build safenet")]
+    [MenuItem("L2/Debug/Safenet - Build safenet", false, 906)]
     static void BuildSafenetMenu()
     {
         GameObject selected = Selection.activeGameObject;

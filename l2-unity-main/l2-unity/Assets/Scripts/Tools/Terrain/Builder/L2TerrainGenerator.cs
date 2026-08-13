@@ -6,6 +6,45 @@ using UnityEngine;
 
 public class L2TerrainGenerator
 {
+    /// Reglages de rendu communs a tous les terrains.
+    ///
+    /// POURQUOI UNE METHODE PARTAGEE
+    /// Ces valeurs etaient posees uniquement a la CREATION du terrain. Les
+    /// regions deja importees ne pouvaient donc pas en beneficier sans un
+    /// reimport, qui detruirait leur raccord et leur peinture.
+    ///
+    /// La meme methode sert desormais aux deux chemins - creation et rattrapage
+    /// (voir L2MapBatchImporter, "Corriger les reglages de terrain") - pour que
+    /// les deux ne divergent pas avec le temps.
+    public static void ApplyTerrainSettings(Terrain terrain)
+    {
+        terrain.heightmapPixelError = 3;
+        terrain.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+        terrain.drawInstanced = true;
+        terrain.detailObjectDistance = 150;
+
+        // DISTANCE DE BASCULE VERS LA BASEMAP.
+        //
+        // Au-dela, Unity rend le terrain avec un shader allege - MicroSplat en
+        // genere un pour chaque region (MicroSplat_Base.shader, declare par
+        // Dependency "BaseMapShader" dans le shader principal).
+        //
+        // Les prefabs existants portaient 99999, ce qui interdisait cette
+        // bascule : chaque terrain rendait au shader complet jusqu'a l'horizon.
+        // Avec le streaming et plusieurs regions visibles - chacune ayant son
+        // PROPRE shader, il y en a 153 - ca a suffi a declencher le timeout GPU
+        // de Windows le 2026-08-12.
+        //
+        // Cette valeur de 99999 contournait le probleme des terrains nus au
+        // loin, qui venait en realite des calques sans texture. Celui-ci etant
+        // corrige, le contournement n'a plus lieu d'etre.
+        //
+        // 512 est la valeur que MicroSplat pose lui-meme (MicroSplatTerrain.cs,
+        // ligne 137). Une region faisant 624 unites, le terrain sur lequel on se
+        // trouve reste donc en qualite pleine.
+        terrain.basemapDistance = 512;
+    }
+
     public float ueToUnityUnitScale = (1f / 52.5f); // 1 meter = 52.5 UU
     public float worldPositionOffset = 1f;
     private string terrainContainerName = "terrain_";
@@ -55,10 +94,7 @@ public class L2TerrainGenerator
 
         // Get the Terrain component and TerrainData
         Terrain terrain = terrainObj.GetComponent<Terrain>();
-        terrain.heightmapPixelError = 3;
-        terrain.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
-        terrain.drawInstanced = true;
-        terrain.detailObjectDistance = 150;
+        ApplyTerrainSettings(terrain);
 
         TerrainData terrainData = terrain.terrainData;
         terrainData.baseMapResolution = L2TerrainGeneratorTool.UV_LAYER_ALPHAMAP_SIZE;

@@ -7,7 +7,7 @@ using UnityEngine;
 public class L2CameraBuilder
 {
 
-    [MenuItem("Shnok/08. [Camera] (T3D) Build cameras")]
+    [MenuItem("L2/Import/08 Camera - (T3D) Build cameras", false, 29)]
     static void ImportBrushTexturesT3D()
     {
         string title = "Select T3D file";

@@ -8,7 +8,7 @@ using UnityEngine;
 public class L2AmbientSoundBuilder : MonoBehaviour
 {
 
-    [MenuItem("Shnok/[Debug][AmbientSound] (JSON) Build ambient sounds")]
+    [MenuItem("L2/Debug/AmbientSound - (JSON) Build ambient sounds", false, 902)]
     static void BuildSoundsMenu()
     {
         string title = "Select ambient sound list";
@@ -25,7 +25,7 @@ public class L2AmbientSoundBuilder : MonoBehaviour
         }
     }
 
-    [MenuItem("Shnok/10. [AmbientSound] (T3D) Build ambient sounds")]
+    [MenuItem("L2/Import/10 AmbientSound - (T3D) Build ambient sounds", false, 31)]
     static void BuildSoundsMenuT3D()
     {
         string title = "Select ambient sound list";

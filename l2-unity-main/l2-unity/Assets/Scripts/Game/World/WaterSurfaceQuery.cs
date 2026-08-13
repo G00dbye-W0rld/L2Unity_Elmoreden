@@ -55,13 +55,23 @@ public static class WaterSurfaceQuery
     public static void Invalidate()
     {
         _volumes = null;
+        _indexed = false;
     }
+
+    // Le drapeau est distinct du tableau : se fier a sa longueur relancerait un
+    // FindObjectsByType a CHAQUE image dans une region sans eau - "aucun volume"
+    // est un resultat valide, pas un cache vide. UnderwaterEffect interroge en
+    // Update, la difference n'est pas theorique.
+    private static bool _indexed;
 
     private static void RefreshIfNeeded()
     {
-        if (_volumes == null || _volumes.Length == 0)
+        if (_indexed)
         {
-            _volumes = Object.FindObjectsByType<WaterVolumeBase>(FindObjectsSortMode.None);
+            return;
         }
+
+        _volumes = Object.FindObjectsByType<WaterVolumeBase>(FindObjectsSortMode.None);
+        _indexed = true;
     }
 }

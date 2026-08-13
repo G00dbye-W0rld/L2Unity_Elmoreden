@@ -1,4 +1,3 @@
-using AtmosphericHeightFog;
 using FMOD.Studio;
 using FMODUnity;
 using UnityEngine;
@@ -59,6 +58,18 @@ public class UnderwaterEffect : MonoBehaviour
     private float _capturedFogStart;
     private float _capturedFogEnd;
 
+    /// Densite de surface, pour les modes exponentiels.
+    private float _capturedFogDensity;
+
+    /// Une valeur de surface a ete capturee : le brouillard nous appartient
+    /// jusqu'a ce qu'on l'ait rendue a l'identique. Sans ce drapeau, le bloc
+    /// s'appliquerait des la premiere image avec des valeurs capturees a zero.
+    private bool _fogCaptured;
+
+    /// Immersion en cours ou en cours de resorption : couleur et brouillard
+    /// sont a nous, et surtout ne doivent PAS etre recaptures.
+    private bool _captured;
+
     private EventInstance _ambienceInstance;
     private bool _ambienceInstanceValid;
     private bool _ambiencePlaying;
@@ -111,16 +122,40 @@ public class UnderwaterEffect : MonoBehaviour
         Vector3 camPos = mainCamera.transform.position;
         bool underwater = WaterSurfaceQuery.TryGetSurfaceHeight(camPos, out float surfaceY) && camPos.y < surfaceY;
 
-        if (underwater && !_wasUnderwater && _colorAdjustments != null)
+        // UNE SEULE CAPTURE PAR IMMERSION, couleur ET brouillard.
+        //
+        // La condition !_captured est le point important. Replonger avant la
+        // fin du fondu enregistrerait comme "surface" des valeurs deja teintees
+        // par l'eau : chaque aller-retour rapide decalerait un peu plus la
+        // reference vers le fond, sans retour possible.
+        //
+        // Le drapeau doit couvrir les DEUX familles. Ne proteger que le
+        // brouillard laissait deriver filtre, contraste et saturation - c'est
+        // ce qui rendait les plongeons rapides incoherents.
+        if (underwater && !_wasUnderwater && !_captured && _colorAdjustments != null)
         {
             _capturedColorFilter = _colorAdjustments.colorFilter.value;
             _capturedContrast = _colorAdjustments.contrast.value;
             _capturedSaturation = _colorAdjustments.saturation.value;
-            if (HeightFogGlobal.Instance != null)
+
+            // Brouillard URP depuis le retrait d'Atmospheric Height Fog, qui
+            // n'affectait pas les terrains MicroSplat. Voir DayNightCycle.
+            if (RenderSettings.fog)
             {
-                _capturedFogStart = HeightFogGlobal.Instance.fogDistanceStart;
-                _capturedFogEnd = HeightFogGlobal.Instance.fogDistanceEnd;
+                if (RenderSettings.fogMode == FogMode.Linear)
+                {
+                    _capturedFogStart = RenderSettings.fogStartDistance;
+                    _capturedFogEnd = RenderSettings.fogEndDistance;
+                }
+                else
+                {
+                    _capturedFogDensity = RenderSettings.fogDensity;
+                }
+
+                _fogCaptured = true;
             }
+
+            _captured = true;
         }
         _wasUnderwater = underwater;
 
@@ -150,10 +185,53 @@ public class UnderwaterEffect : MonoBehaviour
             _lensDistortion.intensity.value = wobble * _blend;
         }
 
-        if (HeightFogGlobal.Instance != null && _blend > 0f)
+        // Sous l'eau, le brouillard se resserre pour donner la sensation de
+        // faible visibilite.
+        // NE PAS conditionner ce bloc a _blend > 0.
+        //
+        // A blend = 0 le Lerp rend exactement la valeur de surface : c'est LUI
+        // qui restaure le brouillard. Le sauter des que le fondu touche zero
+        // fige le reglage sur l'avant-derniere image, et le brouillard reste
+        // celui du fond de l'eau une fois revenu a l'air libre.
+        //
+        // Le defaut etait discret en lineaire - quelques pourcents d'ecart -
+        // mais criant en exponentiel : entre 0,00715 en surface et 0,268 sous
+        // l'eau, l'ecart est de 37x, donc 7 % du trajet laissent une densite
+        // 3,5 fois trop forte.
+        if (_fogCaptured && RenderSettings.fog)
         {
-            HeightFogGlobal.Instance.fogDistanceStart = Mathf.Lerp(_capturedFogStart, _underwaterFogStart, _blend);
-            HeightFogGlobal.Instance.fogDistanceEnd = Mathf.Lerp(_capturedFogEnd, _underwaterFogEnd, _blend);
+            if (RenderSettings.fogMode == FogMode.Linear)
+            {
+                RenderSettings.fogStartDistance = Mathf.Lerp(_capturedFogStart, _underwaterFogStart, _blend);
+                RenderSettings.fogEndDistance = Mathf.Lerp(_capturedFogEnd, _underwaterFogEnd, _blend);
+            }
+            else
+            {
+                // Meme intention en exponentiel : on raisonne en distance de
+                // visibilite, convertie en densite. _underwaterFogEnd reste
+                // donc le seul reglage a toucher, quel que soit le mode.
+                float target = RegionStreamer.DensityForHorizon(
+                    RenderSettings.fogMode, _underwaterFogEnd);
+
+                RenderSettings.fogDensity = Mathf.Lerp(_capturedFogDensity, target, _blend);
+            }
+
+            // Surface retrouvee et valeurs rendues a l'identique : on lache le
+            // brouillard, pour ne pas ecraser en continu ce que le cycle
+            // jour/nuit ou les reglages video pourraient y ecrire.
+            if (_blend <= 0f)
+            {
+                _fogCaptured = false;
+            }
+        }
+
+        // La capture n'est rouverte qu'une fois le fondu entierement resorbe :
+        // les Lerp ci-dessus ont alors rendu couleur ET brouillard a leur
+        // valeur de surface exacte. Hors de ce bloc pour que la liberation ait
+        // lieu meme quand le brouillard est desactive.
+        if (_blend <= 0f)
+        {
+            _captured = false;
         }
     }
 

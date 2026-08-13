@@ -75,10 +75,13 @@ MonoBehaviour:
   _serverPort: 2106
   _connectionTimeoutMs: 10000
   _connected: 0
-  _logReceivedPackets: 1
-  _logSentPackets: 1
+  _logReceivedPackets: 0
+  _logSentPackets: 0
+  _logCryptography: 1
   _sessionKey1: 0
   _sessionKey2: 0
+  _ping: 0
+  _lastSocketPoll: 0
   _account: 
   _password: 
 --- !u!114 &2808076256991555282
@@ -97,11 +100,15 @@ MonoBehaviour:
   _serverPort: 11000
   _connectionTimeoutMs: 10000
   _connected: 0
-  _logReceivedPackets: 1
-  _logSentPackets: 1
+  _logReceivedPackets: 0
+  _logSentPackets: 0
+  _logCryptography: 0
   _sessionKey1: 0
   _sessionKey2: 0
-  _currentPlayer: {fileID: 0}
+  _ping: 0
+  _lastSocketPoll: 0
   _serverId: 0
   _playKey1: 0
   _playKey2: 0
+  _serverEntityPositionSyncThreshold: 0
+  _playerPositionSyncThreshold: 0

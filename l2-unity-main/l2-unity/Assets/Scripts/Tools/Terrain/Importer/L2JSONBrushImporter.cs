@@ -12,7 +12,7 @@ public class DataContainer {
 
 public class L2JSONBrushImporter : AssetImporter {
 
-    [MenuItem("Shnok/[Brush] Import Textures")]
+    [MenuItem("L2/Outils/Brush - Import Textures", false, 400)]
     static void ImportBrushTextures() {
         string title = "Select Brush list";
         string directory = Path.Combine(Application.dataPath, "Resources/Data/Maps");
