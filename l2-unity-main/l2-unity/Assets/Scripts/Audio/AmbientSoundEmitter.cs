@@ -39,6 +39,21 @@ public class AmbientSoundEmitter : EventHandler {
             Lookup();
         }
 
+        // Un evenement absent laisse une description invalide : l'interroger
+        // ici propagerait l'echec dans tout le reste du composant.
+        //
+        // On ne s'inscrit PAS aupres du culler dans ce cas : il rallumerait
+        // periodiquement un emetteur qui n'a rien a jouer.
+        if(_missing || !_eventDescription.isValid()) {
+            enabled = false;
+            return;
+        }
+
+        // A partir d'ici l'emetteur est viable : le culler decide quand il doit
+        // etre actif. Voir AmbientSoundCuller - environ 1180 emetteurs par
+        // region, dont une poignee sont a portee d'oreille.
+        AmbientSoundCuller.Register(this);
+
         int lengthMs = 0;
         _eventDescription.getLength(out lengthMs);
         _clipLengthSeconds = lengthMs / 1000f;
@@ -57,14 +72,56 @@ public class AmbientSoundEmitter : EventHandler {
                 Lookup();
             }
 
+            if(_missing || !_eventDescription.isValid()) {
+                return 0f;
+            }
+
             float minDistance, maxDistance;
             _eventDescription.getMinMaxDistance(out minDistance, out maxDistance);
             return maxDistance;
         }
     }
 
+    /// La recherche a echoue : l'evenement n'existe pas dans les banques
+    /// chargees. On ne retentera pas.
+    private bool _missing;
+
+    /// Evenements deja signales, tous emetteurs confondus.
+    ///
+    /// Sans ce filtre, un meme son absent produit un avertissement par
+    /// emetteur ET par declenchement : mesure du 2026-08-14, 2405 exceptions
+    /// FMOD en un quart d'heure, chacune retenue par la Console de l'editeur
+    /// avec sa trace de pile.
+    private static readonly System.Collections.Generic.HashSet<string> _reported
+        = new System.Collections.Generic.HashSet<string>();
+
+    /// ETAT DES BANQUES, 2026-08-14
+    /// Master.strings.bank ne contient d'evenements d'ambiance que pour la
+    /// region 17_25 - les banques datent d'une epoque ou une seule region
+    /// existait. Toutes les autres regions demandent donc des evenements
+    /// absents. Le projet FMOD Studio (.fspro) n'est pas dans le depot : les
+    /// reconstruire est un chantier a part, avec les sources audio.
+    ///
+    /// En attendant, un evenement manquant doit rester silencieux, pas
+    /// bruyant : l'emetteur se desactive au lieu de lever une exception a
+    /// chaque entree dans son declencheur.
     private void Lookup() {
-        _eventDescription = RuntimeManager.GetEventDescription(_eventReference);
+        if(_missing) {
+            return;
+        }
+
+        try {
+            _eventDescription = RuntimeManager.GetEventDescription(_eventReference);
+        }
+        catch(EventNotFoundException) {
+            _missing = true;
+
+            string path = _eventReference.IsNull ? "(vide)" : _eventReference.Path;
+            if(_reported.Add(path)) {
+                Debug.LogWarning($"[AmbientSound] Evenement absent des banques : {path}. "
+                                 + "Emetteur desactive. Signale une seule fois.");
+            }
+        }
     }
 
     public void Play() {
@@ -74,6 +131,13 @@ public class AmbientSoundEmitter : EventHandler {
 
         if(!_eventDescription.isValid()) {
             Lookup();
+        }
+
+        // Un composant desactive ne recoit plus OnTriggerEnter, mais Play peut
+        // aussi etre appele directement : on garde la porte fermee des deux
+        // cotes plutot que de dependre d'un detail du cycle de vie Unity.
+        if(_missing || !_eventDescription.isValid()) {
+            return;
         }
 
         if (_loop) {
@@ -164,6 +228,18 @@ public class AmbientSoundEmitter : EventHandler {
     public void Stop() {
         StopCoroutine(StartPlayLoop());
         StopInstance();
+    }
+
+    /// Le culler garde une liste statique : sans desinscription, decharger une
+    /// region y laisserait des references detruites. Il les nettoie aussi de
+    /// son cote, mais autant ne pas les y mettre.
+    ///
+    /// OVERRIDE, pas une nouvelle methode : EventHandler declare OnDestroy en
+    /// protected virtual et y notifie ObjectDestroy. La masquer couperait ce
+    /// signal a FMOD.
+    protected override void OnDestroy() {
+        AmbientSoundCuller.Unregister(this);
+        base.OnDestroy();
     }
 
     private void StopInstance() {
