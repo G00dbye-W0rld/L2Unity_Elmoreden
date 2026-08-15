@@ -95,10 +95,9 @@ public static class L2MicroSplatMutualizer
         int scoreFrequency = ScoreOrder(byFrequency, layersOf, packOf);
         int scoreOptimised = ScoreOrder(optimised, layersOf, packOf);
 
-        // On ne retient l'ordre optimise que s'il gagne reellement. L'heuristique
-        // est gloutonne : rien ne garantit qu'elle batte la frequence sur toutes
-        // les distributions.
-        List<string> order = scoreOptimised <= scoreFrequency ? optimised : byFrequency;
+        // Meme fonction que l'application, pour que les deux ne puissent pas
+        // diverger. Voir BuildOrderForApply.
+        List<string> order = BuildOrderForApply(layersOf, packOf);
 
         Dictionary<string, int> indexOf = new Dictionary<string, int>();
         for (int i = 0; i < order.Count; i++)
@@ -191,6 +190,24 @@ public static class L2MicroSplatMutualizer
             report.AppendLine($"      NON RESOLUES : {string.Join(", ", unresolved)} "
                               + "- aucune substitution ne les couvre.");
         }
+    }
+
+    /// Ordre retenu pour le tableau partage, expose a l'execution.
+    ///
+    /// CRITIQUE : l'analyse et l'application DOIVENT produire le meme ordre.
+    /// C'est lui qui definit ce que signifie chaque tranche ; deux ordres
+    /// differents rendraient les splatmaps deja reindexees silencieusement
+    /// fausses. On passe donc par cette unique fonction plutot que de dupliquer
+    /// la regle de selection.
+    public static List<string> BuildOrderForApply(Dictionary<string, List<string>> layersOf,
+                                                  Dictionary<string, string> packOf)
+    {
+        List<string> byFrequency = BuildSharedOrder(layersOf, packOf);
+        List<string> optimised = BuildOptimisedOrder(layersOf, packOf);
+
+        return ScoreOrder(optimised, layersOf, packOf) <= ScoreOrder(byFrequency, layersOf, packOf)
+            ? optimised
+            : byFrequency;
     }
 
     /// Ordre du tableau partage : les packs les plus repandus d'abord.
