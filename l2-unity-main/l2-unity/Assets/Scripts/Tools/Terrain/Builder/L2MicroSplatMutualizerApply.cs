@@ -81,7 +81,7 @@ public static class L2MicroSplatMutualizerApply
     //  ETAPE 1 - les 32 couches partagees
     // ================================================================
 
-    [MenuItem("L2/Terrain/Mutualisation/3. Creer les couches partagees", false, 182)]
+    [MenuItem("L2/Terrain/Mutualisation/Reconstruction (DANGER)/1. Creer les couches partagees", false, 300)]
     public static void CreateSharedLayers()
     {
         List<string> order = ResolveSharedOrder();
@@ -139,119 +139,6 @@ public static class L2MicroSplatMutualizerApply
     //  ETAPE 2 - la config partagee
     // ================================================================
 
-    /// Batit la TextureArrayConfig unique : 32 packs dans l'ordre partage.
-    ///
-    /// C'est la moitie deterministe du materiau maitre - celle qui ne depend
-    /// que de nos donnees. La seconde moitie (generer le materiau lui-meme)
-    /// passe par l'interface MicroSplat : elle appelle du code de generation de
-    /// shader que je ne peux pas piloter de facon fiable sans le voir tourner.
-    ///
-    /// Les chemins de textures suivent la meme convention que l'etape 05 du
-    /// pipeline : {pack}_BaseColor.jpg, _AO, _Bump, _Normal, _Gloss,
-    /// _Roughness, _Specular.
-    [MenuItem("L2/Terrain/Mutualisation/3b. Batir la config partagee", false, 183)]
-    public static void BuildSharedConfig()
-    {
-        List<string> order = ResolveSharedOrder();
-        if (order == null)
-        {
-            return;
-        }
-
-        Directory.CreateDirectory(SharedFolder);
-
-        string configPath = $"{SharedFolder}/MicroSplatConfig.asset";
-        var cfg = AssetDatabase.LoadAssetAtPath<JBooth.MicroSplat.TextureArrayConfig>(configPath);
-
-        if (cfg == null)
-        {
-            cfg = JBooth.MicroSplat.TextureArrayConfigEditor.CreateConfig(SharedFolder);
-            if (cfg == null)
-            {
-                Debug.LogError("[Mutualisation] Creation de la config partagee impossible.");
-                return;
-            }
-        }
-
-        cfg.sourceTextures.Clear();
-
-        int missing = 0;
-
-        foreach (string pack in order)
-        {
-            string path = TextureUtils.GetSplatTexturePath(pack);
-
-            Texture2D diffuse = AssetDatabase.LoadAssetAtPath<Texture2D>(path + "_BaseColor.jpg");
-            if (diffuse == null)
-            {
-                Debug.LogError($"[Mutualisation] Pack '{pack}' : BaseColor introuvable. "
-                               + "Abandon - un trou decalerait tout l'ordre.");
-                missing++;
-                continue;
-            }
-
-            var entry = new JBooth.MicroSplat.TextureArrayConfig.TextureEntry
-            {
-                diffuse = diffuse,
-                ao = AssetDatabase.LoadAssetAtPath<Texture2D>(path + "_AO.jpg"),
-                height = AssetDatabase.LoadAssetAtPath<Texture2D>(path + "_Bump.jpg"),
-                normal = AssetDatabase.LoadAssetAtPath<Texture2D>(path + "_Normal.jpg"),
-                specular = AssetDatabase.LoadAssetAtPath<Texture2D>(path + "_Specular.jpg")
-            };
-
-            // BRILLANCE : le gloss d'abord, la rugosite en repli et INVERSEE.
-            // Poser _Roughness.jpg comme brillance etait la cause du terrain
-            // miroitant corrige le 2026-08-11. Voir L2TerrainGeneratorTool.
-            Texture2D gloss = AssetDatabase.LoadAssetAtPath<Texture2D>(path + "_Gloss.jpg");
-            if (gloss != null)
-            {
-                entry.smoothness = gloss;
-                entry.isRoughness = false;
-            }
-            else
-            {
-                Texture2D roughness = AssetDatabase.LoadAssetAtPath<Texture2D>(path + "_Roughness.jpg");
-                if (roughness != null)
-                {
-                    entry.smoothness = roughness;
-                    entry.isRoughness = true;
-                }
-            }
-
-            cfg.sourceTextures.Add(entry);
-        }
-
-        if (missing > 0)
-        {
-            Debug.LogError($"[Mutualisation] {missing} pack(s) sans texture : config NON compilee.");
-            return;
-        }
-
-        // RESOLUTION DES ARRAYS.
-        //
-        // Sans ce reglage la config part sur 1024 non compresse : mesure du
-        // 2026-08-14, 150 Mo pour 28 textures, contre 15 Mo pour les 9 textures
-        // d'une region en 512. Les reglages ne sont pas sur cfg mais dans la
-        // classe imbriquee TextureArrayGroup, via defaultTextureSettings -
-        // les adresser sur cfg ne compile pas (CS1061).
-        var settings = cfg.defaultTextureSettings;
-
-        settings.diffuseSettings.textureSize = ArrayResolution;
-        settings.normalSettings.textureSize = ArrayResolution;
-        settings.smoothSettings.textureSize = ArrayResolution;
-        settings.specularSettings.textureSize = ArrayResolution;
-        settings.antiTileSettings.textureSize = ArrayResolution;
-        settings.emissiveSettings.textureSize = ArrayResolution;
-
-        EditorUtility.SetDirty(cfg);
-        AssetDatabase.SaveAssets();
-
-        JBooth.MicroSplat.TextureArrayConfigEditor.CompileConfig(cfg);
-
-        Debug.Log($"[Mutualisation] Config partagee : {cfg.sourceTextures.Count} textures compilees "
-                  + $"dans {SharedFolder}. Assignez-la maintenant a un terrain via l'inspecteur "
-                  + "MicroSplat pour produire le materiau maitre.");
-    }
 
     // ================================================================
     //  ETAPE 2b - le terrain jetable qui produit le materiau maitre
@@ -271,7 +158,7 @@ public static class L2MicroSplatMutualizerApply
     /// Assigner 28 couches a une region redimensionnerait ses splatmaps et
     /// detruirait sa peinture avant meme la reindexation. Le terrain temporaire
     /// est minuscule - 33x33 - et n'existe que le temps de la generation.
-    [MenuItem("L2/Terrain/Mutualisation/3c. Creer le terrain maitre (temporaire)", false, 184)]
+    [MenuItem("L2/Terrain/Mutualisation/Reconstruction (DANGER)/2. Creer le terrain maitre (temporaire)", false, 301)]
     public static void CreateMasterTerrain()
     {
         List<string> order = ResolveSharedOrder();
@@ -408,7 +295,7 @@ public static class L2MicroSplatMutualizerApply
     ///
     /// Cette etape a d'abord servi a DESCENDRE en 512 - une erreur, voir le
     /// commentaire d'ArrayResolution. Elle sert desormais a remonter en 1024.
-    [MenuItem("L2/Terrain/Mutualisation/3d. Aligner la resolution de la config maitre", false, 185)]
+    [MenuItem("L2/Terrain/Mutualisation/Reconstruction (DANGER)/3. Aligner la resolution de la config maitre", false, 302)]
     public static void FixMasterResolution()
     {
         var cfg = AssetDatabase.LoadAssetAtPath<JBooth.MicroSplat.TextureArrayConfig>(MasterConfigPath);
@@ -514,28 +401,6 @@ public static class L2MicroSplatMutualizerApply
                   + "elle gagnera sur le prefab - c'est la scene que charge le streaming.");
     }
 
-    /// Force la resynchronisation de toutes les regions dont la scene est
-    /// OUVERTE avec le materiau maitre actuel.
-    ///
-    /// POURQUOI CET OUTIL EXISTE
-    /// MicroSplatTerrain.Sync() ne recopie les proprietes du templateMaterial
-    /// vers l'instance reellement affichee (matInstance) qu'a l'activation du
-    /// composant, a la sauvegarde de la scene, ou a une recompilation de
-    /// script (MicroSplatTerrain.cs:194-218). Editer le fichier .mat a la main
-    /// ne declenche AUCUN de ces trois evenements : la scene ouverte continue
-    /// d'afficher l'ancienne copie tant qu'aucun de ces trois n'est survenu.
-    ///
-    /// Constate le 2026-08-17 : correction de _Contrast et
-    /// _HybridHeightBlendDistance sur le materiau maitre sans effet visible -
-    /// tres probablement parce que la scene ouverte n'avait jamais ete
-    /// rechargee depuis l'edition du fichier.
-    [MenuItem("L2/Terrain/Mutualisation/12. Forcer la resynchronisation (scenes ouvertes)", false, 196)]
-    public static void ForceSyncOpenScenes()
-    {
-        JBooth.MicroSplat.MicroSplatObject.SyncAll();
-        Debug.Log("[Mutualisation] Resynchronisation forcee sur toutes les regions actuellement chargees. "
-                 + "Ne touche que les scenes OUVERTES - sans effet sur le reste.");
-    }
 
     /// Complete la config MAITRE avec hauteur, brillance, occlusion et
     /// speculaire, puis recompile les tableaux.
@@ -563,7 +428,7 @@ public static class L2MicroSplatMutualizerApply
     /// Celle-ci vise la config du maitre et retrouve le pack de chaque entree
     /// par le nom de son TerrainLayer ("shared_NN_<pack>"), donc sans dependre
     /// d'un ordre recalcule.
-    [MenuItem("L2/Terrain/Mutualisation/3f. Completer la config maitre (hauteur, AO, brillance)", false, 187)]
+    [MenuItem("L2/Terrain/Mutualisation/Reconstruction (DANGER)/4. Completer la config maitre (hauteur, AO, brillance)", false, 303)]
     public static void CompleteMasterConfig()
     {
         var cfg = AssetDatabase.LoadAssetAtPath<JBooth.MicroSplat.TextureArrayConfig>(MasterConfigPath);
@@ -769,366 +634,9 @@ public static class L2MicroSplatMutualizerApply
         Debug.Log(report.ToString());
     }
 
-    /// Rapporte le poids moyen de chaque tranche sur la region ouverte.
-    ///
-    /// Symptome du 2026-08-16 : apres reindexation, une seule texture recouvre
-    /// toute la carte alors que la somme des poids est conservee a 100 %.
-    /// Conserver la somme ne garantit pas qu'elle soit repartie sur les bonnes
-    /// tranches - cette mesure le dit, la vue de scene ne le dit pas.
-    [MenuItem("L2/Terrain/Mutualisation/7. Diagnostic : poids par tranche (scene ouverte)", false, 191)]
-    public static void ReportWeights()
-    {
-        UnityEngine.Terrain terrain = UnityEngine.Terrain.activeTerrain;
 
-        if (terrain == null || terrain.terrainData == null)
-        {
-            Debug.LogError("[Mutualisation] Aucun terrain actif dans la scene ouverte.");
-            return;
-        }
 
-        TerrainData data = terrain.terrainData;
-        int w = data.alphamapWidth;
-        int h = data.alphamapHeight;
-        int layers = data.terrainLayers.Length;
 
-        float[,,] a = data.GetAlphamaps(0, 0, w, h);
-
-        var sums = new double[layers];
-        for (int y = 0; y < h; y++)
-        {
-            for (int x = 0; x < w; x++)
-            {
-                for (int i = 0; i < layers; i++)
-                {
-                    sums[i] += a[y, x, i];
-                }
-            }
-        }
-
-        double total = sums.Sum();
-
-        var report = new System.Text.StringBuilder();
-        report.AppendLine($"[Mutualisation] {terrain.name} : {layers} couches, "
-                          + $"controle {data.alphamapResolution}, "
-                          + $"{data.size.x / Mathf.Max(1, data.alphamapResolution):F2} unites/texel");
-        report.AppendLine();
-
-        for (int i = 0; i < layers; i++)
-        {
-            double share = total > 0 ? sums[i] / total : 0;
-            if (share < 0.0005)
-            {
-                continue;
-            }
-
-            TerrainLayer layer = data.terrainLayers[i];
-            string name = layer != null && layer.diffuseTexture != null
-                ? layer.diffuseTexture.name
-                : "(sans texture)";
-
-            report.AppendLine($"  tranche {i,2} : {share,7:P2}  {name}");
-        }
-
-        report.AppendLine();
-        report.AppendLine("Les tranches sous 0,05 % sont omises.");
-
-        Debug.Log(report.ToString());
-    }
-
-    /// Repartition des poids sur TOUTES les regions, lue directement dans les
-    /// assets - sans ouvrir la moindre scene.
-    ///
-    /// POURQUOI CE DIAGNOSTIC EXISTE
-    /// Constat du 2026-08-17 : toutes les regions sauf Talking Island et les
-    /// regions test paraissent uniformement couvertes d'herbe. Deux causes
-    /// possibles, opposees et impossibles a distinguer a l'oeil :
-    ///
-    ///   a) les POIDS sont fautifs - une seule tranche porte tout ;
-    ///   b) les poids sont bons et c'est le RENDU qui ecrase (materiau,
-    ///      propdata, echelle d'UV).
-    ///
-    /// L'etape 7 ne repond pas : elle exige une scene ouverte, ce qui est
-    /// justement interdit ici. Celle-ci lit l'asset, donc la verite du disque.
-    ///
-    /// On sous-echantillonne un pixel sur huit : a 1024x1024x28 sur 150
-    /// regions, tout lire serait inutilement long pour une mesure statistique.
-    [MenuItem("L2/Terrain/Mutualisation/10. Diagnostic : repartition des poids (toutes regions)", false, 194)]
-    public static void ReportWeightSpread()
-    {
-        const int Step = 8;
-        const double Dominant = 0.90;
-
-        var report = new System.Text.StringBuilder();
-        report.AppendLine("[Mutualisation] Repartition des poids, lue dans les assets.");
-        report.AppendLine();
-
-        var dominated = new List<string>();
-        var healthy = new List<string>();
-        string[] regions = EnumerateRegions();
-
-        for (int r = 0; r < regions.Length; r++)
-        {
-            if (EditorUtility.DisplayCancelableProgressBar("Diagnostic des poids",
-                    $"{regions[r]} ({r + 1}/{regions.Length})", (float)r / regions.Length))
-            {
-                break;
-            }
-
-            string dataPath = $"{MapsFolder}/{regions[r]}/TerrainData/{regions[r]}.asset";
-            TerrainData data = AssetDatabase.LoadAssetAtPath<TerrainData>(dataPath);
-            if (data == null)
-            {
-                continue;
-            }
-
-            int layers = data.terrainLayers != null ? data.terrainLayers.Length : 0;
-            if (layers == 0)
-            {
-                continue;
-            }
-
-            int w = data.alphamapWidth;
-            int h = data.alphamapHeight;
-            float[,,] a = data.GetAlphamaps(0, 0, w, h);
-
-            var sums = new double[layers];
-            for (int y = 0; y < h; y += Step)
-            {
-                for (int x = 0; x < w; x += Step)
-                {
-                    for (int i = 0; i < layers; i++)
-                    {
-                        sums[i] += a[y, x, i];
-                    }
-                }
-            }
-
-            double total = sums.Sum();
-            if (total <= 0)
-            {
-                continue;
-            }
-
-            int top = 0;
-            for (int i = 1; i < layers; i++)
-            {
-                if (sums[i] > sums[top]) { top = i; }
-            }
-
-            double topShare = sums[top] / total;
-            int visible = sums.Count(s => s / total >= 0.01);
-
-            string topName = data.terrainLayers[top] != null
-                             && data.terrainLayers[top].diffuseTexture != null
-                ? data.terrainLayers[top].diffuseTexture.name
-                : "(sans texture)";
-
-            string line = $"  {regions[r]} : {layers,2} couches, {visible,2} visible(s) >1%, "
-                          + $"dominante {topShare,7:P2} tranche {top,2} {topName}";
-
-            if (topShare >= Dominant) { dominated.Add(line); } else { healthy.Add(line); }
-        }
-
-        EditorUtility.ClearProgressBar();
-
-        report.AppendLine($"REGIONS DOMINEES PAR UNE SEULE TRANCHE (>= {Dominant:P0}) : {dominated.Count}");
-        foreach (string l in dominated.Take(40)) { report.AppendLine(l); }
-        if (dominated.Count > 40) { report.AppendLine($"  ... et {dominated.Count - 40} autre(s)"); }
-
-        report.AppendLine();
-        report.AppendLine($"REGIONS AVEC DU RELIEF DE TEXTURES : {healthy.Count}");
-        foreach (string l in healthy.Take(40)) { report.AppendLine(l); }
-        if (healthy.Count > 40) { report.AppendLine($"  ... et {healthy.Count - 40} autre(s)"); }
-
-        Debug.Log(report.ToString());
-    }
-
-    /// Mesure la DOUCEUR des transitions entre textures.
-    ///
-    /// POURQUOI
-    /// Constat du 2026-08-17 : la peinture parait faite au pinceau carre. Le
-    /// test du _UVScale a montre que les carres ne suivent PAS le carrelage des
-    /// textures - ce sont donc les texels de la carte de controle. Or sa
-    /// resolution est identique (1024, 0,61 unite/texel) sur Talking Island,
-    /// que l'utilisateur juge correcte, et sur les regions mutualisees.
-    ///
-    /// Deux explications restent, et elles n'appellent pas le meme correctif :
-    ///
-    ///   a) les carres preexistaient et n'etaient pas visibles tant qu'une
-    ///      seule texture couvrait tout ; il n'y a alors rien de casse, et
-    ///      adoucir demanderait de lisser les cartes de controle ;
-    ///   b) la reindexation les a durcis - additionner plusieurs couches sur
-    ///      une meme tranche concentre le poids et peut transformer un degrade
-    ///      en marche d'escalier.
-    ///
-    /// On compare donc la douceur de Talking Island (jamais reindexee, donc
-    /// temoin) a celle des regions mutualisees. Un texel "franc" ne porte
-    /// qu'une seule texture : plus il y en a, plus la transition est carree.
-    [MenuItem("L2/Terrain/Mutualisation/11. Diagnostic : douceur des transitions", false, 195)]
-    public static void ReportBlendSoftness()
-    {
-        const int Step = 4;
-
-        string[] sample = ReferenceRegions
-            .Concat(TestRegions)
-            .Concat(new[] { "19_20", "22_14", "21_20", "20_20" })
-            .ToArray();
-
-        var report = new System.Text.StringBuilder();
-        report.AppendLine("[Mutualisation] Douceur des transitions entre textures.");
-        report.AppendLine();
-        report.AppendLine("  region    couches   texels francs   textures/texel");
-
-        foreach (string region in sample)
-        {
-            string path = $"{MapsFolder}/{region}/TerrainData/{region}.asset";
-            TerrainData data = AssetDatabase.LoadAssetAtPath<TerrainData>(path);
-            if (data == null || data.terrainLayers == null || data.terrainLayers.Length == 0)
-            {
-                continue;
-            }
-
-            int layers = data.terrainLayers.Length;
-            int w = data.alphamapWidth, h = data.alphamapHeight;
-            float[,,] a = data.GetAlphamaps(0, 0, w, h);
-
-            long texels = 0, pure = 0, contributions = 0;
-
-            for (int y = 0; y < h; y += Step)
-            {
-                for (int x = 0; x < w; x += Step)
-                {
-                    float max = 0f;
-                    int active = 0;
-
-                    for (int i = 0; i < layers; i++)
-                    {
-                        float v = a[y, x, i];
-                        if (v > max) { max = v; }
-                        if (v > 0.01f) { active++; }
-                    }
-
-                    texels++;
-                    contributions += active;
-                    if (max >= 0.99f) { pure++; }
-                }
-            }
-
-            bool witness = ReferenceRegions.Contains(region);
-
-            report.AppendLine($"  {region,-8} {layers,6}   {(double)pure / texels,12:P1}   "
-                              + $"{(double)contributions / texels,8:F2}"
-                              + (witness ? "   <- temoin (non reindexee)" : ""));
-        }
-
-        report.AppendLine();
-        report.AppendLine("Un texel franc ne porte qu'une texture : plus il y en a, plus la");
-        report.AppendLine("transition est abrupte. Si le temoin affiche les memes valeurs que");
-        report.AppendLine("les regions reindexees, les carres preexistaient a la mutualisation.");
-
-        Debug.Log(report.ToString());
-    }
-
-    /// Mesure si les splatmaps sont definies sur une grille PLUS GROSSIERE que
-    /// leur resolution declaree.
-    ///
-    /// POURQUOI
-    /// Toutes les regions annoncent 1024 texels pour 624 unites, soit 0,61
-    /// unite/texel. Pourtant les regions test se peignent proprement et les
-    /// autres produisent des carres, alors que materiau, propdata, taille de
-    /// terrain et nombre de couches sont rigoureusement identiques.
-    ///
-    /// Il reste une possibilite : que la DONNEE soit grossiere meme si le
-    /// conteneur est fin. Une source basse resolution etiree au plus proche
-    /// voisin remplit un texel sur N puis recopie - le fichier fait bien
-    /// 1024, mais la peinture n'a que 1024/N de finesse reelle.
-    ///
-    /// On teste donc la constance par blocs : pour N = 2, 4, 8, 16, quelle
-    /// proportion des texels vaut exactement celui du coin de son bloc NxN ?
-    /// Une donnee vraiment fine tombe vite ; une donnee etiree d'un facteur 8
-    /// restera a 100 % jusqu'a N = 8.
-    [MenuItem("L2/Terrain/Mutualisation/14. Diagnostic : finesse reelle de la donnee", false, 198)]
-    public static void ReportDataGranularity()
-    {
-        int[] blocks = { 2, 4, 8, 16 };
-
-        string[] sample = TestRegions
-            .Concat(new[] { "22_22", "22_23", "22_14", "25_11", "19_20" })
-            .Concat(ReferenceRegions)
-            .ToArray();
-
-        var report = new System.Text.StringBuilder();
-        report.AppendLine("[Mutualisation] Finesse reelle de la donnee de splatmap.");
-        report.AppendLine();
-        report.AppendLine("  Proportion de texels identiques au coin de leur bloc NxN.");
-        report.AppendLine("  Une valeur proche de 100 % signifie que la donnee est CONSTANTE");
-        report.AppendLine("  sur ce bloc, donc que sa finesse reelle est N fois moindre.");
-        report.AppendLine();
-        report.AppendLine("  region     N=2      N=4      N=8     N=16   role");
-
-        foreach (string region in sample)
-        {
-            string path = $"{MapsFolder}/{region}/TerrainData/{region}.asset";
-            TerrainData data = AssetDatabase.LoadAssetAtPath<TerrainData>(path);
-            if (data == null || data.terrainLayers == null || data.terrainLayers.Length == 0)
-            {
-                continue;
-            }
-
-            int layers = data.terrainLayers.Length;
-            int w = data.alphamapWidth, h = data.alphamapHeight;
-            float[,,] a = data.GetAlphamaps(0, 0, w, h);
-
-            var line = new System.Text.StringBuilder();
-            line.Append($"  {region,-8}");
-
-            foreach (int n in blocks)
-            {
-                long same = 0, total = 0;
-
-                for (int y = 0; y + n <= h; y += n)
-                {
-                    for (int x = 0; x + n <= w; x += n)
-                    {
-                        for (int dy = 0; dy < n; dy++)
-                        {
-                            for (int dx = 0; dx < n; dx++)
-                            {
-                                total++;
-                                bool identical = true;
-
-                                for (int i = 0; i < layers; i++)
-                                {
-                                    if (Mathf.Abs(a[y + dy, x + dx, i] - a[y, x, i]) > 0.002f)
-                                    {
-                                        identical = false;
-                                        break;
-                                    }
-                                }
-
-                                if (identical) { same++; }
-                            }
-                        }
-                    }
-                }
-
-                line.Append($" {(double)same / total,7:P1}");
-            }
-
-            string role = TestRegions.Contains(region) ? "   <- TEST (bonne)"
-                        : ReferenceRegions.Contains(region) ? "   <- Talking Island"
-                        : "";
-
-            report.AppendLine(line + role);
-        }
-
-        report.AppendLine();
-        report.AppendLine("Si les regions TEST chutent vite et les autres restent hautes,");
-        report.AppendLine("la donnee des autres est etiree : le probleme vient de l'import,");
-        report.AppendLine("pas du materiau ni de la mutualisation.");
-
-        Debug.Log(report.ToString());
-    }
 
     /// Recense les regions dont la splatmap est DEGENEREE : une seule texture
     /// partout, alors que leurs couches d'origine visaient plusieurs packs.
@@ -1522,7 +1030,7 @@ public static class L2MicroSplatMutualizerApply
     /// A LANCER AVANT LA REINDEXATION : une fois le maitre en place, MicroSplat
     /// synchronise le terrain sur 28 couches de lui-meme, et la reindexation
     /// ecrit dans un terrain deja correctement dimensionne.
-    [MenuItem("L2/Terrain/Mutualisation/3e. Basculer les SCENES sur le maitre", false, 186)]
+    [MenuItem("L2/Terrain/Mutualisation/Reconstruction (DANGER)/5. Basculer les SCENES sur le maitre", false, 304)]
     public static void RetargetScenes()
     {
         Material master = AssetDatabase.LoadAssetAtPath<Material>(MasterMaterialPath);
@@ -1613,11 +1121,6 @@ public static class L2MicroSplatMutualizerApply
     //  ETAPE 3 - reindexation
     // ================================================================
 
-    [MenuItem("L2/Terrain/Mutualisation/4. Reindexer les regions TEST", false, 188)]
-    public static void ReindexTestRegions()
-    {
-        Reindex(TestRegions, "regions test");
-    }
 
     [MenuItem("L2/Terrain/Mutualisation/5. Reindexer TOUTES les regions", false, 189)]
     public static void ReindexAllRegions()
