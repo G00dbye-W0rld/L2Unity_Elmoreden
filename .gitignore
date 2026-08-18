@@ -48,3 +48,18 @@
 # format (GeoDataType = L2J) et les 140 regions activees. C'est la que vit la
 # configuration ; les donnees se redeposent dans data/geodata/.
 /l2-unity-gameserver-master/gameserver/data/geodata/*.l2j
+
+# Enregistrements du profileur (diagnostic ponctuel, plusieurs centaines de Mo)
+/l2-unity-main/l2-unity/ProfilerLogs/
+
+# Sauvegardes de TerrainData / Maps (plusieurs Go chacune)
+#
+# POURQUOI CETTE REGLE EXISTE
+# _backup_terraindata_20260814 a ete commite par accident dans f692c7b43 :
+# 8691 fichiers, 4,5 Go, pousses sur origin/main. Le depot .git est passe a
+# 4,2 Go et chaque clone les traine. Meme motif que les .l2j ci-dessus.
+#
+# Ces dossiers sont des filets de securite LOCAUX, a garder sur le disque mais
+# jamais dans l'historique : ils doublent des donnees deja versionnees, et
+# leur interet est justement d'etre anterieurs a la version suivie.
+/_backup_*/

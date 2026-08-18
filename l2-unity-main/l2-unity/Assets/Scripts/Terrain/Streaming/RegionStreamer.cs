@@ -120,8 +120,39 @@ public class RegionStreamer : MonoBehaviour
 
     public static RegionStreamer Instance { get; private set; }
 
+    /// Priorite du chargement asynchrone.
+    ///
+    /// LA CAUSE DES GELS, TROUVEE AU PROFILEUR LE 2026-08-16.
+    ///
+    /// Par defaut Unity utilise ThreadPriority.High : il consacre alors autant
+    /// de temps que possible PAR IMAGE au chargement, quitte a la faire durer
+    /// plusieurs secondes. Mesure sur une image bloquee :
+    ///
+    ///     PlayerLoop                          623 ms
+    ///       CharacterSelector.Update()        613 ms   <- simple raycast
+    ///         Loading.IsObjectAvailable       613 ms
+    ///           Loading.LockPersistentManager 613 ms
+    ///     [thread Loading] Application Preload Assets  6182 ms
+    ///
+    /// Le script ne chargeait rien : toucher une reference Unity appelle
+    /// IsObjectAvailable, qui attend le verrou tenu par le prechargement de la
+    /// scene de region. Le thread principal entier se bloquait avec lui, et le
+    /// GPU n'attendait que d'etre nourri - ce qui, en D3D11, finissait en reset
+    /// de pilote.
+    ///
+    /// En Low, Unity etale le meme travail sur beaucoup plus d'images : le
+    /// chargement d'une region dure plus longtemps, mais ne gele plus le jeu.
+    /// C'est le compromis normal d'un monde streame.
+    [Header("Chargement")]
+    [Tooltip("Low etale le chargement sur plus d'images et supprime les gels. "
+             + "High (defaut Unity) charge le plus vite possible, au prix de "
+             + "blocages de plusieurs secondes.")]
+    [SerializeField] private ThreadPriority _loadingPriority = ThreadPriority.Low;
+
     private void Awake()
     {
+        Application.backgroundLoadingPriority = _loadingPriority;
+
         if (Instance == null)
         {
             Instance = this;

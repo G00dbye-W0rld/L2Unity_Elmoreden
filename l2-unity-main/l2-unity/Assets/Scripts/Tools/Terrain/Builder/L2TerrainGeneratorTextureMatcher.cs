@@ -105,6 +105,29 @@ public class L2TerrainGeneratorTextureMatcher
         // pas, il tombera sur la regle "st" plus bas.
         (@"^scht.*_s[_0-9]|^scs[n0-9]", "Trampled_Snow_vcqnfdk_1K"),
 
+        // ---- Prefixes de zone finissant par "c" --------------------------
+        // PIEGE : les regles de falaise cherchent un "c" suivi d'un chiffre ou
+        // d'un underscore, en supposant que ce "c" est le marqueur de TYPE
+        // (OC_03 = Oren Cliff 03). Mais deux zones portent un "c" dans leur
+        // PREFIXE : "ORC_" et "ADC_". Le "c_" de leur prefixe declenche alors
+        // `^o.*c[_0-9]` et le `c[_0-9]` generique, et toute la zone - herbes et
+        // sols compris - se retrouve classee en falaise.
+        //
+        // Mesure du 2026-08-17 : 10 regions rendues d'une seule texture, leurs
+        // 8 a 10 couches ecrasees sur la meme tranche (18_14, 19_13/14/15,
+        // 20_13/14/15, 21_17, 25_16/17). Les autres prefixes en "c_" (AC_,
+        // GOC_, INNC_, OC_, RUC_) sont, eux, de VRAIES falaises - verifie sur
+        // les 378 noms du monde, aucun autre faux positif.
+        //
+        // Ces regles doivent rester AVANT toute regle de falaise.
+        (@"^orc_c",                   "Layered_Rock_Cliff_tjtmcg3g_1K"),
+        (@"^orc_g",                   "Mossy_Forest_Floor_vfylbge_1K"),
+        (@"^orc_s",                   "Ground_Roots_smspdebp_1K"),
+        (@"^adc_c",                   "Rock_Cliff_xccibbi_1K"),
+        (@"^adc_g",                   "Grass_Dried_pjvvl0_1K"),
+        (@"^adc_r",                   "Rocky_Steppe_ulgmbhwn_1K"),
+        (@"^adc_s",                   "Rocky_Sand_vd4pbdt_1K"),
+
         // ---- Noms explicites ---------------------------------------------
         (@"rock|cliff",               "Rock_Cliff_xccibbi_1K"),
         (@"sand",                     "Thai_Beach_Sand_tefnah1q_1K"),

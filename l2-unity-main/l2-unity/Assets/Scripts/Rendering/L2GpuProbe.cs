@@ -37,6 +37,13 @@ public class L2GpuProbe : MonoBehaviour
              + "c'est la correlation la plus probable avec les resets.")]
     [SerializeField] private bool _logSceneChanges = true;
 
+    [Header("Profileur")]
+    [Tooltip("Ecrit les donnees du profileur dans un fichier, en continu. "
+             + "INDISPENSABLE ici : quand le pilote lache, Unity meurt et emporte "
+             + "les donnees gardees en memoire - or c'est justement cette image-la "
+             + "qu'on veut examiner. Le fichier, lui, survit.")]
+    [SerializeField] private bool _writeProfilerLog = false;
+
     private float _next;
     private float _worstFrameMs;
     private int _frames;
@@ -45,6 +52,11 @@ public class L2GpuProbe : MonoBehaviour
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
+
+        if (_writeProfilerLog)
+        {
+            StartProfilerLog();
+        }
 
         if (_logSceneChanges)
         {
@@ -149,6 +161,30 @@ public class L2GpuProbe : MonoBehaviour
         sb.Append($" | gc {System.GC.CollectionCount(0)}/{System.GC.CollectionCount(1)}/{System.GC.CollectionCount(2)}");
 
         return sb.ToString();
+    }
+
+    /// Demarre l'ecriture continue du profileur sur disque.
+    ///
+    /// Le fichier .raw se recharge ensuite dans la fenetre Profiler
+    /// (Load), y compris apres un crash - c'est tout l'interet.
+    ///
+    /// ATTENTION : le fichier grossit vite, de l'ordre de plusieurs centaines
+    /// de Mo par minute. A n'activer que pour une session de diagnostic, et a
+    /// supprimer ensuite.
+    private void StartProfilerLog()
+    {
+        string dir = System.IO.Path.Combine(Application.dataPath, "..", "ProfilerLogs");
+        System.IO.Directory.CreateDirectory(dir);
+
+        string path = System.IO.Path.Combine(
+            dir, $"session_{System.DateTime.Now:yyyyMMdd_HHmmss}");
+
+        Profiler.logFile = path;
+        Profiler.enableBinaryLog = true;
+        Profiler.enabled = true;
+
+        Debug.Log($"[GpuProbe] Profileur enregistre dans {path}.raw - "
+                  + "a recharger via Window > Analysis > Profiler > Load apres le crash.");
     }
 
     private static string DescribeDevice()
