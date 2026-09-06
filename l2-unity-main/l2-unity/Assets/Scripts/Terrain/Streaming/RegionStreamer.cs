@@ -106,6 +106,25 @@ public class RegionStreamer : MonoBehaviour
     /// Un balayage d'assets est en cours. Empeche d'en empiler plusieurs.
     private bool _sweeping;
 
+    /// Seuil de memoire graphique au-dela duquel un balayage se declenche, en
+    /// mega-octets.
+    ///
+    /// Mesure du 2026-08-18 sur RTX 4050 portable : le regime etabli a quatre
+    /// regions tient a 774 Mo pour un budget de 5152. On peut donc laisser la
+    /// memoire monter tranquillement avant de payer le prix d'un balayage.
+    [SerializeField] private int _sweepAboveMb = 2000;
+
+    /// Delai minimal entre deux balayages, en secondes. Filet de securite si le
+    /// seuil de memoire venait a osciller autour de sa valeur.
+    [SerializeField] private float _sweepMinInterval = 45f;
+
+    /// Nombre de dechargements au-dela duquel on balaye meme sous le seuil.
+    /// Couvre le cas ou la mesure de memoire graphique serait indisponible.
+    [SerializeField] private int _sweepEveryUnloads = 12;
+
+    private float _lastSweepAt = -999f;
+    private int _unloadsSinceSweep;
+
     /// Instant ou chaque region est sortie de la fenetre. Sert de compte a
     /// rebours avant dechargement.
     private readonly Dictionary<string, float> _leftWindowAt = new Dictionary<string, float>();
@@ -212,23 +231,11 @@ public class RegionStreamer : MonoBehaviour
     /// Le plancher n'est jamais franchi vers le bas : un brouillard tres court
     /// ne doit pas reduire la fenetre en deca de ce que la vitesse de course
     /// exige pendant un chargement.
-    /// PLAFOND DE SECURITE, EN UNITES UNITY.
-    ///
-    /// Valeur PROVISOIRE, posee le temps de valider la liberation des assets
-    /// (voir ReleaseUnusedAssets). A 300 les voisines orthogonales, a 312 du
-    /// centre, restent dehors : on retrouve la fenetre de 4 regions.
-    ///
-    /// Attention a ne pas se tromper de cause. On a d'abord cru que le reset
-    /// du pilote venait du NOMBRE de regions simultanees, et ce plafond a ete
-    /// pose sur cette base. C'etait faux : le crash suivant est survenu avec
-    /// quatre regions seulement. La vraie cause etait l'accumulation en VRAM
-    /// des regions TRAVERSEES, dont les assets n'etaient jamais liberes.
-    ///
-    /// Une fois ce correctif valide en jeu, ce plafond devrait pouvoir
-    /// remonter a 450 - la valeur qui fait coincider l'horizon du brouillard
-    /// avec le bloc 3x3 complet. Le remonter AVANT d'avoir valide, ou le
-    /// laisser a 300 par simple prudence, sont deux erreurs symetriques.
-    public const float MaxHorizon = 300f;
+
+    // Plafond de l'horizon, en unites Unity. 450 fait coincider la portee du
+    // brouillard avec le bloc 3x3 complet. Il pilote aussi la distance de
+    // coupe de la camera, via GameSettings.ApplyCameraReach.
+    public const float MaxHorizon = 450f;
 
     /// Seuil d'opacite retenu pour les modes exponentiels : 99 %.
     ///
@@ -480,10 +487,30 @@ public class RegionStreamer : MonoBehaviour
 
     /// Balayage des assets devenus orphelins.
     ///
-    /// L'operation est couteuse - elle parcourt tous les assets charges - et
-    /// provoque un a-coup visible. On ne la lance donc jamais en parallele
-    /// d'elle-meme : quand plusieurs regions expirent dans le meme tick, un
-    /// seul balayage suffit a toutes les liberer.
+    /// POURQUOI IL NE SE DECLENCHE PLUS A CHAQUE DECHARGEMENT
+    /// Resources.UnloadUnusedAssets renvoie un AsyncOperation, mais sa partie
+    /// lourde n'est PAS asynchrone : Unity parcourt tout le graphe d'objets
+    /// charges sur le thread principal. Dans ce projet, ou Resources/ pese
+    /// 13 Go, ce parcours dure des secondes.
+    ///
+    /// Mesure du 2026-08-18, sonde GPU, au dechargement de 18_24 :
+    ///
+    ///     regime etabli      10-12 ms par image
+    ///     au balayage        pic a 2446 ms
+    ///     puis              pic a 23614 ms, et retrait du peripherique
+    ///
+    /// Windows declenche son TDR apres environ deux secondes sans reponse du
+    /// GPU ; les 23 secondes sont la duree de recuperation, donc la
+    /// consequence. Le balayage detruit en outre des ressources GPU pendant que
+    /// le rendu peut encore les referencer - ce que D3D12 tolere beaucoup moins
+    /// que D3D11, d'ou l'apparition du symptome au changement d'API.
+    ///
+    /// LE COMPROMIS RETENU
+    /// La fuite que ce balayage corrige est reelle : sans lui, c'est le nombre
+    /// de regions TRAVERSEES qui compte, pas le nombre chargees. Mais elle est
+    /// lente, et la memoire graphique tient a 774 Mo sur un budget de 5152.
+    /// On laisse donc monter jusqu'a un seuil au lieu de payer l'a-coup a
+    /// chaque region franchie.
     private void ReleaseUnusedAssets()
     {
         if (_sweeping)
@@ -491,6 +518,33 @@ public class RegionStreamer : MonoBehaviour
             return;
         }
 
+        _unloadsSinceSweep++;
+
+        if (Time.unscaledTime - _lastSweepAt < _sweepMinInterval)
+        {
+            return;
+        }
+
+        long graphicsMb =
+            UnityEngine.Profiling.Profiler.GetAllocatedMemoryForGraphicsDriver() / (1024 * 1024);
+
+        bool overBudget = graphicsMb >= _sweepAboveMb;
+        bool tooManyUnloads = _unloadsSinceSweep >= _sweepEveryUnloads;
+
+        if (!overBudget && !tooManyUnloads)
+        {
+            return;
+        }
+
+        if (_verbose)
+        {
+            Debug.Log($"[Streaming] Balayage declenche : {graphicsMb} Mo graphiques, "
+                      + $"{_unloadsSinceSweep} dechargement(s) depuis le dernier. "
+                      + "Un a-coup est attendu.");
+        }
+
+        _lastSweepAt = Time.unscaledTime;
+        _unloadsSinceSweep = 0;
         _sweeping = true;
 
         AsyncOperation sweep = Resources.UnloadUnusedAssets();

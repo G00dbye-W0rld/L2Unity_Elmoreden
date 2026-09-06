@@ -29,6 +29,12 @@ public class InGameState : GameStateBase
                 _stateMachine.ChangeState(GameState.RESTARTING);
                 break;
             case GameEvent.CHAR_LOADED:
+                // La camera du joueur existe seulement maintenant. C'est donc
+                // le premier instant ou sa portee peut etre bornee a l'horizon
+                // du brouillard : ApplyAll, declenchee bien plus tot a la
+                // construction de l'interface, n'avait encore rien a regler.
+                GameSettings.RefreshCameraReach();
+
                 _stateMachine.StopLoading();
                 break;
             case GameEvent.GAME_DISCONNECTED:

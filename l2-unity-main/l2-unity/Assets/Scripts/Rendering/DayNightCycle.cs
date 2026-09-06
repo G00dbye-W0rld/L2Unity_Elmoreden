@@ -226,30 +226,27 @@ public class DayNightCycle : MonoBehaviour
             return;
         }
 
-        // On ne conserve que la couleur : la notion de degrade start/end et
-        // l'intensite directionnelle etaient propres au plugin et n'ont pas
-        // d'equivalent URP. Les champs restent serialises pour ne pas perdre
-        // les teintes reglees a la main.
-        Color fogColor = RenderSettings.fogColor;
+        RenderSettings.fogColor = ResolveFogColor();
+    }
 
-        if (_clock.Clock.dawnRatio > 0 && _clock.Clock.dawnRatio < 1)
+    // Toujours partir des teintes de reference, jamais de RenderSettings.fogColor :
+    // le lire pour le reecrire rendait le resultat cumulatif d'une image a
+    // l'autre. Et les deux branches hors transition sont indispensables - sans
+    // elles, en pleine nuit aucune condition ne s'appliquait et le brouillard
+    // gardait le bleu de la scene.
+    private Color ResolveFogColor()
+    {
+        if (_clock.Clock.dawnRatio > 0f && _clock.Clock.dawnRatio < 1f)
         {
-            fogColor = Color.Lerp(fogColor, _dayFogColorStart, _clock.Clock.dawnRatio);
-        }
-        if (_clock.Clock.brightRatio > 0 && _clock.Clock.brightRatio < 1)
-        {
-            fogColor = _dayFogColorStart;
-        }
-        if (_clock.Clock.duskRatio > 0 && _clock.Clock.duskRatio < 1)
-        {
-            fogColor = Color.Lerp(_dayFogColorStart, _nightFogColorStart, _clock.Clock.duskRatio);
-        }
-        if (_clock.Clock.darkRatio > 0 && _clock.Clock.darkRatio < 1)
-        {
-            fogColor = _nightFogColorStart;
+            return Color.Lerp(_nightFogColorStart, _dayFogColorStart, _clock.Clock.dawnRatio);
         }
 
-        RenderSettings.fogColor = fogColor;
+        if (_clock.Clock.duskRatio > 0f && _clock.Clock.duskRatio < 1f)
+        {
+            return Color.Lerp(_dayFogColorStart, _nightFogColorStart, _clock.Clock.duskRatio);
+        }
+
+        return _clock.IsNightTime() ? _nightFogColorStart : _dayFogColorStart;
     }
 
     private void UpdateAmbientLightIntensity()

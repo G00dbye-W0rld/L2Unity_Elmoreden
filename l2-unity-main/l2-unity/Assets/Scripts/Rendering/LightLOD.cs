@@ -23,6 +23,8 @@ public class LightLOD : MonoBehaviour
     private List<LODAdjustment> LODLevels = new();
 
     private bool _ready = false;
+    private bool _inRange = true;
+    private LightSchedule _schedule;
 
     private void Awake()
     {
@@ -33,7 +35,26 @@ public class LightLOD : MonoBehaviour
     {
         _ready = false;
         _lastUpdate = 0;
+    }
+
+    // Les lumieres d'une region se chargent avant la camera du joueur : lire
+    // CameraController.Instance dans Start levait une NullReferenceException,
+    // et le LOD ne s'appliquait alors jamais.
+    private bool ResolveCamera()
+    {
+        if (_mainCamera != null)
+        {
+            return true;
+        }
+
+        if (CameraController.Instance == null)
+        {
+            return false;
+        }
+
         _mainCamera = CameraController.Instance.GetComponent<Camera>();
+
+        return _mainCamera != null;
     }
 
 
@@ -76,7 +97,10 @@ public class LightLOD : MonoBehaviour
 #if (UNITY_EDITOR)
             if (EditorApplication.isPlaying)
             {
-                AdjustLODQuality(_mainCamera);
+                if (ResolveCamera())
+                {
+                    AdjustLODQuality(_mainCamera);
+                }
             }
             else
             {
@@ -86,7 +110,10 @@ public class LightLOD : MonoBehaviour
                 }
             }
 #else
-            AdjustLODQuality(_mainCamera);
+            if (ResolveCamera())
+            {
+                AdjustLODQuality(_mainCamera);
+            }
 #endif
         }
     }
@@ -104,7 +131,8 @@ public class LightLOD : MonoBehaviour
                 && _squareDistanceFromCamera <= LODLevels[i].MaxSquareDistance
             )
             {
-                _light.enabled = true;
+                _inRange = true;
+                RefreshEnabled();
                 _light.shadows = LODLevels[i].LightShadows;
                 if (QualitySettings.shadowResolution <= LODLevels[i].ShadowResolution)
                 {
@@ -119,6 +147,28 @@ public class LightLOD : MonoBehaviour
             }
         }
 
-        _light.enabled = false;
+        _inRange = false;
+        RefreshEnabled();
+    }
+
+    // Seul ecrivain de Light.enabled : la distance vient d'ici, l'heure de
+    // LightSchedule. Sans cet arbitrage les deux se battraient a chaque image.
+    public void RefreshEnabled()
+    {
+        if (_light == null)
+        {
+            return;
+        }
+
+        if (_schedule == null)
+        {
+            _schedule = GetComponent<LightSchedule>();
+        }
+
+        // Hors mode jeu, LightSchedule.Awake n'a pas tourne et son IsOn vaut
+        // false : le consulter eteindrait les lumieres dans la vue Scene.
+        bool scheduleAllows = _schedule == null || !Application.isPlaying || _schedule.IsOn;
+
+        _light.enabled = _inRange && scheduleAllows;
     }
 }

@@ -1,56 +1,60 @@
-using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 using UnityEngine.Profiling;
 
-/// Enregistreur de vol pour les resets GPU.
-///
-/// POURQUOI
-/// Quatre hypotheses ont ete formulees puis invalidees sur les crashs
-/// "Failed to present D3D11 swapchain" du 12-14/08/2026 : le bruit de log, la
-/// rafale de pipeline states MicroSplat, les cibles de rendu surdimensionnees
-/// (MSAA x8, shadowmaps 8192), et la visualisation NavMesh. Chacune reposait
-/// sur une inference a partir de ce que le log NE contenait pas.
-///
-/// Le probleme est que le log ne contient RIEN d'utile au moment du crash :
-/// les "failed to create buffer" qui le precedent sont posterieurs a la perte
-/// du device, et Windows confirme un TDR sans dire ce qui l'a provoque.
-///
-/// Cette sonde ecrit donc l'etat GPU a intervalle regulier. Quand le pilote
-/// lachera, la derniere ligne du log dira ce que la machine etait en train de
-/// dessiner - au lieu de nous laisser deviner une cinquieme fois.
-///
-/// A POSER sur un objet de la scene Game, ou n'importe ou : elle se rend
-/// persistante et n'a aucune dependance.
+// Enregistreur de vol pour les resets pilote. Quand le device meurt, le log
+// Unity ne dit rien d'utile : cette sonde ecrit l'etat GPU en continu, et un
+// releve detaille avec la pose de la camera des qu'une image depasse le seuil.
 public class L2GpuProbe : MonoBehaviour
 {
-    [Tooltip("Secondes entre deux releves. Trop court noierait le log, trop "
-             + "long raterait le pic qui precede le reset.")]
     [SerializeField] private float _interval = 1f;
-
-    [Tooltip("Ne journalise que si le temps par image depasse ce seuil (ms). "
-             + "0 = tout journaliser. Utile pour ne garder que les pics.")]
-    [SerializeField] private float _frameTimeThresholdMs = 0f;
-
-    [Tooltip("Journalise aussi chaque chargement et dechargement de scene : "
-             + "c'est la correlation la plus probable avec les resets.")]
     [SerializeField] private bool _logSceneChanges = true;
 
-    [Header("Profileur")]
-    [Tooltip("Ecrit les donnees du profileur dans un fichier, en continu. "
-             + "INDISPENSABLE ici : quand le pilote lache, Unity meurt et emporte "
-             + "les donnees gardees en memoire - or c'est justement cette image-la "
-             + "qu'on veut examiner. Le fichier, lui, survit.")]
+    [Tooltip("Toute image depassant ce seuil (ms) est relevee seule. 0 desactive.")]
+    [SerializeField] private float _spikeThresholdMs = 250f;
+
+    [Tooltip("Images precedant le pic a joindre au releve : la trajectoire d'approche.")]
+    [SerializeField] private int _spikeTrailFrames = 30;
+
+    [SerializeField] private int _maxSpikeRecords = 200;
+
+    [Tooltip("Enregistrement binaire du profileur. Plusieurs centaines de Mo par minute.")]
     [SerializeField] private bool _writeProfilerLog = false;
+
+    private struct FrameSample
+    {
+        public float Ms;
+        public Vector3 Position;
+        public float Yaw;
+        public bool Valid;
+    }
+
+    private static L2GpuProbe _instance;
 
     private float _next;
     private float _worstFrameMs;
     private int _frames;
     private float _accumMs;
 
+    private FrameSample[] _trail;
+    private int _trailWrite;
+    private int _trailCount;
+    private int _spikeCount;
+    private System.IO.StreamWriter _spikeLog;
+
     private void Awake()
     {
+        // LoadGame recharge Game.unity a chaque entree en jeu : sans garde, une
+        // seconde sonde nait et chaque image serait comptee deux fois.
+        if (_instance != null && _instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        _instance = this;
         DontDestroyOnLoad(gameObject);
 
         if (_writeProfilerLog)
@@ -64,30 +68,46 @@ public class L2GpuProbe : MonoBehaviour
             SceneManager.sceneUnloaded += OnSceneUnloaded;
         }
 
+        if (_spikeThresholdMs > 0f)
+        {
+            _trail = new FrameSample[Mathf.Max(1, _spikeTrailFrames)];
+            OpenSpikeLog();
+        }
+
         Debug.Log("[GpuProbe] Demarree. " + DescribeDevice());
     }
 
     private void OnDestroy()
     {
+        if (_instance != this)
+        {
+            return;
+        }
+
         SceneManager.sceneLoaded -= OnSceneLoaded;
         SceneManager.sceneUnloaded -= OnSceneUnloaded;
+
+        CloseSpikeLog();
+        _instance = null;
+    }
+
+    private void OnApplicationQuit()
+    {
+        CloseSpikeLog();
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        Debug.Log($"[GpuProbe] +scene {scene.name} ({SceneManager.sceneCount} chargees) - {Snapshot()}");
+        Debug.Log($"[GpuProbe] +scene {scene.name} ({SceneManager.sceneCount}) - {Snapshot()}");
     }
 
     private void OnSceneUnloaded(Scene scene)
     {
-        Debug.Log($"[GpuProbe] -scene {scene.name} ({SceneManager.sceneCount} chargees) - {Snapshot()}");
+        Debug.Log($"[GpuProbe] -scene {scene.name} ({SceneManager.sceneCount}) - {Snapshot()}");
     }
 
     private void Update()
     {
-        // Le temps par image est accumule a CHAQUE image, pas seulement au
-        // releve : un pic de 800 ms entre deux releves serait invisible
-        // autrement, alors que c'est precisement ce qu'on cherche.
         float ms = Time.unscaledDeltaTime * 1000f;
         _accumMs += ms;
         _frames++;
@@ -96,6 +116,8 @@ public class L2GpuProbe : MonoBehaviour
         {
             _worstFrameMs = ms;
         }
+
+        TrackFrame(ms);
 
         if (Time.unscaledTime < _next)
         {
@@ -111,24 +133,96 @@ public class L2GpuProbe : MonoBehaviour
         _frames = 0;
         _worstFrameMs = 0f;
 
-        if (_frameTimeThresholdMs > 0f && worst < _frameTimeThresholdMs)
+        Debug.Log($"[GpuProbe] moy {avg:F1} ms | pic {worst:F1} ms | {Snapshot()}");
+    }
+
+    // unscaledDeltaTime lu pendant l'image N donne la duree de N-1 : la pose
+    // fautive est celle du tour precedent, pas la courante.
+    private void TrackFrame(float ms)
+    {
+        if (_trail == null)
         {
             return;
         }
 
-        Debug.Log($"[GpuProbe] moy {avg:F1} ms | pic {worst:F1} ms | {Snapshot()}");
+        int previous = (_trailWrite - 1 + _trail.Length) % _trail.Length;
+
+        if (_trailCount > 0)
+        {
+            _trail[previous].Ms = ms;
+
+            if (ms >= _spikeThresholdMs && _spikeCount < _maxSpikeRecords)
+            {
+                RecordSpike(_trail[previous]);
+            }
+        }
+
+        Camera cam = Camera.main;
+
+        _trail[_trailWrite] = new FrameSample
+        {
+            Ms = 0f,
+            Position = cam != null ? cam.transform.position : Vector3.zero,
+            Yaw = cam != null ? cam.transform.eulerAngles.y : 0f,
+            Valid = cam != null,
+        };
+
+        _trailWrite = (_trailWrite + 1) % _trail.Length;
+
+        if (_trailCount < _trail.Length)
+        {
+            _trailCount++;
+        }
     }
 
-    /// Etat instantane, compact : une seule ligne de log par releve.
+    private void RecordSpike(FrameSample slow)
+    {
+        _spikeCount++;
+
+        Camera cam = Camera.main;
+        string etat = Snapshot();
+        string region = slow.Valid ? RegionGrid.NameAt(slow.Position) : "(inconnue)";
+
+        Debug.LogWarning($"[GpuProbe] PIC #{_spikeCount} : {slow.Ms:F1} ms | region {region} | "
+                         + $"cap {slow.Yaw:F1} deg | pos {Fmt(slow.Position)} | {etat}");
+
+        if (_spikeLog == null)
+        {
+            return;
+        }
+
+        _spikeLog.WriteLine();
+        _spikeLog.WriteLine($"--- PIC #{_spikeCount} | image {slow.Ms:F1} ms | t = {Time.unscaledTime:F1} s");
+        _spikeLog.WriteLine($"    position  {Fmt(slow.Position)}   region {region}   cap {slow.Yaw:F1} deg");
+        _spikeLog.WriteLine($"    etat      {etat}");
+        _spikeLog.WriteLine($"    config    {DescribeConfig(cam)}");
+        _spikeLog.WriteLine($"    scenes    {DescribeScenes()}");
+        _spikeLog.WriteLine($"    trajet    {_trailCount} images precedentes :");
+
+        WriteTrail();
+    }
+
+    private void WriteTrail()
+    {
+        int oldest = (_trailWrite - _trailCount + _trail.Length) % _trail.Length;
+
+        for (int i = 0; i < _trailCount; i++)
+        {
+            FrameSample s = _trail[(oldest + i) % _trail.Length];
+
+            if (s.Valid)
+            {
+                _spikeLog.WriteLine($"      -{_trailCount - 1 - i,-3} {s.Ms,8:F1} ms  "
+                                    + $"{Fmt(s.Position)}  cap {s.Yaw:F1} deg");
+            }
+        }
+    }
+
     private string Snapshot()
     {
-        var sb = new StringBuilder();
-
-        sb.Append($"scenes {SceneManager.sceneCount}");
+        var sb = new StringBuilder($"scenes {SceneManager.sceneCount}");
 
 #if UNITY_EDITOR
-        // UnityStats n'existe qu'en editeur, mais c'est la que les crashs se
-        // produisent - et c'est la seule source de draw calls sans profiler.
         sb.Append($" | draws {UnityEditor.UnityStats.drawCalls}");
         sb.Append($" setpass {UnityEditor.UnityStats.setPassCalls}");
         sb.Append($" batches {UnityEditor.UnityStats.batches}");
@@ -136,61 +230,99 @@ public class L2GpuProbe : MonoBehaviour
         sb.Append($" shadowCasters {UnityEditor.UnityStats.shadowCasters}");
 #endif
 
-        // La memoire graphique allouee par Unity ne couvre pas tout ce que le
-        // pilote reserve (cibles de rendu comprises), mais sa DERIVE est le
-        // signal recherche : une montee reguliere trahit une fuite.
-        long gfx = Profiler.GetAllocatedMemoryForGraphicsDriver();
-        sb.Append($" | gfx {gfx / (1024 * 1024)} Mo");
+        sb.Append($" | gfx {Profiler.GetAllocatedMemoryForGraphicsDriver() / (1024 * 1024)} Mo");
         sb.Append($" mono {Profiler.GetMonoUsedSizeLong() / (1024 * 1024)} Mo");
         sb.Append($" reserve {Profiler.GetTotalReservedMemoryLong() / (1024 * 1024)} Mo");
 
-        // LE DISCRIMINANT.
-        //
-        // Le releve du 2026-08-14 a montre une image a 23 474 ms entouree
-        // d'images a 15 ms, sans montee de gfx ni surcharge de draws. Deux
-        // mecanismes peuvent produire cela :
-        //
-        //   - la creation d'un pipeline state cote pilote, au premier rendu
-        //     d'un shader MicroSplat jamais vu (153 programmes distincts) ;
-        //   - un ramassage de miettes sur un tas manage de 1,6 Go, ou de la
-        //     pagination si la machine manque de RAM.
-        //
-        // Le compteur de GC les separe : s'il augmente pendant l'image
-        // bloquee, c'est la memoire ; sinon c'est le pilote. Time.deltaTime
-        // seul ne pouvait pas trancher, puisqu'il mesure du temps mural.
+        // Un compteur de GC qui monte pendant l'image bloquee designe la
+        // memoire ; sinon c'est le pilote.
         sb.Append($" | gc {System.GC.CollectionCount(0)}/{System.GC.CollectionCount(1)}/{System.GC.CollectionCount(2)}");
 
         return sb.ToString();
     }
 
-    /// Demarre l'ecriture continue du profileur sur disque.
-    ///
-    /// Le fichier .raw se recharge ensuite dans la fenetre Profiler
-    /// (Load), y compris apres un crash - c'est tout l'interet.
-    ///
-    /// ATTENTION : le fichier grossit vite, de l'ordre de plusieurs centaines
-    /// de Mo par minute. A n'activer que pour une session de diagnostic, et a
-    /// supprimer ensuite.
-    private void StartProfilerLog()
+    private static string Fmt(Vector3 v)
     {
-        string dir = System.IO.Path.Combine(Application.dataPath, "..", "ProfilerLogs");
-        System.IO.Directory.CreateDirectory(dir);
+        return $"({v.x:F1} ; {v.y:F1} ; {v.z:F1})";
+    }
 
-        string path = System.IO.Path.Combine(
-            dir, $"session_{System.DateTime.Now:yyyyMMdd_HHmmss}");
+    private static string DescribeScenes()
+    {
+        var sb = new StringBuilder();
 
-        Profiler.logFile = path;
-        Profiler.enableBinaryLog = true;
-        Profiler.enabled = true;
+        for (int i = 0; i < SceneManager.sceneCount; i++)
+        {
+            sb.Append(i > 0 ? ", " : "").Append(SceneManager.GetSceneAt(i).name);
+        }
 
-        Debug.Log($"[GpuProbe] Profileur enregistre dans {path}.raw - "
-                  + "a recharger via Window > Analysis > Profiler > Load apres le crash.");
+        return sb.ToString();
     }
 
     private static string DescribeDevice()
     {
         return $"{SystemInfo.graphicsDeviceName} | {SystemInfo.graphicsDeviceType} | "
-               + $"VRAM {SystemInfo.graphicsMemorySize} Mo | "
-               + $"shadowmap max {SystemInfo.maxTextureSize}";
+               + $"VRAM {SystemInfo.graphicsMemorySize} Mo";
+    }
+
+    // La camera est passee en argument : Camera.main peut renvoyer la
+    // LoadingCamera, dont la distance de coupe n'est pas celle du joueur.
+    private static string DescribeConfig(Camera cam)
+    {
+        RenderPipelineAsset pipeline = GraphicsSettings.currentRenderPipeline;
+
+        return $"camera {(cam != null ? cam.name : "(aucune)")} "
+               + $"far clip {(cam != null ? cam.farClipPlane : 0f)} | "
+               + $"MSAA {QualitySettings.antiAliasing}x | "
+               + $"pipeline {(pipeline != null ? pipeline.name : "(builtin)")} | "
+               + $"brouillard {(RenderSettings.fog ? RenderSettings.fogDensity.ToString() : "off")}";
+    }
+
+    // AutoFlush est indispensable : un TDR tue le processus sans lui laisser
+    // fermer le fichier, et c'est le dernier releve qui nous interesse.
+    private void OpenSpikeLog()
+    {
+        try
+        {
+            string dir = System.IO.Path.Combine(Application.dataPath, "..", "GpuProbeLogs");
+            System.IO.Directory.CreateDirectory(dir);
+
+            string path = System.IO.Path.Combine(dir, $"pics_{System.DateTime.Now:yyyyMMdd_HHmmss}.log");
+
+            _spikeLog = new System.IO.StreamWriter(path, false) { AutoFlush = true };
+            _spikeLog.WriteLine($"# {System.DateTime.Now} - {DescribeDevice()}");
+            _spikeLog.WriteLine($"# seuil {_spikeThresholdMs} ms, trajet {_spikeTrailFrames} images");
+
+            Debug.Log($"[GpuProbe] Pics enregistres dans {System.IO.Path.GetFullPath(path)}");
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"[GpuProbe] Fichier de pics impossible a ouvrir : {e.Message}");
+            _spikeLog = null;
+        }
+    }
+
+    private void CloseSpikeLog()
+    {
+        if (_spikeLog == null)
+        {
+            return;
+        }
+
+        _spikeLog.WriteLine();
+        _spikeLog.WriteLine($"# Fin de session - {_spikeCount} pic(s).");
+        _spikeLog.Dispose();
+        _spikeLog = null;
+    }
+
+    private void StartProfilerLog()
+    {
+        string dir = System.IO.Path.Combine(Application.dataPath, "..", "ProfilerLogs");
+        System.IO.Directory.CreateDirectory(dir);
+
+        Profiler.logFile = System.IO.Path.Combine(dir, $"session_{System.DateTime.Now:yyyyMMdd_HHmmss}");
+        Profiler.enableBinaryLog = true;
+        Profiler.enabled = true;
+
+        Debug.Log($"[GpuProbe] Profileur -> {Profiler.logFile}.raw");
     }
 }

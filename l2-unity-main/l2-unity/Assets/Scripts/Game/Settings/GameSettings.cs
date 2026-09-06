@@ -33,8 +33,14 @@ public static class GameSettings
     // (Atmospheric Height Fog) deja calibre par les artistes (ex. la scene Game.unity a
     // fogDistanceStart=179.49/fogDistanceEnd=381) - un chiffre en dur ecrasait ce reglage et
     // pouvait meme inverser start>end (brouillard partout des le palier par defaut). Le far
-    // clip de la camera suit la meme echelle pour rester cohérent avec le brouillard.
+    // clip de la camera suit la meme echelle, MAIS il est desormais borne par l'horizon du
+    // brouillard : monter la distance de vue eclaircit le brouillard sans jamais faire
+    // dessiner au-dela de ce qu'il laisse voir. Voir ApplyCameraReach.
     private static readonly float[] ViewDistanceScale = { 0.6f, 1f, 1.6f, 2.4f };
+
+    /// De combien la camera porte au-dela de l'horizon du brouillard. Voir
+    /// ApplyCameraReach : juste assez pour que la coupe reste invisible.
+    private const float HorizonMargin = 1.15f;
     // Index aligne sur "Detail de l'eau" (Basse/Moyenne/Haute). Moyenne = valeurs par defaut du
     // materiau (WaterVolume-URP.shadergraph) : _DetailStrength/_RefractStrength/_BumpStrength.
     private static readonly float[] WaterDetailStrengths = { 0.05f, 0.2f, 0.4f };
@@ -152,16 +158,6 @@ public static class GameSettings
 
         float viewScale = ViewDistanceScale[Mathf.Clamp(ViewDistanceLevel, 0, ViewDistanceScale.Length - 1)];
 
-        Camera mainCamera = Camera.main;
-        if (mainCamera != null)
-        {
-            if (_cachedFarClipPlane < 0f)
-            {
-                _cachedFarClipPlane = mainCamera.farClipPlane;
-            }
-            mainCamera.farClipPlane = _cachedFarClipPlane * viewScale;
-        }
-
         // La distance de vue etire aussi le brouillard, pour qu'il reste
         // coherent avec la portee de la camera.
         //
@@ -206,7 +202,54 @@ public static class GameSettings
             RenderSettings.fogEndDistance = end;
         }
 
+        // APRES le brouillard, jamais avant : la portee de la camera est bornee
+        // par l'horizon, qui depend de la densite qu'on vient d'appliquer.
+        ApplyCameraReach(viewScale);
+
         ApplyWaterDetail();
+    }
+
+    // Bornee par l'horizon du brouillard : au-dela, la surface dessinee est
+    // invisible. Resolue via CameraController et non Camera.main, qui peut
+    // renvoyer la LoadingCamera et figer une reference de 1000 au lieu de 500.
+    private static void ApplyCameraReach(float viewScale)
+    {
+        if (CameraController.Instance == null)
+        {
+            return;
+        }
+
+        Camera cam = CameraController.Instance.GetComponent<Camera>();
+
+        if (cam == null)
+        {
+            return;
+        }
+
+        if (_cachedFarClipPlane < 0f)
+        {
+            _cachedFarClipPlane = cam.farClipPlane;
+        }
+
+        // La marge laisse le brouillard achever de fermer la vue avant la
+        // coupe : pile a l'horizon il subsiste 1 % de visibilite, et le bord
+        // se verrait comme une ligne nette sur le ciel.
+        float limit = RegionStreamer.HorizonDistance(0f) * HorizonMargin;
+
+        cam.farClipPlane = Mathf.Min(_cachedFarClipPlane * viewScale, limit);
+    }
+
+    /// Rappel de la portee de camera une fois le joueur en jeu.
+    ///
+    /// ApplyAll est declenchee a la construction de l'interface, alors que la
+    /// camera du joueur n'existe pas encore : ApplyCameraReach renonce donc, a
+    /// dessein. Il faut un second passage quand elle est la, sans quoi la
+    /// borne ne s'appliquerait qu'a la premiere ouverture des options.
+    public static void RefreshCameraReach()
+    {
+        float viewScale = ViewDistanceScale[Mathf.Clamp(ViewDistanceLevel, 0, ViewDistanceScale.Length - 1)];
+
+        ApplyCameraReach(viewScale);
     }
 
     // Noms de propriete reels du shader (WaterVolume-URP.shadergraph) : Shader Graph ne genere
