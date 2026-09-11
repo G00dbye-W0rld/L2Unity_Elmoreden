@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5761803617169700733}
   - component: {fileID: 1227905388046833727}
   - component: {fileID: 6026827821703622600}
+  - component: {fileID: 5935459509874654817}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -28,7 +29,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7616108795757726014}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.27059805, y: 0.6532815, z: -0.27059805, w: 0.6532815}
+  m_LocalRotation: {x: 0.21766494, y: 0.37191108, z: -0.09015978, w: 0.8978727}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -89,7 +90,7 @@ Light:
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 1, y: 1}
   m_BounceIntensity: 1
-  m_ColorTemperature: 4629.411
+  m_ColorTemperature: 4635.028
   m_UseColorTemperature: 1
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
@@ -191,8 +192,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dayDurationMinutes: 240
-  _timeHour: 08:16:35
-  _timeElapsed: 4965.993
+  _timeHour: 08:16:55
+  _timeElapsed: 4969.255
   _startClock: 1
   _worldTimer:
     dayStartTime: 0.25
@@ -202,10 +203,24 @@ MonoBehaviour:
     sunsetStartTime: 0.89
     sunsetEndTime: 0.99
   _clock:
-    totalRatio: 0.34486064
-    dayRatio: 0.169394
+    totalRatio: 0.34508714
+    dayRatio: 0.16979846
     nightRatio: 0
     dawnRatio: 1
-    brightRatio: 0.08784051
+    brightRatio: 0.08835249
     duskRatio: 0
     darkRatio: 1
+--- !u!114 &5935459509874654817
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7616108795757726014}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 495d5a7fdb61ac64da96627fdded11fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _dayFactor: 0.15
+  _fadeSeconds: 6

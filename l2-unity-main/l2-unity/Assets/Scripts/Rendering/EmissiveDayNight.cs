@@ -16,6 +16,7 @@ public class EmissiveDayNight : MonoBehaviour
     [Tooltip("Duree de la transition, en secondes.")]
     [SerializeField] private float _fadeSeconds = 6f;
 
+    private const string DayNightTag = "L2DayNight";
     private static readonly int EmissionColorId = Shader.PropertyToID("_EmissionColor");
 
     private readonly Dictionary<Material, Material> _copies = new Dictionary<Material, Material>();
@@ -88,16 +89,20 @@ public class EmissiveDayNight : MonoBehaviour
         _applied = -1f;
     }
 
+    // Le marqueur pose par L2EmissionRestorer est indispensable : sans lui on
+    // attenuerait aussi les flammes et les effets magiques, qui doivent briller
+    // de jour comme de nuit.
     private static bool IsEmissive(Material m)
     {
-        return m.HasProperty(EmissionColorId)
+        return m.GetTag(DayNightTag, false, "") == "1"
+               && m.HasProperty(EmissionColorId)
                && m.IsKeywordEnabled("_EMISSION")
                && m.GetColor(EmissionColorId).maxColorComponent > 0.001f;
     }
 
     private void Update()
     {
-        if (WorldClock.Instance == null || _live.Count == 0)
+        if (WorldClock.Instance == null || !WorldClock.Instance.Synchronized || _live.Count == 0)
         {
             return;
         }

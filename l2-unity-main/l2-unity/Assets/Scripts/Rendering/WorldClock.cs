@@ -95,11 +95,18 @@ public class WorldClock : MonoBehaviour
         _timeHour = time.ToString(@"hh\:mm\:ss");
     }
 
+    // Avant cet appel, dayRatio vaut 0 et IsNightTime() renvoie donc vrai :
+    // tout ce qui s'allume la nuit doit attendre ce drapeau, sans quoi il
+    // s'allume au chargement puis s'eteint des que l'heure serveur arrive.
+    public bool Synchronized { get; private set; }
+
     public void SynchronizeClock(int currentGameTime)
     {
         //Gametime goes from 0 to 1439
         float serverDayRatio = currentGameTime / 1439f;
         _timeElapsed = serverDayRatio * _dayDurationMinutes * 60f;
+
+        Synchronized = true;
     }
 
     public bool IsNightTime()

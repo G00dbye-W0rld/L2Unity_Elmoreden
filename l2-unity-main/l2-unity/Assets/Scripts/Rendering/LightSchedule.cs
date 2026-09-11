@@ -41,7 +41,7 @@ public class LightSchedule : MonoBehaviour
 
     private void Update()
     {
-        if (WorldClock.Instance == null)
+        if (WorldClock.Instance == null || !WorldClock.Instance.Synchronized)
         {
             return;
         }
