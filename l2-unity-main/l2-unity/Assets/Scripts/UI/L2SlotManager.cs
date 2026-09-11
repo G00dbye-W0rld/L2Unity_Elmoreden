@@ -123,6 +123,19 @@ public class L2SlotManager : L2PopupWindow
             case L2Slot.SlotType.Basket:
                 HandleBasketDrag();
                 break;
+            case L2Slot.SlotType.StoreItem:
+                if (_hoverSlot != null && _hoverSlot.Type == L2Slot.SlotType.StoreBasket)
+                {
+                    ((PrivateStoreSlot)_draggedSlot).SwapBasket();
+                }
+                break;
+            case L2Slot.SlotType.StoreBasket:
+                // Sortir un objet du magasin, ou le lacher ailleurs, le rend a l'inventaire.
+                if (_hoverSlot == null || _hoverSlot.Type != L2Slot.SlotType.StoreBasket)
+                {
+                    ((PrivateStoreSlot)_draggedSlot).SwapBasket();
+                }
+                break;
             default:
                 break;
         }

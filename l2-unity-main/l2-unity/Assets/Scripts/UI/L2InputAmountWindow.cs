@@ -192,6 +192,17 @@ public class L2InputAmountWindow : L2PopupWindow
         ShowWindow(systemMessage.PrintMessage(false), count, confirmAction, cancelAction);
     }
 
+    public void ShowWindow(SystemMessage systemMessage, int count, int initialAmount, Action<int> confirmAction, Action cancelAction)
+    {
+        ShowWindow(systemMessage.PrintMessage(false), count, confirmAction, cancelAction);
+
+        if (initialAmount > 0)
+        {
+            _inputField.value = initialAmount.ToString("N0", CultureInfo.InvariantCulture);
+            _currentAmount = initialAmount;
+        }
+    }
+
     private void ShowWindow(string content, int count, Action<int> confirmAction, Action cancelAction)
     {
         _inputFocused = false;

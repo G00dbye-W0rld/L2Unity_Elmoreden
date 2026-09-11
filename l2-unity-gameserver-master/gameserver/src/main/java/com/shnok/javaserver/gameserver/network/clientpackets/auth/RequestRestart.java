@@ -60,8 +60,11 @@ public final class RequestRestart extends L2GameClientPacket
 		// detach the client from the char so that the connection isnt closed in the deleteMe
 		player.setClient(null);
 		
-		// removing player from the world
-		player.deleteMe();
+		// removing player from the world, unless he stays as an offline trader
+		if (player.canEnterOfflineTrade())
+			LOGGER.info("[OfflineTrade] {} reste en jeu avec son magasin (retour au choix du personnage).", player.getName());
+		else
+			player.deleteMe();
 		
 		client.setPlayer(null);
 		client.setState(GameClientState.AUTHED);

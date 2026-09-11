@@ -105,7 +105,7 @@ public class UserInfoPacket : ServerPacket
             EntityActionInfo.Invisible = ReadB() == 1;
 
             ReadB(); //MountType
-            ReadB(); //OperateType
+            EntityActionInfo.OperateType = (OperateType)ReadB();
 
             int cubicCount = ReadH();
             for (int i = 0; i < cubicCount; i++)

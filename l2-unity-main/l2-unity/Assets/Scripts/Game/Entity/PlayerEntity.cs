@@ -73,7 +73,24 @@ public class PlayerEntity : Entity
     {
         base.UpdateWaitType(moveType);
 
-        PlayerStateMachine.Instance.OnActionAllowed();
+        // Assis ou releve par le serveur (magasin prive) sans demande du
+        // joueur : aucune intention n'attend cette reponse, on force l'etat.
+        PlayerStateMachine stateMachine = PlayerStateMachine.Instance;
+        bool sitting = stateMachine.State == PlayerState.SITTING || stateMachine.State == PlayerState.SIT_WAIT;
+
+        if (moveType == ChangeWaitTypePacket.WaitType.WT_SITTING && !sitting && stateMachine.Intention != Intention.INTENTION_SIT)
+        {
+            stateMachine.ChangeState(PlayerState.SITTING);
+            return;
+        }
+
+        if (moveType == ChangeWaitTypePacket.WaitType.WT_STANDING && sitting && stateMachine.Intention != Intention.INTENTION_STAND)
+        {
+            stateMachine.ChangeState(PlayerState.STANDING);
+            return;
+        }
+
+        stateMachine.OnActionAllowed();
     }
 
     public override void UpdateMoveType(bool running)

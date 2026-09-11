@@ -32,6 +32,9 @@ public class PlayerActions : MonoBehaviour
         _actions.Add(ActionType.PartyLeave, new PartyLeaveAction());
         _actions.Add(ActionType.PartyKick, new PartyKickAction());
         _actions.Add(ActionType.PartyChangeLeader, new PartyChangeLeaderAction());
+        _actions.Add(ActionType.PrivateStoreSell, new ServerAction(ActionType.PrivateStoreSell));
+        _actions.Add(ActionType.PackageSale, new ServerAction(ActionType.PackageSale));
+        _actions.Add(ActionType.PrivateStoreBuy, new ServerAction(ActionType.PrivateStoreBuy));
     }
 
     private void OnDestroy()

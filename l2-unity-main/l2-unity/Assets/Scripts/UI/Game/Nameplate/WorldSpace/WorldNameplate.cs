@@ -122,6 +122,137 @@ public class WorldNameplate
         // Hover sert desormais d'etat par defaut TOUJOURS affiche (plus une
         // reaction au survol souris) - cf. NameplatesManagerGame.UpdateWorldBubbleStates.
         SetBubbleState(BubbleState.Hover);
+
+        _shownOperateType = (OperateType)255;
+    }
+
+    private OperateType _shownOperateType = (OperateType)255;
+    private string _shownStoreMessage;
+    private string _shownTitle;
+
+    // Fond du nom de magasin : un quad noir dimensionne sur le texte, plus
+    // precis que la balise <mark> de TMP. Cree a la demande, garde par le pool.
+    private const string StoreBackgroundName = "StoreBackground";
+    private const float StoreBackgroundAlpha = 0.9f;
+    private static readonly Vector2 StoreBackgroundPadding = new Vector2(0.3f, 0.1f);
+    private static Material _storeBackgroundMaterial;
+    private MeshRenderer _storeBackground;
+    private MaterialPropertyBlock _storeBackgroundMpb;
+    private float _storeBackgroundShownAlpha = -1f;
+
+    // Un marchand affiche le nom de son magasin a la place du titre, sur fond
+    // noir : violet pour la vente, rose pour l'achat, orange pour l'atelier.
+    private void UpdateStoreTitle()
+    {
+        OperateType type = Entity.OperateType;
+        string message = Entity.StoreMessage;
+        string title = Entity.Identity.Title;
+
+        if (type != _shownOperateType || message != _shownStoreMessage || title != _shownTitle)
+        {
+            _shownOperateType = type;
+            _shownStoreMessage = message;
+            _shownTitle = title;
+
+            string color = StoreColor(type);
+            bool isStore = color != null && !string.IsNullOrEmpty(message);
+
+            _titleText.text = isStore ? $"<color={color}><noparse>{message}</noparse></color>" : title;
+            RefreshStoreBackground(isStore);
+        }
+
+        if (_storeBackground != null && _storeBackground.enabled && !Mathf.Approximately(_storeBackgroundShownAlpha, _currentAlpha))
+        {
+            ApplyStoreBackgroundAlpha();
+        }
+    }
+
+    private void RefreshStoreBackground(bool visible)
+    {
+        if (_storeBackground == null)
+        {
+            _storeBackground = FindStoreBackground();
+        }
+
+        if (!visible)
+        {
+            if (_storeBackground != null)
+            {
+                _storeBackground.enabled = false;
+            }
+            return;
+        }
+
+        if (_storeBackground == null)
+        {
+            _storeBackground = CreateStoreBackground();
+        }
+
+        _titleText.ForceMeshUpdate();
+        Bounds bounds = _titleText.textBounds;
+
+        Transform t = _storeBackground.transform;
+        t.localPosition = new Vector3(bounds.center.x, bounds.center.y, 0.01f);
+        t.localScale = new Vector3(bounds.size.x + StoreBackgroundPadding.x, bounds.size.y + StoreBackgroundPadding.y, 1f);
+        _storeBackground.enabled = true;
+        ApplyStoreBackgroundAlpha();
+    }
+
+    private MeshRenderer FindStoreBackground()
+    {
+        Transform existing = _titleText.transform.Find(StoreBackgroundName);
+        return existing != null ? existing.GetComponent<MeshRenderer>() : null;
+    }
+
+    private MeshRenderer CreateStoreBackground()
+    {
+        if (_storeBackgroundMaterial == null)
+        {
+            // Copie du materiau de la bulle : deja transparent et visible en jeu.
+            Material source = _bubbleIcon.sharedMaterial;
+            _storeBackgroundMaterial = source != null
+                ? new Material(source)
+                : new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+            _storeBackgroundMaterial.SetTexture("_BaseMap", Texture2D.whiteTexture);
+            _storeBackgroundMaterial.SetTexture("_MainTex", Texture2D.whiteTexture);
+            _storeBackgroundMaterial.renderQueue = _titleText.fontSharedMaterial.renderQueue - 1;
+        }
+
+        GameObject go = new GameObject(StoreBackgroundName);
+        go.transform.SetParent(_titleText.transform, false);
+        go.AddComponent<MeshFilter>().sharedMesh = Resources.GetBuiltinResource<Mesh>("Quad.fbx");
+
+        MeshRenderer renderer = go.AddComponent<MeshRenderer>();
+        renderer.sharedMaterial = _storeBackgroundMaterial;
+        renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        renderer.receiveShadows = false;
+        return renderer;
+    }
+
+    // Suit le fondu par distance de la nameplate, comme le texte.
+    private void ApplyStoreBackgroundAlpha()
+    {
+        _storeBackgroundMpb ??= new MaterialPropertyBlock();
+        _storeBackground.GetPropertyBlock(_storeBackgroundMpb);
+        _storeBackgroundMpb.SetColor(BaseColorId, new Color(0f, 0f, 0f, StoreBackgroundAlpha * Mathf.Max(0f, _currentAlpha)));
+        _storeBackground.SetPropertyBlock(_storeBackgroundMpb);
+        _storeBackgroundShownAlpha = _currentAlpha;
+    }
+
+    private static string StoreColor(OperateType type)
+    {
+        switch (type)
+        {
+            case OperateType.Sell:
+            case OperateType.PackageSell:
+                return "#C08CFF";
+            case OperateType.Buy:
+                return "#FF8CD2";
+            case OperateType.Manufacture:
+                return "#FFA040";
+            default:
+                return null;
+        }
     }
 
     // Port quasi verbatim de Nameplate.ManageColors() - meme ordre de
@@ -130,6 +261,8 @@ public class WorldNameplate
     // eviter de reecrire la couleur a chaque frame.
     public void ManageColors()
     {
+        UpdateStoreTitle();
+
         if (_previousServerTitleColor != Entity.Appearance.ServerTitleColor)
         {
             _previousServerTitleColor = Entity.Appearance.ServerTitleColor;

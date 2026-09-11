@@ -82,6 +82,10 @@ public final class RequestPrivateStoreBuy extends L2GameClientPacket
 		{
 			storePlayer.setOperateType(OperateType.NONE);
 			storePlayer.broadcastUserInfo();
+
+			// Un marchand hors ligne n'a plus rien a faire en jeu.
+			if (storePlayer.getClient() == null)
+				storePlayer.deleteMe();
 		}
 	}
 }

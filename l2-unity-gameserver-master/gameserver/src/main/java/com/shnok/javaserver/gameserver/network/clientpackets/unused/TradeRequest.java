@@ -44,13 +44,13 @@ public final class TradeRequest extends L2GameClientPacket
 		
 		if (target.isInOlympiadMode() || player.isInOlympiadMode())
 		{
-			player.sendMessage("You cannot trade during Olympiad.");
+			player.sendMessage("Vous ne pouvez pas échanger pendant l'Olympiade.");
 			return;
 		}
-		
+
 		if (!Config.KARMA_PLAYER_CAN_TRADE && (player.getKarma() > 0 || target.getKarma() > 0))
 		{
-			player.sendMessage("You cannot trade in a chaotic state.");
+			player.sendMessage("Vous ne pouvez pas échanger en étant chaotique.");
 			return;
 		}
 		

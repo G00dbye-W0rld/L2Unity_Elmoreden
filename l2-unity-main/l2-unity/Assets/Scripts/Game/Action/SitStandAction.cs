@@ -12,6 +12,13 @@ public class SitStandAction : L2Action
             return;
         }
 
+        // Se relever ferme le magasin : c'est le serveur qui releve le personnage.
+        if (PlayerStateMachine.IsPlayerInStoreMode())
+        {
+            GameClient.Instance.ClientPacketHandler.RequestActionUse((int)ActionType.Sit);
+            return;
+        }
+
         if (PlayerStateMachine.Instance.State == PlayerState.SITTING || PlayerStateMachine.Instance.State == PlayerState.SIT_WAIT)
         {
             PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_STAND);

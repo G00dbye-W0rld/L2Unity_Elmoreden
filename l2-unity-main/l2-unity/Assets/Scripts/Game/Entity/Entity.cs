@@ -17,6 +17,8 @@ public abstract class Entity : MonoBehaviour
     [SerializeField] private bool _running;
     [SerializeField] private bool _sitting;
     [SerializeField] private bool _swimming;
+    [SerializeField] private OperateType _operateType;
+    [SerializeField] private string _storeMessage;
 
     public Status Status { get => _status; set => _status = value; }
     public Stats Stats { get => _stats; set => _stats = value; }
@@ -34,6 +36,21 @@ public abstract class Entity : MonoBehaviour
     public Combat Combat { get { return _referenceHolder.Combat; } }
     public bool IsDead { get { return Status.IsDead; } }
     public bool IsSitting { get { return _sitting; } }
+    public OperateType OperateType
+    {
+        get { return _operateType; }
+        set
+        {
+            if (_operateType == value)
+            {
+                return;
+            }
+
+            _operateType = value;
+            PrivateStoreStall.Refresh(this);
+        }
+    }
+    public string StoreMessage { get { return _storeMessage; } set { _storeMessage = value; } }
 
     private void Awake()
     {

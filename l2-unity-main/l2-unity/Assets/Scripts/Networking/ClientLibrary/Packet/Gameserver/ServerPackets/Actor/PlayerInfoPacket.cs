@@ -146,7 +146,7 @@ public class PlayerInfoPacket : ServerPacket
             ReadI(); //AllyCrest
             ReadI(); //Relation
             ReadB(); //MountType
-            ReadB(); //OperateType
+            EntityActionInfo.OperateType = (OperateType)ReadB();
             ReadB(); //HasCrystallize
             Stats.PkKills = ReadI();
             Stats.PvpKills = ReadI();

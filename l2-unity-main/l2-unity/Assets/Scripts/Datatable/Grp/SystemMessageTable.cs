@@ -90,6 +90,43 @@ public class SystemMessageTable
 
             Debug.Log($"Successfully imported {_systemMessages.Count} system message(s)");
         }
+
+        ReadFrenchOverrides();
+    }
+
+    // Remplace le texte anglais sans toucher a la couleur ni au son du message.
+    private void ReadFrenchOverrides()
+    {
+        string path = Path.Combine(Application.streamingAssetsPath, "Data/Meta/SystemMsg_fr.txt");
+        if (!File.Exists(path))
+        {
+            return;
+        }
+
+        int count = 0;
+
+        foreach (string line in File.ReadAllLines(path, System.Text.Encoding.UTF8))
+        {
+            if (line.Length == 0 || line[0] == '#')
+            {
+                continue;
+            }
+
+            int tab = line.IndexOf('\t');
+            if (tab <= 0 || !int.TryParse(line.Substring(0, tab), out int id))
+            {
+                continue;
+            }
+
+            if (_systemMessages.TryGetValue(id, out SystemMessageDat message))
+            {
+                message.Message = line.Substring(tab + 1);
+                _systemMessages[id] = message;
+                count++;
+            }
+        }
+
+        Debug.Log($"{count} system message(s) translated to French");
     }
 
     public SystemMessageDat GetSystemMessage(int id)

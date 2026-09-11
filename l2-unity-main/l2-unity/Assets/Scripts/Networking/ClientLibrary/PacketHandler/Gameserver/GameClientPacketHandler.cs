@@ -308,6 +308,46 @@ public class GameClientPacketHandler : ClientPacketHandler
         SendPacket(packet);
     }
 
+    public void SendSetPrivateStoreMsgSell(string title)
+    {
+        SendPacket(new SetPrivateStoreMsgSellPacket(title));
+    }
+
+    public void SendSetPrivateStoreListSell(bool packageSale, List<Product> products)
+    {
+        SendPacket(new SetPrivateStoreListSellPacket(packageSale, products));
+    }
+
+    public void SendRequestPrivateStoreQuitSell()
+    {
+        SendPacket(new RequestPrivateStoreQuitSellPacket());
+    }
+
+    public void SendRequestPrivateStoreBuy(int storeObjectId, List<Product> products)
+    {
+        SendPacket(new RequestPrivateStoreBuyPacket(storeObjectId, products));
+    }
+
+    public void SendSetPrivateStoreMsgBuy(string title)
+    {
+        SendPacket(new SetPrivateStoreMsgBuyPacket(title));
+    }
+
+    public void SendSetPrivateStoreListBuy(List<Product> products)
+    {
+        SendPacket(new SetPrivateStoreListBuyPacket(products));
+    }
+
+    public void SendRequestPrivateStoreQuitBuy()
+    {
+        SendPacket(new RequestPrivateStoreQuitBuyPacket());
+    }
+
+    public void SendRequestPrivateStoreSell(int storeObjectId, List<Product> products)
+    {
+        SendPacket(new RequestPrivateStoreSellPacket(storeObjectId, products));
+    }
+
     public void RequestMagicSkillUse(int skillId, bool ctrlPressed, bool shiftPressed)
     {
         RequestMagicSkillUsePacket packet = new RequestMagicSkillUsePacket(skillId, ctrlPressed, shiftPressed);

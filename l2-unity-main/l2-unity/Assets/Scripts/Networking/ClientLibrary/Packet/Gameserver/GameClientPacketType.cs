@@ -40,6 +40,14 @@ public enum GameClientPacketType : byte
     RequestAnswerJoinParty = 0x2a,
     RequestWithdrawParty = 0x2b,
     RequestOustPartyMember = 0x2c,
+    SetPrivateStoreListSell = 0x74,
+    RequestPrivateStoreQuitSell = 0x76,
+    SetPrivateStoreMsgSell = 0x77,
+    RequestPrivateStoreBuy = 0x79,
+    SetPrivateStoreListBuy = 0x91,
+    RequestPrivateStoreQuitBuy = 0x93,
+    SetPrivateStoreMsgBuy = 0x94,
+    RequestPrivateStoreSell = 0x96,
 
 
     //deprecated

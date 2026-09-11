@@ -4,6 +4,7 @@ import com.shnok.javaserver.commons.random.Rnd;
 import com.shnok.javaserver.commons.util.ArraysUtil;
 
 import com.shnok.javaserver.gameserver.enums.SayType;
+import com.shnok.javaserver.gameserver.enums.actors.OperateType;
 import com.shnok.javaserver.gameserver.model.WorldObject;
 import com.shnok.javaserver.gameserver.model.actor.Creature;
 import com.shnok.javaserver.gameserver.model.actor.Player;
@@ -108,6 +109,15 @@ public final class RequestActionUse extends L2GameClientPacket
 		switch (_actionId)
 		{
 			case 0: // Sit/Stand
+				// Se relever ferme le magasin prive, comme sur le client officiel.
+				if (player.isInStoreMode())
+				{
+					player.setOperateType(OperateType.NONE);
+					player.standUp();
+					player.broadcastUserInfo();
+					break;
+				}
+
 				if (player.isSitting() || player.isSittingNow())
 					player.getAI().tryToStand();
 				else

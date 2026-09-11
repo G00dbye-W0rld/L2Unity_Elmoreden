@@ -1,0 +1,105 @@
+.private-store-window {
+    width: 268px;
+    height: 486px;
+    position: absolute;
+    font-size: 11px;
+}
+
+.private-store-content {
+    position: absolute;
+    top: 38px;
+    left: 4px;
+    right: 4px;
+    bottom: 4px;
+    padding-left: 8px;
+    padding-right: 6px;
+    padding-bottom: 6px;
+    flex-direction: column;
+}
+
+.private-store-list {
+    width: 240px;
+    flex-shrink: 0;
+}
+
+.private-store-list-top {
+    height: 190px;
+}
+
+.private-store-list-bottom {
+    height: 84px;
+    margin-top: 6px;
+}
+
+.private-store-buy-window {
+    height: 352px;
+}
+
+.private-store-list-first {
+    margin-top: 0;
+}
+
+.private-store-notice {
+    width: 240px;
+    margin: 4px 0 0 0;
+    padding: 0;
+    white-space: normal;
+}
+
+.private-store-footer {
+    width: 240px;
+    margin: 6px 0 0 0;
+    padding: 3px 4px;
+    flex-direction: column;
+    background-color: rgba(0, 0, 0, 0.35);
+    border-width: 1px;
+    border-color: rgba(111, 111, 111, 0.14);
+}
+
+.private-store-row-spaced {
+    margin-top: 2px;
+}
+
+.private-store-row {
+    width: 240px;
+    flex-direction: row;
+    align-items: center;
+    height: 22px;
+    margin-top: 4px;
+}
+
+.private-store-title-label {
+    width: 40px;
+    margin: 0;
+    padding: 0;
+}
+
+.private-store-title-input {
+    flex-grow: 1;
+}
+
+.private-store-toggle {
+    margin: 0 6px 0 0;
+}
+
+.private-store-toggle .unity-toggle__input {
+    margin: 0;
+}
+
+.private-store-toggle .unity-toggle__checkmark {
+    width: 16px;
+    height: 16px;
+    background-color: rgba(0, 0, 0, 0.4);
+    background-image: resource('Data/UI/Assets/Quest/CheckBoxQuest');
+    -unity-background-scale-mode: scale-to-fit;
+    border-width: 0;
+}
+
+.private-store-toggle:checked .unity-toggle__checkmark {
+    background-image: resource('Data/UI/Assets/Quest/CheckBox_checked');
+}
+
+.private-store-toggle-label {
+    margin: 0;
+    padding: 0;
+}

@@ -185,6 +185,24 @@ public class GameServerPacketHandler : ServerPacketHandler
             case GameServerPacketType.SellList:
                 OnSellListReceived(data);
                 break;
+            case GameServerPacketType.PrivateStoreManageListSell:
+                OnPrivateStoreManageListSell(data);
+                break;
+            case GameServerPacketType.PrivateStoreMsgSell:
+                OnPrivateStoreMsg(data);
+                break;
+            case GameServerPacketType.PrivateStoreListSell:
+                OnPrivateStoreListSell(data);
+                break;
+            case GameServerPacketType.PrivateStoreManageListBuy:
+                PrivateStorePacketHandler.OnManageListBuy(data, _eventProcessor);
+                break;
+            case GameServerPacketType.PrivateStoreListBuy:
+                PrivateStorePacketHandler.OnListBuy(data, _eventProcessor);
+                break;
+            case GameServerPacketType.PrivateStoreMsgBuy:
+                OnPrivateStoreMsg(data);
+                break;
             case GameServerPacketType.MagicSkillLaunched:
                 OnSkillLaunched(data);
                 break;
@@ -800,6 +818,30 @@ public class GameServerPacketHandler : ServerPacketHandler
             NpcHtmlWindow.Instance.HideWindow(false);
             ShopWindow.Instance.ShowWindow();
             ShopWindow.Instance.RefreshProductList(-1, packet.Adena, packet.Products, ShopTab.ShopTabType.SELL, packet.OpenTab);
+        });
+    }
+
+    private void OnPrivateStoreManageListSell(byte[] data)
+    {
+        PrivateStoreManageListSellPacket packet = new PrivateStoreManageListSellPacket(data);
+        _eventProcessor.QueueEvent(() =>
+        {
+            PrivateStoreWindow.Instance?.Open(packet.Adena, packet.PackageSale, packet.Inventory, packet.Store);
+        });
+    }
+
+    private void OnPrivateStoreMsg(byte[] data)
+    {
+        PrivateStoreMsgPacket packet = new PrivateStoreMsgPacket(data);
+        World.Instance.UpdateStoreMessage(packet.ObjectId, packet.Message);
+    }
+
+    private void OnPrivateStoreListSell(byte[] data)
+    {
+        PrivateStoreListSellPacket packet = new PrivateStoreListSellPacket(data);
+        _eventProcessor.QueueEvent(() =>
+        {
+            PrivateStoreBuyWindow.Instance?.Open(packet.StoreObjectId, packet.Packaged, packet.Adena, packet.Products);
         });
     }
 

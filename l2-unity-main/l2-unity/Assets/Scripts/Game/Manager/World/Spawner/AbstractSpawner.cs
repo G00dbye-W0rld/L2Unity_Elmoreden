@@ -60,6 +60,7 @@ public abstract class EntitySpawnStrategy<TAppearance, TStats, TStatus> where TA
         }
 
         entity.UpdateMoveType(actionInfo.Running);
+        entity.OperateType = actionInfo.OperateType;
 
         if (actionInfo.Sitting)
         {

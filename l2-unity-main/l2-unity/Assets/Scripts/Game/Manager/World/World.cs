@@ -215,6 +215,11 @@ public class World : MonoBehaviour
         });
     }
 
+    public Task UpdateStoreMessage(int owner, string message)
+    {
+        return _worldSpawner.ExecuteWithEntityAsync(owner, e => e.StoreMessage = message);
+    }
+
     public Task ChangeMoveType(int owner, bool running, bool swimming)
     {
         return _worldSpawner.ExecuteWithEntityAsync(owner, e =>

@@ -1,0 +1,64 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Template name="WindowTemplate" src="project://database/Assets/Resources/Data/UI/_Elements/Components/WindowTemplate.uxml?fileID=9197481963319205126&amp;guid=5ca840f56ef6f1044b4dc077c7d3e6e6&amp;type=3#WindowTemplate" />
+    <ui:Template name="L2Button" src="project://database/Assets/Resources/Data/UI/_Elements/Components/L2Button/L2Button.uxml?fileID=9197481963319205126&amp;guid=47796068f89476143b10b5d383be52fc&amp;type=3#L2Button" />
+    <ui:Template name="L2Input" src="project://database/Assets/Resources/Data/UI/_Elements/Components/L2Input/L2Input.uxml?fileID=9197481963319205126&amp;guid=dce83b8dcd7f5614280886eaaa82f0f7&amp;type=3#L2Input" />
+    <ui:Template name="L2SlotContainer" src="project://database/Assets/Resources/Data/UI/_Elements/Components/L2SlotContainer/L2SlotContainer.uxml?fileID=9197481963319205126&amp;guid=67f2ae460501d60439fd529481631728&amp;type=3#L2SlotContainer" />
+    <Style src="project://database/Assets/Resources/Data/UI/_Elements/L2StyleSheet.uss?fileID=7433441132597879392&amp;guid=72e99cc94b130bf4ba100dceaa830b13&amp;type=3#L2StyleSheet" />
+    <Style src="project://database/Assets/Resources/Data/UI/_Elements/Game/ShopWindow/ShopStyle.uss?fileID=7433441132597879392&amp;guid=9e85dc28fcf6a6f4fa0432707a81e0fd&amp;type=3#ShopStyle" />
+    <Style src="project://database/Assets/Resources/Data/UI/_Elements/Game/PrivateStoreWindow/PrivateStoreWindow.uss?fileID=7433441132597879392&amp;guid=3c7e1a9f5b2d4e8a9c6f0b1d2e3a4f57&amp;type=3#PrivateStoreWindow" />
+    <ui:Instance template="WindowTemplate" name="WindowTemplate" class="private-store-window">
+        <AttributeOverrides element-name="windows-name-label" text="Magasin privé : vente" />
+        <ui:VisualElement name="StoreContent" class="private-store-content">
+            <ui:VisualElement name="InventoryList" class="private-store-list private-store-list-top">
+                <ui:Instance template="L2SlotContainer" style="flex-grow: 1;">
+                    <AttributeOverrides element-name="TabLabel" text="Inventaire" />
+                </ui:Instance>
+            </ui:VisualElement>
+            <ui:VisualElement name="StoreList" class="private-store-list private-store-list-bottom">
+                <ui:Instance template="L2SlotContainer" style="flex-grow: 1;">
+                    <AttributeOverrides element-name="TabLabel" text="Objets en vente" />
+                </ui:Instance>
+            </ui:VisualElement>
+            <ui:GroupBox name="Footer" class="private-store-footer">
+                <ui:VisualElement class="shop-statistic-row">
+                    <ui:Label text="Adena" class="l2-color-4 shop-statistic-label" />
+                    <ui:VisualElement class="shop-statistic-icon">
+                        <ui:VisualElement class="item-statistic-icon icon-adena" />
+                    </ui:VisualElement>
+                    <ui:GroupBox class="inventory-adena-box shop-statistic-gauge">
+                        <ui:GroupBox class="inventory-adena-box-inner">
+                            <ui:Label text="0" name="AdenaCount" class="inventory-adena-count" />
+                        </ui:GroupBox>
+                    </ui:GroupBox>
+                </ui:VisualElement>
+                <ui:VisualElement class="shop-statistic-row private-store-row-spaced">
+                    <ui:Label text="Total" class="l2-color-4 shop-statistic-label" />
+                    <ui:VisualElement class="shop-statistic-icon">
+                        <ui:VisualElement class="item-statistic-icon icon-adena" />
+                    </ui:VisualElement>
+                    <ui:GroupBox class="inventory-adena-box shop-statistic-gauge">
+                        <ui:GroupBox class="inventory-adena-box-inner">
+                            <ui:Label text="0" name="TotalPrice" class="inventory-adena-count" />
+                        </ui:GroupBox>
+                    </ui:GroupBox>
+                </ui:VisualElement>
+            </ui:GroupBox>
+            <ui:VisualElement class="private-store-row">
+                <ui:Label text="Nom" class="l2-color-4 private-store-title-label" />
+                <ui:Instance template="L2Input" name="TitleInput" class="private-store-title-input" />
+            </ui:VisualElement>
+            <ui:VisualElement name="PackageRow" class="private-store-row">
+                <ui:Toggle name="PackageToggle" class="private-store-toggle" />
+                <ui:Label text="Vente en lot (tout ou rien)" class="l2-color-4 private-store-toggle-label" />
+            </ui:VisualElement>
+            <ui:VisualElement name="ButtonBar" class="shop-button-bar">
+                <ui:Instance template="L2Button" name="OkButton" class="shop-button">
+                    <AttributeOverrides element-name="ButtonLabel" text="Ouvrir" />
+                </ui:Instance>
+                <ui:Instance template="L2Button" name="CancelButton" class="shop-button">
+                    <AttributeOverrides element-name="ButtonLabel" text="Annuler" />
+                </ui:Instance>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:Instance>
+</ui:UXML>

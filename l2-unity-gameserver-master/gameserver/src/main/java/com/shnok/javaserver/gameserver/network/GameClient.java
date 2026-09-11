@@ -555,11 +555,15 @@ public final class GameClient extends MMOClient<MMOConnection<GameClient>> imple
 		
 		// We found an existing Player ; abort the connection if a GameClient is found, otherwise delete the object.
 		if (player.getClient() != null)
+		{
 			player.getClient().closeNow();
-		else
-			player.deleteMe();
-		
-		return null;
+			return null;
+		}
+
+		// Marchand hors ligne : on le retire du monde puis on le recharge, sinon
+		// la premiere tentative de connexion echouerait sans message.
+		player.deleteMe();
+		return Player.restore(objectId);
 	}
 	
 	/**
@@ -640,8 +644,11 @@ public final class GameClient extends MMOClient<MMOConnection<GameClient>> imple
 			{
 				// Prevent closing again.
 				getPlayer().setClient(null);
-				
-				if (getPlayer().isOnline())
+
+				// Un marchand reste en jeu sans client : c'est l'offline trade.
+				if (getPlayer().canEnterOfflineTrade())
+					LOGGER.info("[OfflineTrade] {} reste en jeu avec son magasin (deconnexion).", getPlayer().getName());
+				else if (getPlayer().isOnline())
 					getPlayer().deleteMe();
 			}
 			setPlayer(null);

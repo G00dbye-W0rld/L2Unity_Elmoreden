@@ -2354,10 +2354,18 @@ public final class Player extends Playable
 		}
 		
 		// No store zones.
-		if (isInsideZone(ZoneId.NO_STORE) || isInOlympiadMode())
+		if (isInsideZone(ZoneId.NO_STORE) || isInOlympiadMode() || (!Config.PRIVATE_STORE_EVERYWHERE && !isInsideZone(ZoneId.TOWN)))
 		{
 			setOperateType(OperateType.NONE);
 			sendPacket(SystemMessageId.NO_PRIVATE_STORE_HERE);
+			return false;
+		}
+
+		// Les etals voisins se chevaucheraient : on impose un ecart minimal.
+		if (Config.PRIVATE_STORE_MIN_DISTANCE > 0 && !getKnownTypeInRadius(Player.class, Config.PRIVATE_STORE_MIN_DISTANCE, Player::isInStoreMode).isEmpty())
+		{
+			setOperateType(OperateType.NONE);
+			sendMessage("Vous êtes trop près d'un autre magasin.");
 			return false;
 		}
 		
@@ -3235,6 +3243,16 @@ public final class Player extends Playable
 	public boolean isInManageStoreMode()
 	{
 		return _operateType == OperateType.BUY_MANAGE || _operateType == OperateType.SELL_MANAGE || _operateType == OperateType.MANUFACTURE_MANAGE;
+	}
+
+	/**
+	 * Offline trade : a merchant who loses his client stays in the world, sat with his store open,
+	 * until the store is empty or he logs back in.
+	 * @return True if this {@link Player} must stay in the world once disconnected.
+	 */
+	public boolean canEnterOfflineTrade()
+	{
+		return Config.OFFLINE_TRADE_ENABLE && isInStoreMode() && !isDead() && !isInOlympiadMode();
 	}
 	
 	/**

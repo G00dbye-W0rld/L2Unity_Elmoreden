@@ -5,4 +5,5 @@ public class EntityActionInfo
     public bool InCombat { get; set; }
     public bool AlikeDead { get; set; }
     public bool Invisible { get; set; }
+    public OperateType OperateType { get; set; }
 }

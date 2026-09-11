@@ -26,6 +26,16 @@ public class L2GameUI : L2UI
         }
 
         _openedWindows = new List<L2PopupWindow>();
+
+        // Absentes du prefab UI : ajoutees ici pour ne pas avoir a l'editer.
+        if (GetComponent<PrivateStoreWindow>() == null)
+        {
+            gameObject.AddComponent<PrivateStoreWindow>();
+        }
+        if (GetComponent<PrivateStoreBuyWindow>() == null)
+        {
+            gameObject.AddComponent<PrivateStoreBuyWindow>();
+        }
     }
 
     private void Start()
@@ -106,6 +116,16 @@ public class L2GameUI : L2UI
         {
             ActionWindow.Instance.AddWindow(_rootVisualContainer);
             ActionWindow.Instance.HideWindow(true);
+        }
+        if (PrivateStoreWindow.Instance != null)
+        {
+            PrivateStoreWindow.Instance.AddWindow(_rootVisualContainer);
+            PrivateStoreWindow.Instance.HideWindow(true);
+        }
+        if (PrivateStoreBuyWindow.Instance != null)
+        {
+            PrivateStoreBuyWindow.Instance.AddWindow(_rootVisualContainer);
+            PrivateStoreBuyWindow.Instance.HideWindow(true);
         }
         if (NpcHtmlWindow.Instance != null)
         {

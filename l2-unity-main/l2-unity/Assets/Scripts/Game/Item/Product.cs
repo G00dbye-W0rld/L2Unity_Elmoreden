@@ -10,6 +10,8 @@ public class Product
         Price = old.Price;
         Type2 = old.Type2;
         BodyPart = old.BodyPart;
+        Enchant = old.Enchant;
+        ReferencePrice = old.ReferencePrice;
     }
 
     public ItemType1 Type1 { get; set; }
@@ -19,4 +21,6 @@ public class Product
     public int Price { get; set; }
     public ItemType2 Type2 { get; set; }
     public ItemSlot BodyPart { get; set; }
+    public int Enchant { get; set; }
+    public int ReferencePrice { get; set; }
 }

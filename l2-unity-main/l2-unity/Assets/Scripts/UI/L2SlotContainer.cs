@@ -135,6 +135,11 @@ public class L2SlotContainer : L2Scrollable
                 slotElement = L2SlotManager.Instance.ShopSlotTemplate.Instantiate()[0];
                 slot = new BasketSlot(slotIndex, slotElement, this, slotType);
                 break;
+            case L2Slot.SlotType.StoreItem:
+            case L2Slot.SlotType.StoreBasket:
+                slotElement = L2SlotManager.Instance.ShopSlotTemplate.Instantiate()[0];
+                slot = new PrivateStoreSlot(slotIndex, slotElement, this, slotType);
+                break;
             case L2Slot.SlotType.Skill:
                 slotElement = L2SlotManager.Instance.SkillSlotTemplate.Instantiate()[0];
                 slot = new SkillSlot(slotIndex, slotElement, slotType);

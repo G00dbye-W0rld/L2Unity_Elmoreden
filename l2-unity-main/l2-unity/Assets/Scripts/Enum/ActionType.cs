@@ -10,5 +10,8 @@ public enum ActionType : int
     PartyInvite = 7,
     PartyLeave = 8,
     PartyKick = 9,
-    PartyChangeLeader = 50
+    PrivateStoreSell = 10,
+    PrivateStoreBuy = 28,
+    PartyChangeLeader = 50,
+    PackageSale = 61
 }

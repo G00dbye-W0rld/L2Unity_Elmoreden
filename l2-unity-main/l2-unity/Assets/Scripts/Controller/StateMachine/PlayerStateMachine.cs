@@ -102,6 +102,13 @@ public class PlayerStateMachine : MonoBehaviour
             return;
         }
 
+        // En magasin, le serveur refuse tout deplacement ou action : en lancer
+        // cote client desynchroniserait le personnage.
+        if (IsPlayerInStoreMode() && newIntention != Intention.INTENTION_IDLE && newIntention != Intention.INTENTION_WAITING)
+        {
+            return;
+        }
+
         if (_enableLogs) Debug.Log("[StateMachine][INTENTION] " + newIntention);
         _intentionInstance?.Exit();
         _currentIntention = newIntention;
@@ -143,6 +150,17 @@ public class PlayerStateMachine : MonoBehaviour
             Intention.INTENTION_JUMP => new JumpIntention(this),
             _ => throw new ArgumentException("Invalid intention")
         };
+    }
+
+    public static bool IsPlayerInStoreMode()
+    {
+        if (PlayerEntity.Instance == null)
+        {
+            return false;
+        }
+
+        OperateType type = PlayerEntity.Instance.OperateType;
+        return type == OperateType.Sell || type == OperateType.PackageSell || type == OperateType.Buy || type == OperateType.Manufacture;
     }
 
     public bool CanMove()

@@ -17,7 +17,9 @@ public class L2Slot
         Trash,
         Product,
         Basket,
-        Effect
+        Effect,
+        StoreItem,
+        StoreBasket
     }
 
     [SerializeField] protected int _id;
