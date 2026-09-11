@@ -196,27 +196,19 @@ public class AudioManager : MonoBehaviour
 
     public void PlayStepSound(string surfaceTag, Vector3 position)
     {
-        string eventKey;
+        // On cherche l'evenement plutot que d'aiguiller sur une liste codee en
+        // dur : creer sand_run dans FMOD Studio suffira a l'entendre, sans
+        // toucher au code. PathToEventReference renvoie une reference nulle
+        // quand l'evenement n'existe pas.
         surfaceTag = surfaceTag.ToLower();
 
-        switch (surfaceTag)
-        {
-            case "dirt":
-                eventKey = surfaceTag + "_run";
-                break;
-            case "stone":
-                eventKey = surfaceTag + "_run";
-                break;
-            case "wood":
-                eventKey = surfaceTag + "_run";
-                break;
-            default:
-                eventKey = "default_run";
-                break;
+        EventReference er = RuntimeManager.PathToEventReference("event:/StepSound/" + surfaceTag + "_run");
 
+        if (er.IsNull)
+        {
+            er = RuntimeManager.PathToEventReference("event:/StepSound/default_run");
         }
 
-        EventReference er = RuntimeManager.PathToEventReference("event:/StepSound/" + eventKey);
         if (!er.IsNull)
         {
             PlaySound(er, position);
