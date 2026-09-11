@@ -85,6 +85,7 @@ public class AmbientSoundEmitter : EventHandler {
     /// La recherche a echoue : l'evenement n'existe pas dans les banques
     /// chargees. On ne retentera pas.
     private bool _missing;
+    private Coroutine _loopRoutine;
 
     /// Evenements deja signales, tous emetteurs confondus.
     ///
@@ -141,8 +142,14 @@ public class AmbientSoundEmitter : EventHandler {
         }
 
         if (_loop) {
-            StopCoroutine(StartPlayLoop());
-            StartCoroutine(StartPlayLoop());
+            // StopCoroutine(StartPlayLoop()) ne stoppait rien : l'argument est
+            // un NOUVEL iterateur, sans rapport avec celui qui tourne. Chaque
+            // appel empilait donc une boucle de plus.
+            if (_loopRoutine != null) {
+                StopCoroutine(_loopRoutine);
+            }
+
+            _loopRoutine = StartCoroutine(StartPlayLoop());
             return;
         }
 
@@ -154,18 +161,25 @@ public class AmbientSoundEmitter : EventHandler {
     }
 
 
+    // Le test d'eloignement vient APRES la lecture, pas avant.
+    //
+    // Le rayon du declencheur vaut exactement _overrideMaxDistance, et Unity
+    // declenche OnTriggerEnter quand les colliders se touchent : au moment ou
+    // Play est appele, le centre du joueur est a rayon + 0,1 (son
+    // CharacterController), donc deja hors de portee. La boucle se terminait
+    // avant d'avoir emis un seul son.
     IEnumerator StartPlayLoop() {
         while(true) {
-            if (_isSound3D && ShouldStop()) {
-                Stop();
-                yield break;
-            }
             if(ShouldPlayEvent()) {
                 PlayInstance();
             }
             yield return new WaitForSeconds(_clipLengthSeconds * 0.99f); // 1% for error margin
             if (_loopDelaySeconds > 0) {
                 yield return new WaitForSeconds(_loopDelaySeconds);
+            }
+            if (_isSound3D && ShouldStop()) {
+                Stop();
+                yield break;
             }
         }
     }
@@ -226,7 +240,13 @@ public class AmbientSoundEmitter : EventHandler {
     }
 
     public void Stop() {
-        StopCoroutine(StartPlayLoop());
+        // Meme piege que dans Play : passer un nouvel iterateur a StopCoroutine
+        // n'arrete pas la boucle en cours.
+        if (_loopRoutine != null) {
+            StopCoroutine(_loopRoutine);
+            _loopRoutine = null;
+        }
+
         StopInstance();
     }
 

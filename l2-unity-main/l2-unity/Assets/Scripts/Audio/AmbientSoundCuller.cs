@@ -64,6 +64,22 @@ public class AmbientSoundCuller : MonoBehaviour
         _emitters.Remove(emitter);
     }
 
+    private static bool IsInsideTrigger(AmbientSoundEmitter emitter, Vector3 point)
+    {
+        var sphere = emitter.GetComponent<SphereCollider>();
+
+        if (sphere == null)
+        {
+            return false;
+        }
+
+        Vector3 centre = emitter.transform.TransformPoint(sphere.center);
+        Vector3 scale = emitter.transform.lossyScale;
+        float radius = sphere.radius * Mathf.Max(scale.x, Mathf.Max(scale.y, scale.z));
+
+        return (centre - point).sqrMagnitude <= radius * radius;
+    }
+
     private void Update()
     {
         if (Time.time < _next)
@@ -73,13 +89,23 @@ public class AmbientSoundCuller : MonoBehaviour
 
         _next = Time.time + _interval;
 
-        Camera main = Camera.main;
-        if (main == null)
+        // Pas Camera.main : la LoadingCamera porte le meme tag et reste au
+        // point du menu, a des milliers d'unites. Tous les emetteurs seraient
+        // alors juges trop loin et desactives.
+        Vector3 listener;
+
+        if (CameraController.Instance != null)
+        {
+            listener = CameraController.Instance.transform.position;
+        }
+        else if (Camera.main != null)
+        {
+            listener = Camera.main.transform.position;
+        }
+        else
         {
             return;
         }
-
-        Vector3 listener = main.transform.position;
         float onSqr = _radius * _radius;
         float offSqr = (_radius + _hysteresis) * (_radius + _hysteresis);
 
@@ -117,12 +143,43 @@ public class AmbientSoundCuller : MonoBehaviour
             {
                 emitter.enabled = true;
                 active++;
+
+                // Un composant desactive ne recoit pas OnTriggerEnter. Si le
+                // joueur se trouve deja dans la sphere au moment ou on rallume
+                // l'emetteur - au spawn, ou parce qu'il y est entre pendant que
+                // le composant dormait - aucun declenchement n'arrivera jamais.
+                if (IsInsideTrigger(emitter, listener) && !emitter.IsPlaying())
+                {
+                    emitter.Play();
+                }
             }
         }
 
         if (_verbose)
         {
-            Debug.Log($"[AmbientCull] {active} actifs sur {_emitters.Count} inscrits"
+            int playing = 0;
+            int inside = 0;
+
+            foreach (AmbientSoundEmitter e in _emitters)
+            {
+                if (e == null || !e.enabled)
+                {
+                    continue;
+                }
+
+                if (e.IsPlaying())
+                {
+                    playing++;
+                }
+
+                if (IsInsideTrigger(e, listener))
+                {
+                    inside++;
+                }
+            }
+
+            Debug.Log($"[AmbientCull] {active} actifs sur {_emitters.Count} inscrits | "
+                      + $"{inside} sphere(s) contenant l'auditeur | {playing} en lecture"
                       + (removed > 0 ? $" ({removed} detruits retires)" : ""));
         }
     }
