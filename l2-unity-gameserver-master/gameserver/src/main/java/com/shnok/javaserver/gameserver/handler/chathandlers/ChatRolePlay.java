@@ -3,15 +3,14 @@ package com.shnok.javaserver.gameserver.handler.chathandlers;
 import com.shnok.javaserver.gameserver.enums.FloodProtector;
 import com.shnok.javaserver.gameserver.enums.SayType;
 import com.shnok.javaserver.gameserver.handler.IChatHandler;
-import com.shnok.javaserver.gameserver.model.World;
 import com.shnok.javaserver.gameserver.model.actor.Player;
 import com.shnok.javaserver.gameserver.network.serverpackets.CreatureSay;
 
-public class ChatShout implements IChatHandler
+public class ChatRolePlay implements IChatHandler
 {
 	private static final SayType[] COMMAND_IDS =
 	{
-		SayType.SHOUT
+		SayType.ROLE_PLAY
 	};
 	
 	@Override
@@ -23,7 +22,10 @@ public class ChatShout implements IChatHandler
 			return;
 		}
 		
-		World.broadcastToSameRegion(player, new CreatureSay(player, type, text));
+		final CreatureSay cs = new CreatureSay(player, type, text);
+		
+		player.sendPacket(cs);
+		player.forEachKnownTypeInRadius(Player.class, 1250, p -> p.sendPacket(cs));
 	}
 	
 	@Override

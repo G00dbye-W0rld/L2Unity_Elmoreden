@@ -24,6 +24,10 @@ public static class GameSettings
     private const string WaterDetailKey = "Settings_WaterDetailLevel";
     private const string PreferredPartyLootRuleKey = "Settings_PreferredPartyLootRule";
     private const string DenyPartyRequestsKey = "Settings_DenyPartyRequests";
+    private const string ChatTabChannelsKey = "Settings_ChatTabChannels3_";
+    private const string ChatFontSizeKey = "Settings_ChatFontSize";
+    private const string ChatSystemWindowKey = "Settings_ChatSystemWindow";
+    private const string ChatKeywordsKey = "Settings_ChatKeywords";
 
     private static readonly int[] MsaaSamples = { 1, 2, 4, 8 };
     // Index aligne sur les choix du dropdown "Distance des ombres" (Desactivees/Proches/Moyennes/Lointaines).
@@ -78,6 +82,168 @@ public static class GameSettings
     // lui-meme aligne sur les ordinaux du LootRule.java cote serveur.
     public static int PreferredPartyLootRule { get; private set; } = 0;
     public static bool DenyPartyRequests { get; private set; } = false;
+    /// Canaux affiches dans chaque onglet de chat, un bit par L2MessageType,
+    /// reglables onglet par onglet.
+    public const int ChatTabCount = 6;
+
+    /// Taille du texte du chat, cyclee par le bouton "Tt".
+    private static readonly int[] ChatFontSizes = { 11, 13, 16 };
+    public static int ChatFontSizeIndex { get; private set; }
+    public static int ChatFontSize { get { Load(); return ChatFontSizes[ChatFontSizeIndex]; } }
+
+    /// Fenetre separee au-dessus du chat pour les messages systeme.
+    public static bool ChatSystemWindow { get; private set; }
+    public const int ChatKeywordCount = 3;
+
+    /// Mots indesirables : un message qui en contient un n'apparait nulle part.
+    public static string[] ChatKeywords { get; private set; } = new string[ChatKeywordCount];
+
+    // Canaux proposes a la configuration, dans l'ordre d'affichage.
+    private static readonly L2MessageType[] FilterableChannels =
+    {
+        L2MessageType.ROLE_PLAY,
+        L2MessageType.HRP,
+        L2MessageType.SHOUT,
+        L2MessageType.TRADE,
+        L2MessageType.PARTY,
+        L2MessageType.CLAN,
+        L2MessageType.ALLIANCE,
+        L2MessageType.HERO_VOICE,
+        L2MessageType.TELL,
+        L2MessageType.SYSTEM_MESSAGE
+    };
+
+    // Par defaut, le Role Play recoit aussi les cris, la voix des heros et les
+    // messages systeme ; les autres onglets restent propres.
+    private static readonly L2MessageType[][] DefaultTabChannels =
+    {
+        new[] { L2MessageType.ROLE_PLAY, L2MessageType.SHOUT, L2MessageType.HERO_VOICE, L2MessageType.TELL, L2MessageType.SYSTEM_MESSAGE },
+        new[] { L2MessageType.HRP, L2MessageType.TELL },
+        new[] { L2MessageType.TRADE, L2MessageType.SHOUT, L2MessageType.HERO_VOICE, L2MessageType.TELL },
+        new[] { L2MessageType.PARTY, L2MessageType.TELL },
+        new[] { L2MessageType.CLAN, L2MessageType.TELL },
+        new[] { L2MessageType.ALLIANCE, L2MessageType.TELL }
+    };
+
+    private static int[] _chatTabChannels;
+
+    public static L2MessageType[] ChatFilterableChannels { get { return FilterableChannels; } }
+
+    private static int BuildChannelMask(L2MessageType[] channels)
+    {
+        int mask = 0;
+        foreach (L2MessageType channel in channels)
+        {
+            mask |= 1 << (int)channel;
+        }
+        return mask;
+    }
+
+    private static void LoadChatTabChannels()
+    {
+        _chatTabChannels = new int[ChatTabCount];
+        for (int i = 0; i < ChatTabCount; i++)
+        {
+            _chatTabChannels[i] = PlayerPrefs.GetInt(ChatTabChannelsKey + i, BuildChannelMask(DefaultTabChannels[i]));
+        }
+    }
+
+    public static bool IsChatChannelVisible(int tabIndex, L2MessageType channel)
+    {
+        Load();
+        if (tabIndex < 0 || tabIndex >= ChatTabCount)
+        {
+            return false;
+        }
+
+        return (_chatTabChannels[tabIndex] & (1 << (int)channel)) != 0;
+    }
+
+    public static void SetChatChannelVisible(int tabIndex, L2MessageType channel, bool visible)
+    {
+        Load();
+        if (tabIndex < 0 || tabIndex >= ChatTabCount)
+        {
+            return;
+        }
+
+        int bit = 1 << (int)channel;
+        _chatTabChannels[tabIndex] = visible
+            ? (_chatTabChannels[tabIndex] | bit)
+            : (_chatTabChannels[tabIndex] & ~bit);
+
+        PlayerPrefs.SetInt(ChatTabChannelsKey + tabIndex, _chatTabChannels[tabIndex]);
+        PlayerPrefs.Save();
+    }
+
+    public static int GetChatTabChannels(int tabIndex)
+    {
+        Load();
+        return (tabIndex < 0 || tabIndex >= ChatTabCount) ? 0 : _chatTabChannels[tabIndex];
+    }
+
+    public static void SetChatTabChannels(int tabIndex, int mask)
+    {
+        Load();
+        if (tabIndex < 0 || tabIndex >= ChatTabCount)
+        {
+            return;
+        }
+
+        _chatTabChannels[tabIndex] = mask;
+        PlayerPrefs.SetInt(ChatTabChannelsKey + tabIndex, mask);
+        PlayerPrefs.Save();
+    }
+
+    public static void SetChatSystemWindow(bool value)
+    {
+        Load();
+        ChatSystemWindow = value;
+        PlayerPrefs.SetInt(ChatSystemWindowKey, ChatSystemWindow ? 1 : 0);
+        PlayerPrefs.Save();
+    }
+
+    public static void SetChatFontSizeIndex(int index)
+    {
+        Load();
+        ChatFontSizeIndex = ((index % ChatFontSizes.Length) + ChatFontSizes.Length) % ChatFontSizes.Length;
+        PlayerPrefs.SetInt(ChatFontSizeKey, ChatFontSizeIndex);
+        PlayerPrefs.Save();
+    }
+
+    public static void SetChatKeyword(int index, string keyword)
+    {
+        Load();
+        if (index < 0 || index >= ChatKeywordCount)
+        {
+            return;
+        }
+
+        ChatKeywords[index] = string.IsNullOrWhiteSpace(keyword) ? "" : keyword.Trim();
+        PlayerPrefs.SetString(ChatKeywordsKey, string.Join("\n", ChatKeywords));
+        PlayerPrefs.Save();
+    }
+
+    /// Vrai si le message contient un mot indesirable.
+    public static bool IsChatFiltered(string text)
+    {
+        Load();
+        if (string.IsNullOrEmpty(text))
+        {
+            return false;
+        }
+
+        for (int i = 0; i < ChatKeywords.Length; i++)
+        {
+            string keyword = ChatKeywords[i];
+            if (!string.IsNullOrEmpty(keyword) && text.IndexOf(keyword, System.StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     private static void Load()
     {
@@ -100,6 +266,10 @@ public static class GameSettings
         WaterDetailLevel = PlayerPrefs.GetInt(WaterDetailKey, 1);
         PreferredPartyLootRule = PlayerPrefs.GetInt(PreferredPartyLootRuleKey, 0);
         DenyPartyRequests = PlayerPrefs.GetInt(DenyPartyRequestsKey, 0) == 1;
+        LoadChatTabChannels();
+        ChatFontSizeIndex = Mathf.Clamp(PlayerPrefs.GetInt(ChatFontSizeKey, 0), 0, ChatFontSizes.Length - 1);
+        ChatSystemWindow = PlayerPrefs.GetInt(ChatSystemWindowKey, 0) == 1;
+        ChatKeywords = SplitKeywords(PlayerPrefs.GetString(ChatKeywordsKey, ""));
     }
 
     // Applique les valeurs sauvegardees au demarrage (audio + video). A appeler
@@ -407,6 +577,17 @@ public static class GameSettings
         PreferredPartyLootRule = value;
         PlayerPrefs.SetInt(PreferredPartyLootRuleKey, PreferredPartyLootRule);
         PlayerPrefs.Save();
+    }
+
+    private static string[] SplitKeywords(string stored)
+    {
+        string[] keywords = new string[ChatKeywordCount];
+        string[] parts = stored.Split('\n');
+        for (int i = 0; i < ChatKeywordCount; i++)
+        {
+            keywords[i] = i < parts.Length ? parts[i] : "";
+        }
+        return keywords;
     }
 
     public static void SetDenyPartyRequests(bool value)

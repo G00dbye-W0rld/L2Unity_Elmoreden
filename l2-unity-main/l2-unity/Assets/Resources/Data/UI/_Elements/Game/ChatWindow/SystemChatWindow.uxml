@@ -1,0 +1,15 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/Resources/Data/UI/_Elements/L2StyleSheet.uss?fileID=7433441132597879392&amp;guid=72e99cc94b130bf4ba100dceaa830b13&amp;type=3#L2StyleSheet" />
+    <Style src="project://database/Assets/Resources/Data/UI/_Elements/Game/ChatWindow/ChatWindow.uss?fileID=7433441132597879392&amp;guid=0f1fc063049f5064a9a2f798c3ecd11f&amp;type=3#ChatWindow" />
+    <ui:VisualElement name="SystemChatWindow" focusable="true" class="chat-window system-chat-window">
+        <ui:GroupBox name="BGContainer" class="chat-bg-container">
+            <ui:VisualElement name="TextBG" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0.36);" />
+        </ui:GroupBox>
+        <ui:GroupBox name="Container" focusable="true" class="chat-window-wrapper">
+            <ui:VisualElement name="SystemContent" class="system-chat-content">
+                <ui:Label name="Content" text="" class="system-chat-label" />
+            </ui:VisualElement>
+            <ui:VisualElement name="SystemResizeTop" class="chat-resize-edge-top" />
+        </ui:GroupBox>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,6 +1,6 @@
 public class NormalMessage : ChatMessage
 {
-    public NormalMessage(string user, string message) : base(user, message, L2MessageType.ALL)
+    public NormalMessage(string user, string message) : base(user, message, L2MessageType.ROLE_PLAY)
     {
     }
 

@@ -14,6 +14,11 @@ public abstract class L2Tab
     public VisualElement TabHeader { get { return _tabHeader; } }
     private L2TabView _tabView;
 
+    protected void SetTabName(string tabName)
+    {
+        _tabName = tabName;
+    }
+
     public virtual void Initialize(L2TabView tabView, VisualElement tabContainer, VisualElement tabHeader)
     {
         _tabContainer = tabContainer;

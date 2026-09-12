@@ -76,6 +76,12 @@ public class ChatWindow : L2Window
 
         diagonalResizeHandle.AddManipulator(diagonalResizeManipulator);
 
+        VisualElement topEdge = GetElementById("ChatResizeTop");
+        topEdge.AddManipulator(new EdgeResizeManipulator(topEdge, _windowEle, EdgeResizeManipulator.Edge.Top, _chatWindowMinHeight, _chatWindowMaxHeight, 14.5f, 2f));
+
+        VisualElement rightEdge = GetElementById("ChatResizeRight");
+        rightEdge.AddManipulator(new EdgeResizeManipulator(rightEdge, _windowEle, EdgeResizeManipulator.Edge.Right, _chatWindowMinWidth, _chatWindowMaxWidth, 0f, 0f));
+
         _chatInput = (TextField)GetElementById("ChatInputField");
         _chatInput.RegisterCallback<FocusEvent>(OnChatInputFocus);
         _chatInput.RegisterCallback<BlurEvent>(OnChatInputBlur);
@@ -83,15 +89,18 @@ public class ChatWindow : L2Window
 
         var enlargeTextBtn = (Button)GetElementById("EnlargeTextBtn");
         enlargeTextBtn.AddManipulator(new ButtonClickSoundManipulator(enlargeTextBtn));
+        enlargeTextBtn.RegisterCallback<MouseUpEvent>(evt => CycleFontSize(), TrickleDown.TrickleDown);
 
         var chatOptionsBtn = (Button)GetElementById("ChatOptionsBtn");
         chatOptionsBtn.AddManipulator(new ButtonClickSoundManipulator(chatOptionsBtn));
+        chatOptionsBtn.RegisterCallback<MouseUpEvent>(evt => ChatOptionsWindow.Instance?.Open(), TrickleDown.TrickleDown);
 
         _chatInput.AddManipulator(new BlinkingCursorManipulator(_chatInput));
 
         _chatInputContainer = GetElementById("InnerBar");
 
         CreateTabs();
+        ApplyFontSize();
 
         yield return new WaitForEndOfFrame();
         diagonalResizeManipulator.SnapSize();
@@ -100,9 +109,22 @@ public class ChatWindow : L2Window
     }
 
 
+    // Onglets definis ici plutot que dans UI.prefab : les filtres viennent
+    // des reglages, et le prefixe ouvre le nom pour qu'on retrouve d'un coup
+    // d'oeil comment ecrire dans le canal.
     private void CreateTabs()
     {
         VisualElement chatTabView = GetElementById("ChatTabView");
+
+        _tabs = new ChatTab[]
+        {
+            new ChatTab("Role Play", L2MessageType.ROLE_PLAY),
+            new ChatTab("HRP", L2MessageType.HRP),
+            new ChatTab("+Monde", L2MessageType.TRADE),
+            new ChatTab("#Groupe", L2MessageType.PARTY),
+            new ChatTab("@Clan", L2MessageType.CLAN),
+            new ChatTab("$Alliance", L2MessageType.ALLIANCE)
+        };
 
         _l2TabView = new L2TabView();
         _l2TabView.Initialize(chatTabView, _tabs, _tabTemplate, _tabHeaderTemplate, false);
@@ -262,6 +284,12 @@ public class ChatWindow : L2Window
 
                 switch (text[0])
                 {
+                    case '(':
+                        // Ecrire entre parentheses est la convention HRP : on garde
+                        // les parentheses dans le texte, elles font partie du ton.
+                        messageType = L2MessageType.HRP;
+                        explicitPrefix = false;
+                        break;
                     case '+':
                         messageType = L2MessageType.TRADE;
                         break;
@@ -281,9 +309,14 @@ public class ChatWindow : L2Window
                         messageType = L2MessageType.HERO_VOICE;
                         break;
                     case '"':
-                        string[] s = text[1..].Split(" ");
-                        target = (s.Length > 0) ? s[0] : "";
+                        // Le destinataire part dans un champ dedie du paquet :
+                        // son nom ne doit pas rester dans le texte du message.
+                        string rest = text[1..];
+                        int separator = rest.IndexOf(' ');
+                        target = separator >= 0 ? rest[..separator] : rest;
+                        text = separator >= 0 ? rest[(separator + 1)..] : "";
                         messageType = L2MessageType.TELL;
+                        explicitPrefix = false;
                         break;
                     default:
                         explicitPrefix = false;
@@ -295,14 +328,56 @@ public class ChatWindow : L2Window
                     text = text[1..];
                 }
 
+                if (text.Length == 0)
+                {
+                    return;
+                }
+
+                // Depuis l'onglet HRP, la convention est ajoutee toute seule.
+                if (messageType == L2MessageType.HRP && !text.StartsWith("("))
+                {
+                    text = "(" + text + ")";
+                }
+
                 GameClient.Instance.ClientPacketHandler.SendMessage(text, messageType, target);
             }
         }
     }
 
+    // Le bouton "Tt" fait tourner la taille du texte, comme dans L2.
+    private void CycleFontSize()
+    {
+        GameSettings.SetChatFontSizeIndex(GameSettings.ChatFontSizeIndex + 1);
+        ApplyFontSize();
+    }
+
+    private void ApplyFontSize()
+    {
+        int size = GameSettings.ChatFontSize;
+        for (int i = 0; i < _tabs.Length; i++)
+        {
+            if (_tabs[i].Content != null)
+            {
+                _tabs[i].Content.style.fontSize = size;
+            }
+        }
+    }
+
+    public List<string> TabNames()
+    {
+        List<string> names = new List<string>();
+        for (int i = 0; i < _tabs.Length; i++)
+        {
+            names.Add(_tabs[i].TabName);
+        }
+        return names;
+    }
+
+    public VisualElement WindowElement { get { return _windowEle; } }
+
     private L2MessageType GetDefaultSendType()
     {
-        return _l2TabView?.ActiveTab?.TabName == "Groupe" ? L2MessageType.PARTY : L2MessageType.ALL;
+        return _l2TabView?.ActiveTab is ChatTab tab ? tab.DefaultSendType : L2MessageType.ROLE_PLAY;
     }
 
     public void ReceiveChatMessage(ChatMessage message)
@@ -312,15 +387,42 @@ public class ChatWindow : L2Window
             return;
         }
 
+        L2MessageType type = message.MessageType;
+
+        if (GameSettings.IsChatFiltered(message.Text))
+        {
+            return;
+        }
+
+        // Annonces et messages des GM : toujours partout, ils ne se reglent pas.
+        if (IsAlwaysShown(type))
+        {
+            AddToEveryTab(message.ToString());
+            return;
+        }
+
+        // Chaque onglet a sa propre liste de canaux, reglable dans les options.
         for (int i = 0; i < _tabs.Length; i++)
         {
-            if (_tabs[i].FilteredMessages.Count > 0)
+            if (GameSettings.IsChatChannelVisible(i, type))
             {
-                if (_tabs[i].FilteredMessages.Contains(message.MessageType))
-                {
-                    _tabs[i].AddMessage(message.ToString());
-                }
+                _tabs[i].AddMessage(message.ToString());
             }
+        }
+    }
+
+    private static bool IsAlwaysShown(L2MessageType type)
+    {
+        return type == L2MessageType.ANNOUNCEMENT
+            || type == L2MessageType.CRITICAL_ANNOUNCE
+            || type == L2MessageType.GM;
+    }
+
+    private void AddToEveryTab(string text)
+    {
+        for (int i = 0; i < _tabs.Length; i++)
+        {
+            _tabs[i].AddMessage(text);
         }
     }
 
@@ -331,9 +433,14 @@ public class ChatWindow : L2Window
             return;
         }
 
+        if (GameSettings.ChatSystemWindow && SystemChatWindow.Instance != null)
+        {
+            SystemChatWindow.Instance.AddMessage(message.ToString());
+        }
+
         for (int i = 0; i < _tabs.Length; i++)
         {
-            if (_tabs[i].FilteredMessages.Contains(L2MessageType.SYSTEM_MESSAGE))
+            if (GameSettings.IsChatChannelVisible(i, L2MessageType.SYSTEM_MESSAGE))
             {
                 _tabs[i].AddMessage(message.ToString());
             }

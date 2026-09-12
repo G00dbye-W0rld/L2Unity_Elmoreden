@@ -13,6 +13,24 @@ public class ChatTab : L2Tab
     private Label _content;
     public Label Content { get { return _content; } }
 
+    public ChatTab()
+    {
+    }
+
+    // Le premier canal de la liste est celui dans lequel on ecrit depuis cet
+    // onglet ; les suivants y sont seulement affiches.
+    public ChatTab(string tabName, params L2MessageType[] channels)
+    {
+        SetTabName(tabName);
+        _filteredMessages = new List<L2MessageType>(channels);
+        _autoscroll = true;
+    }
+
+    public L2MessageType DefaultSendType
+    {
+        get { return _filteredMessages.Count > 0 ? _filteredMessages[0] : L2MessageType.ROLE_PLAY; }
+    }
+
     public override void Initialize(L2TabView tabView, VisualElement tabContainer, VisualElement tabHeader)
     {
         base.Initialize(tabView, tabContainer, tabHeader);

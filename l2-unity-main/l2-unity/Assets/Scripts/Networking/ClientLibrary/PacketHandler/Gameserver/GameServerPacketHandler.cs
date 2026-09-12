@@ -406,6 +406,9 @@ public class GameServerPacketHandler : ServerPacketHandler
             case L2MessageType.TRADE:
                 message = new TradeMessage(sender, text);
                 break;
+            case L2MessageType.HRP:
+                message = new HrpMessage(sender, text);
+                break;
             case L2MessageType.SHOUT:
                 message = new ShoutMessage(sender, text);
                 break;
@@ -433,6 +436,27 @@ public class GameServerPacketHandler : ServerPacketHandler
             default:
                 message = new NormalMessage(sender, text);
                 break;
+        }
+
+        // Role Play et HRP s'affichent en bulle au-dessus de la tete : le
+        // serveur fournit l'objectId de l'auteur exactement pour cela. Le HRP
+        // garde son bleu-gris, pour qu'on voie d'un coup d'oeil que ce n'est
+        // pas le personnage qui parle.
+        bool bubbleChannel = packet.MessageType == L2MessageType.ROLE_PLAY || packet.MessageType == L2MessageType.HRP;
+        if (bubbleChannel && packet.ObjectId != 0)
+        {
+            int bubbleId = packet.ObjectId;
+            Color bubbleColor = packet.MessageType == L2MessageType.HRP
+                ? new Color32(0x8F, 0xA9, 0xC0, 255)
+                : Color.white;
+
+            _eventProcessor.QueueEvent(() =>
+            {
+                if (NameplatesManagerGame.Instance != null)
+                {
+                    NameplatesManagerGame.Instance.ShowChatBubble(bubbleId, text, bubbleColor);
+                }
+            });
         }
 
         _eventProcessor.QueueEvent(() => ChatWindow.Instance.ReceiveChatMessage(message));

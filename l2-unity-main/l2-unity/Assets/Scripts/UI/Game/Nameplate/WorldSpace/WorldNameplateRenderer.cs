@@ -201,6 +201,22 @@ public class WorldNameplateRenderer : MonoBehaviour
         return Mathf.Clamp01(1f - (d - start) / (_viewDistance - start));
     }
 
+    // Bulle de chat : l'identifiant vient du paquet de message. Le joueur
+    // local a sa propre nameplate, hors du dictionnaire _active.
+    public void ShowChatBubble(int id, string text, Color textColor)
+    {
+        if (_active.TryGetValue(id, out WorldNameplate nameplate))
+        {
+            nameplate.ShowChatBubble(text, textColor);
+            return;
+        }
+
+        if (_playerNameplate != null && _playerNameplate.Entity != null && _playerNameplate.Entity.Identity.Id == id)
+        {
+            _playerNameplate.ShowChatBubble(text, textColor);
+        }
+    }
+
     public void SetBubbleState(int id, WorldNameplate.BubbleState state)
     {
         if (_active.TryGetValue(id, out WorldNameplate nameplate))

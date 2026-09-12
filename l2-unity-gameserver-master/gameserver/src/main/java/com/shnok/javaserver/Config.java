@@ -489,6 +489,9 @@ public final class Config
 	public static int CHARACTER_SELECT_TIME;
 	public static int GLOBAL_CHAT_TIME;
 	public static int TRADE_CHAT_TIME;
+	public static int TELL_CHAT_TIME;
+	public static boolean WORLD_CHAT_GLOBAL;
+	public static int WORLD_CHAT_MIN_LEVEL;
 	public static int SOCIAL_TIME;
 	
 	/** Misc */
@@ -1033,8 +1036,11 @@ public final class Config
 		MANOR_TIME = server.getProperty("ManorTime", 3000);
 		SENDMAIL_TIME = server.getProperty("SendMailTime", 10000);
 		CHARACTER_SELECT_TIME = server.getProperty("CharacterSelectTime", 3000);
-		GLOBAL_CHAT_TIME = server.getProperty("GlobalChatTime", 0);
-		TRADE_CHAT_TIME = server.getProperty("TradeChatTime", 0);
+		GLOBAL_CHAT_TIME = server.getProperty("GlobalChatTime", 3000);
+		TRADE_CHAT_TIME = server.getProperty("TradeChatTime", 10000);
+		TELL_CHAT_TIME = server.getProperty("TellChatTime", 2000);
+		WORLD_CHAT_GLOBAL = server.getProperty("WorldChatGlobal", true);
+		WORLD_CHAT_MIN_LEVEL = server.getProperty("WorldChatMinLevel", 0);
 		SOCIAL_TIME = server.getProperty("SocialTime", 2000);
 		
 		L2WALKER_PROTECTION = server.getProperty("L2WalkerProtection", false);

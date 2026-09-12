@@ -460,3 +460,229 @@
     width: 100%;
     height: 100%;
 }
+/* ====================================================================
+   Fenetre "Options du chat" (ChatOptionsWindow.uxml)
+   Disposition reprise de la boite de filtrage du client d'origine :
+   groupes encadres, cases a cocher sur deux colonnes, mots indesirables,
+   puis Confirmer / Annuler. Les classes vivent ici parce que cette
+   feuille est chargee globalement par Lineage2_Game.uxml.
+   ==================================================================== */
+/* Un enfant ajoute au modele de fenetre en devient le VOISIN, pas le
+   contenu : il s'afficherait sous le cadre. ChatOptionsWindow.InitWindow le
+   deplace donc dans l'emplacement "Content" du modele, ou il vit en flux. */
+.chat-opt-content {
+    flex-grow: 1;
+    flex-direction: column;
+    overflow: hidden;
+    padding-top: 4px;
+    padding-right: 6px;
+    padding-bottom: 4px;
+    padding-left: 6px;
+}
+
+/* Selecteur d'onglet : meme habillage que les onglets de reglages */
+.chat-opt-tabs {
+    flex-direction: row;
+    flex-shrink: 0;
+    margin-bottom: 4px;
+}
+
+.chat-opt-tab-btn {
+    height: 22px;
+    min-width: 54px;
+    margin-right: 2px;
+    padding-left: 4px;
+    padding-right: 4px;
+    border-width: 0;
+    background-color: transparent;
+    background-image: resource('Data/UI/Assets/Tab/Tab_DF_Tab_Unselected');
+    -unity-slice-top: 24;
+    -unity-slice-left: 5;
+    -unity-slice-bottom: 0;
+    -unity-slice-right: 5;
+    -unity-slice-scale: 1px;
+    color: rgb(185, 185, 185);
+    font-size: 11px;
+    -unity-text-align: middle-center;
+}
+
+.chat-opt-tab-btn:hover {
+    background-image: resource('Data/UI/Assets/Tab/Tab_DF_Tab_Unselected_Over');
+}
+
+.chat-opt-tab-btn.active {
+    background-image: resource('Data/UI/Assets/Tab/Tab_DF_Tab_Selected');
+    color: rgb(255, 255, 255);
+}
+
+/* Groupes sans cadre : seuls les titres separent les categories. Le fond
+   encadre (Tab_DF_bg) donnait deux traits fins colles entre deux groupes. */
+.chat-opt-group {
+    flex-direction: column;
+    flex-shrink: 0;
+    margin-bottom: 12px;
+    padding-top: 2px;
+    padding-right: 4px;
+    padding-bottom: 2px;
+    padding-left: 4px;
+}
+
+.chat-opt-group-title {
+    font-size: 12px;
+    margin-bottom: 2px;
+    -unity-font-style: bold;
+}
+
+.chat-opt-columns {
+    flex-direction: row;
+}
+
+.chat-opt-column {
+    flex-direction: column;
+    flex-grow: 1;
+    width: 50%;
+}
+
+/* Ligne case + libelle : la case vient AVANT le texte, comme dans L2 */
+.chat-opt-check-row {
+    flex-direction: row;
+    align-items: center;
+    min-height: 18px;
+    margin: 0;
+    padding: 0;
+}
+
+.chat-opt-check {
+    margin: 0;
+    margin-right: 5px;
+    flex-shrink: 0;
+}
+
+.chat-opt-check .unity-toggle__input {
+    margin: 0;
+}
+
+.chat-opt-check .unity-toggle__checkmark {
+    width: 15px;
+    height: 15px;
+    background-color: rgba(0, 0, 0, 0.4);
+    background-image: resource('Data/UI/Assets/Quest/CheckBoxQuest');
+    -unity-background-scale-mode: scale-to-fit;
+    border-width: 0;
+}
+
+.chat-opt-check:checked .unity-toggle__checkmark {
+    background-image: resource('Data/UI/Assets/Quest/CheckBox_checked');
+}
+
+.chat-opt-check-label {
+    font-size: 11px;
+    flex-grow: 1;
+}
+
+/* Mots indesirables : champ + bouton de remise a zero */
+.chat-opt-keyword-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 3px;
+}
+
+.chat-opt-keyword-input {
+    flex-grow: 1;
+    height: 20px;
+    margin: 0;
+    margin-right: 5px;
+    border-width: 0;
+    font-size: 11px;
+    color: rgb(220, 220, 220);
+    -unity-text-align: middle-left;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.chat-opt-keyword-input #unity-text-input {
+    background-color: rgba(0, 0, 0, 0);
+    background-image: resource('Data/UI/Assets/Login/CharacterPassword_DF_EditBox_Scaled');
+    cursor: resource('Data/UI/Assets/Cursor/Default');
+    border-width: 0;
+    margin: 0;
+    padding-left: 4px;
+    padding-right: 4px;
+    -unity-slice-left: 10;
+    -unity-slice-top: 10;
+    -unity-slice-right: 10;
+    -unity-slice-bottom: 10;
+}
+
+.chat-opt-keyword-btn {
+    width: 64px;
+    flex-shrink: 0;
+}
+
+.chat-opt-hint {
+    font-size: 10px;
+    white-space: normal;
+    margin-top: -2px;
+    margin-bottom: 4px;
+    padding-left: 2px;
+}
+
+.chat-opt-footer {
+    flex-direction: row;
+    justify-content: center;
+    flex-shrink: 0;
+    /* auto : le pied reste colle en bas, le vide eventuel passe au-dessus */
+    margin-top: auto;
+    margin-bottom: 8px;
+}
+
+.chat-opt-footer-btn {
+    width: 104px;
+    margin-left: 8px;
+    margin-right: 8px;
+}
+
+/* ---------- Bordures saisissables du chat ----------
+   Bandes transparentes le long des bords : la barre du haut regle la
+   hauteur, celle de droite la largeur. L'ancienne poignee d'angle reste. */
+.chat-resize-edge-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 18px;
+    height: 6px;
+    background-color: rgba(0, 0, 0, 0);
+    cursor: resource('Data/UI/Assets/Cursor/Default');
+}
+
+.chat-resize-edge-right {
+    position: absolute;
+    top: 8px;
+    right: 0;
+    bottom: 48px;
+    width: 6px;
+    background-color: rgba(0, 0, 0, 0);
+    cursor: resource('Data/UI/Assets/Cursor/Default');
+}
+
+/* ---------- Fenetre des messages systeme ----------
+   Meme habillage que le chat, sans barre de saisie ni onglets. Sa largeur
+   suit celle du chat ; seule sa hauteur se regle, par sa bordure du haut. */
+.system-chat-window {
+    position: absolute;
+}
+
+.system-chat-content {
+    flex-grow: 1;
+    overflow: hidden;
+    padding-top: 4px;
+    padding-right: 8px;
+    padding-bottom: 4px;
+    padding-left: 8px;
+    justify-content: flex-end;
+}
+
+.system-chat-label {
+    white-space: normal;
+    font-size: 12px;
+    color: rgb(200, 200, 200);
+}

@@ -1,6 +1,7 @@
 package com.shnok.javaserver.gameserver.handler.chathandlers;
 
 import com.shnok.javaserver.gameserver.data.manager.RelationManager;
+import com.shnok.javaserver.gameserver.enums.FloodProtector;
 import com.shnok.javaserver.gameserver.enums.SayType;
 import com.shnok.javaserver.gameserver.handler.IChatHandler;
 import com.shnok.javaserver.gameserver.model.World;
@@ -21,6 +22,12 @@ public class ChatTell implements IChatHandler
 	{
 		if (target == null)
 			return;
+		
+		if (!player.getClient().performAction(FloodProtector.TELL_CHAT))
+		{
+			player.sendMessage("Vous envoyez des messages trop vite, patientez un instant.");
+			return;
+		}
 		
 		final Player targetPlayer = World.getInstance().getPlayer(target);
 		if (targetPlayer == null || targetPlayer.getClient().isDetached())

@@ -11,7 +11,7 @@ public class ChatMessage
     // sur PARTY, ne recevait jamais rien a cause de ça).
     public L2MessageType MessageType { get; }
 
-    public ChatMessage(string user, string message) : this(user, message, L2MessageType.ALL)
+    public ChatMessage(string user, string message) : this(user, message, L2MessageType.ROLE_PLAY)
     {
     }
 
@@ -21,6 +21,8 @@ public class ChatMessage
         _message = message;
         MessageType = type;
     }
+
+    public string Text { get { return _message; } }
 
     public override string ToString()
     {

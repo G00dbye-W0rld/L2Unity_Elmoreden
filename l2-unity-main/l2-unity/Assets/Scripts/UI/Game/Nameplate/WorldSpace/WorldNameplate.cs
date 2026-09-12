@@ -57,6 +57,8 @@ public class WorldNameplate
         _titleText = root.transform.Find("Title").GetComponent<TMP_Text>();
         _bubbleIcon = root.transform.Find("BubbleIcon").GetComponent<MeshRenderer>();
         _mpb = new MaterialPropertyBlock();
+        _defaultTitlePosition = _titleText.transform.localPosition;
+        _storeTitlePosition = _defaultTitlePosition + new Vector3(0f, StoreTitleLift, 0f);
 
         // Reinitialise l'alpha : cette instance enveloppe peut-etre un
         // GameObject recycle du pool, dont le texte/MPB gardait un alpha de
@@ -124,6 +126,11 @@ public class WorldNameplate
         SetBubbleState(BubbleState.Hover);
 
         _shownOperateType = (OperateType)255;
+
+        if (_chatBubble != null)
+        {
+            _chatBubble.SetActive(false);
+        }
     }
 
     private OperateType _shownOperateType = (OperateType)255;
@@ -134,9 +141,13 @@ public class WorldNameplate
     // precis que la balise <mark> de TMP. Cree a la demande, garde par le pool.
     private const string StoreBackgroundName = "StoreBackground";
     private const float StoreBackgroundAlpha = 0.9f;
-    private static readonly Vector2 StoreBackgroundPadding = new Vector2(0.3f, 0.1f);
+    private static readonly Vector2 StoreBackgroundPadding = new Vector2(0.14f, 0.07f);
     private static Material _storeBackgroundMaterial;
+    private const float StoreTitleLift = 0.08f;
+    private Vector3 _defaultTitlePosition;
+    private Vector3 _storeTitlePosition;
     private MeshRenderer _storeBackground;
+    private Mesh _storeBackgroundMesh;
     private MaterialPropertyBlock _storeBackgroundMpb;
     private float _storeBackgroundShownAlpha = -1f;
 
@@ -155,9 +166,14 @@ public class WorldNameplate
             _shownTitle = title;
 
             string color = StoreColor(type);
-            bool isStore = color != null && !string.IsNullOrEmpty(message);
+            // L'encart apparait des que le personnage tient boutique, meme
+            // sans nom saisi : l'en-tete suffit a l'annoncer.
+            bool isStore = color != null;
+            string header = StoreHeader(type);
+            string body = string.IsNullOrEmpty(message) ? header : header + "\n" + message;
 
-            _titleText.text = isStore ? $"<color={color}><noparse>{message}</noparse></color>" : title;
+            _titleText.text = isStore ? $"<color={color}><noparse>{body}</noparse></color>" : title;
+            _titleText.transform.localPosition = isStore ? _storeTitlePosition : _defaultTitlePosition;
             RefreshStoreBackground(isStore);
         }
 
@@ -193,7 +209,7 @@ public class WorldNameplate
 
         Transform t = _storeBackground.transform;
         t.localPosition = new Vector3(bounds.center.x, bounds.center.y, 0.01f);
-        t.localScale = new Vector3(bounds.size.x + StoreBackgroundPadding.x, bounds.size.y + StoreBackgroundPadding.y, 1f);
+        WorldBubbleVisual.UpdateSlicedMesh(_storeBackgroundMesh, bounds.size.x + StoreBackgroundPadding.x, bounds.size.y + StoreBackgroundPadding.y);
         _storeBackground.enabled = true;
         ApplyStoreBackgroundAlpha();
     }
@@ -201,26 +217,26 @@ public class WorldNameplate
     private MeshRenderer FindStoreBackground()
     {
         Transform existing = _titleText.transform.Find(StoreBackgroundName);
-        return existing != null ? existing.GetComponent<MeshRenderer>() : null;
+        if (existing == null)
+        {
+            return null;
+        }
+
+        _storeBackgroundMesh = existing.GetComponent<MeshFilter>().sharedMesh;
+        return existing.GetComponent<MeshRenderer>();
     }
 
     private MeshRenderer CreateStoreBackground()
     {
         if (_storeBackgroundMaterial == null)
         {
-            // Copie du materiau de la bulle : deja transparent et visible en jeu.
-            Material source = _bubbleIcon.sharedMaterial;
-            _storeBackgroundMaterial = source != null
-                ? new Material(source)
-                : new Material(Shader.Find("Universal Render Pipeline/Unlit"));
-            _storeBackgroundMaterial.SetTexture("_BaseMap", Texture2D.whiteTexture);
-            _storeBackgroundMaterial.SetTexture("_MainTex", Texture2D.whiteTexture);
-            _storeBackgroundMaterial.renderQueue = _titleText.fontSharedMaterial.renderQueue - 1;
+            _storeBackgroundMaterial = WorldBubbleVisual.CreateMaterial(_bubbleIcon.sharedMaterial, _titleText.fontSharedMaterial.renderQueue - 1);
         }
 
         GameObject go = new GameObject(StoreBackgroundName);
         go.transform.SetParent(_titleText.transform, false);
-        go.AddComponent<MeshFilter>().sharedMesh = Resources.GetBuiltinResource<Mesh>("Quad.fbx");
+        _storeBackgroundMesh = new Mesh { name = "StoreBackground" };
+        go.AddComponent<MeshFilter>().sharedMesh = _storeBackgroundMesh;
 
         MeshRenderer renderer = go.AddComponent<MeshRenderer>();
         renderer.sharedMaterial = _storeBackgroundMaterial;
@@ -237,6 +253,155 @@ public class WorldNameplate
         _storeBackgroundMpb.SetColor(BaseColorId, new Color(0f, 0f, 0f, StoreBackgroundAlpha * Mathf.Max(0f, _currentAlpha)));
         _storeBackground.SetPropertyBlock(_storeBackgroundMpb);
         _storeBackgroundShownAlpha = _currentAlpha;
+    }
+
+    // Bulle de chat au-dessus de la tete : meme habillage que l'encart de
+    // magasin, avec une pointe dessous et une disparition en fondu.
+    private const string ChatBubbleName = "ChatBubble";
+    private const float ChatBubbleDuration = 5f;
+    private const float ChatBubbleFadeOut = 0.6f;
+    private const float ChatBubbleWidth = 1.9f;
+    private const float ChatBubbleBaseHeight = 0.33f;
+    private const float ChatBubbleAlpha = 0.82f;
+    private static readonly Vector2 ChatBubblePadding = new Vector2(0.16f, 0.09f);
+    private static Material _chatBubbleMaterial;
+
+    private GameObject _chatBubble;
+    private TMP_Text _chatText;
+    private MeshRenderer _chatBackground;
+    private MeshRenderer _chatTail;
+    private Mesh _chatBackgroundMesh;
+    private MaterialPropertyBlock _chatBubbleMpb;
+    private float _chatBubbleHideTime;
+
+    public void ShowChatBubble(string text, Color textColor)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return;
+        }
+
+        if (_chatBubble == null)
+        {
+            CreateChatBubble();
+        }
+
+        // Activer AVANT de mesurer : TMP ne recalcule pas ses bornes sur un
+        // objet desactive, et le fond restait alors invisible.
+        _chatBubble.SetActive(true);
+
+        _chatText.color = textColor;
+        _chatText.text = text;
+        _chatText.ForceMeshUpdate();
+
+        Bounds bounds = _chatText.textBounds;
+        float width = bounds.size.x + ChatBubblePadding.x;
+        float height = bounds.size.y + ChatBubblePadding.y;
+
+        WorldBubbleVisual.UpdateSlicedMesh(_chatBackgroundMesh, width, height);
+        _chatBackground.transform.localPosition = new Vector3(bounds.center.x, bounds.center.y, 0.01f);
+        _chatTail.transform.localPosition = new Vector3(bounds.center.x, bounds.center.y - height * 0.5f, 0.01f);
+
+        // Posee au-dessus du titre : le bas de la bulle reste a la meme
+        // hauteur quel que soit le nombre de lignes.
+        _chatBubble.transform.localPosition = new Vector3(0f, ChatBubbleBaseHeight + height * 0.5f, 0f);
+
+        _chatBubbleHideTime = Time.time + ChatBubbleDuration;
+        ApplyChatBubbleAlpha(1f);
+    }
+
+    private void CreateChatBubble()
+    {
+        _chatBubble = new GameObject(ChatBubbleName);
+        _chatBubble.transform.SetParent(_root.transform, false);
+        _chatBubble.layer = _root.layer;
+
+        // Copie du titre : elle apporte la police, le materiau de texte et la
+        // couche de rendu deja valides dans ce projet.
+        GameObject textGo = Object.Instantiate(_titleText.gameObject, _chatBubble.transform, false);
+        textGo.name = "Text";
+        _chatText = textGo.GetComponent<TMP_Text>();
+        _chatText.text = "";
+        _chatText.color = Color.white;
+        _chatText.alignment = TextAlignmentOptions.Center;
+        _chatText.textWrappingMode = TextWrappingModes.Normal;
+        _chatText.rectTransform.localPosition = Vector3.zero;
+        _chatText.rectTransform.sizeDelta = new Vector2(ChatBubbleWidth, 1f);
+
+        Transform copiedStoreBackground = textGo.transform.Find(StoreBackgroundName);
+        if (copiedStoreBackground != null)
+        {
+            Object.Destroy(copiedStoreBackground.gameObject);
+        }
+
+        if (_chatBubbleMaterial == null)
+        {
+            _chatBubbleMaterial = WorldBubbleVisual.CreateMaterial(_bubbleIcon.sharedMaterial, _chatText.fontSharedMaterial.renderQueue - 1);
+        }
+
+        _chatBackgroundMesh = new Mesh { name = "ChatBubbleBackground" };
+        _chatBackground = CreateChatBubblePiece("Background", _chatBackgroundMesh);
+
+        Mesh tailMesh = new Mesh { name = "ChatBubbleTail" };
+        WorldBubbleVisual.UpdateTailMesh(tailMesh);
+        _chatTail = CreateChatBubblePiece("Tail", tailMesh);
+
+        _chatBubble.SetActive(false);
+    }
+
+    private MeshRenderer CreateChatBubblePiece(string pieceName, Mesh mesh)
+    {
+        GameObject go = new GameObject(pieceName);
+        go.transform.SetParent(_chatBubble.transform, false);
+        go.layer = _root.layer;
+        go.AddComponent<MeshFilter>().sharedMesh = mesh;
+
+        MeshRenderer renderer = go.AddComponent<MeshRenderer>();
+        renderer.sharedMaterial = _chatBubbleMaterial;
+        renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        renderer.receiveShadows = false;
+        return renderer;
+    }
+
+    private void TickChatBubble()
+    {
+        float remaining = _chatBubbleHideTime - Time.time;
+        if (remaining <= 0f)
+        {
+            _chatBubble.SetActive(false);
+            return;
+        }
+
+        ApplyChatBubbleAlpha(Mathf.Clamp01(remaining / ChatBubbleFadeOut));
+    }
+
+    // Suit le fondu par distance de la nameplate, comme le texte.
+    private void ApplyChatBubbleAlpha(float fade)
+    {
+        float alpha = fade * Mathf.Max(0f, _currentAlpha);
+        _chatText.alpha = alpha;
+
+        _chatBubbleMpb ??= new MaterialPropertyBlock();
+        _chatBubbleMpb.SetColor(BaseColorId, new Color(0f, 0f, 0f, ChatBubbleAlpha * alpha));
+        _chatBackground.SetPropertyBlock(_chatBubbleMpb);
+        _chatTail.SetPropertyBlock(_chatBubbleMpb);
+    }
+
+    // En-tete affichee au-dessus du message, comme dans le client d'origine.
+    private static string StoreHeader(OperateType type)
+    {
+        switch (type)
+        {
+            case OperateType.Sell:
+            case OperateType.PackageSell:
+                return "<Magasin priv\u00e9 - Vente>";
+            case OperateType.Buy:
+                return "<Magasin priv\u00e9 - Achat>";
+            case OperateType.Manufacture:
+                return "<Atelier priv\u00e9>";
+            default:
+                return "";
+        }
     }
 
     private static string StoreColor(OperateType type)
@@ -262,6 +427,11 @@ public class WorldNameplate
     public void ManageColors()
     {
         UpdateStoreTitle();
+
+        if (_chatBubble != null && _chatBubble.activeSelf)
+        {
+            TickChatBubble();
+        }
 
         if (_previousServerTitleColor != Entity.Appearance.ServerTitleColor)
         {

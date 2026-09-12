@@ -213,6 +213,15 @@ public class NameplatesManagerGame : NameplatesManagerBase
         }
     }
 
+    // Affiche un message de chat au-dessus de la tete de son auteur.
+    public void ShowChatBubble(int objectId, string text, Color textColor)
+    {
+        if (worldRenderer != null)
+        {
+            worldRenderer.ShowChatBubble(objectId, text, textColor);
+        }
+    }
+
     public override void RemoveNameplate(int id)
     {
         if (useWorldSpaceNameplates)

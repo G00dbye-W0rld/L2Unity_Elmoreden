@@ -1587,7 +1587,7 @@ public class Npc extends Creature
 	 */
 	public void broadcastNpcSay(String message)
 	{
-		broadcastPacket(new NpcSay(this, SayType.ALL, message));
+		broadcastPacket(new NpcSay(this, SayType.ROLE_PLAY, message));
 	}
 	
 	/**

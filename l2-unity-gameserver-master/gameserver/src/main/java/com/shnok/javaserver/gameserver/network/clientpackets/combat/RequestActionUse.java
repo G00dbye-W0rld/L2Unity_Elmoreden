@@ -335,7 +335,7 @@ public final class RequestActionUse extends L2GameClientPacket
 			
 			case 1001: // Sin Eater - Ultimate Bombastic Buster
 				if (useSkill(4139, summon) && summon.getNpcId() == SIN_EATER_ID && Rnd.get(100) < 10)
-					summon.broadcastPacket(new NpcSay(summon, SayType.ALL, Rnd.get(SIN_EATER_ACTIONS_STRINGS)));
+					summon.broadcastPacket(new NpcSay(summon, SayType.ROLE_PLAY, Rnd.get(SIN_EATER_ACTIONS_STRINGS)));
 				break;
 			
 			case 1003: // Wind Hatchling/Strider - Wild Stun

@@ -1,0 +1,98 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Template name="WindowTemplate" src="project://database/Assets/Resources/Data/UI/_Elements/Components/WindowTemplate.uxml?fileID=9197481963319205126&amp;guid=5ca840f56ef6f1044b4dc077c7d3e6e6&amp;type=3#WindowTemplate" />
+    <ui:Template name="L2Button" src="project://database/Assets/Resources/Data/UI/_Elements/Components/L2Button/L2Button.uxml?fileID=9197481963319205126&amp;guid=47796068f89476143b10b5d383be52fc&amp;type=3#L2Button" />
+    <Style src="project://database/Assets/Resources/Data/UI/_Elements/L2StyleSheet.uss?fileID=7433441132597879392&amp;guid=72e99cc94b130bf4ba100dceaa830b13&amp;type=3#L2StyleSheet" />
+    <Style src="project://database/Assets/Resources/Data/UI/_Elements/Game/ChatWindow/ChatWindow.uss?fileID=7433441132597879392&amp;guid=0f1fc063049f5064a9a2f798c3ecd11f&amp;type=3#ChatWindow" />
+    <ui:Instance template="WindowTemplate" name="WindowTemplate" class="chat-options-window" style="width: 382px; height: 474px; position: absolute;">
+        <AttributeOverrides element-name="windows-name-label" text="Options du chat" />
+        <ui:VisualElement name="OptionsContent" class="chat-opt-content">
+            <ui:VisualElement name="TabSelector" class="chat-opt-tabs" />
+            <ui:VisualElement class="chat-opt-group">
+                <ui:Label text="Canaux affichés dans cet onglet" class="chat-opt-group-title l2-color-4" />
+                <ui:VisualElement class="chat-opt-columns">
+                    <ui:VisualElement class="chat-opt-column">
+                        <ui:VisualElement class="chat-opt-check-row">
+                            <ui:Toggle name="ToggleRolePlay" class="chat-opt-check" />
+                            <ui:Label text="Role Play" class="chat-opt-check-label l2-color-3" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="chat-opt-check-row">
+                            <ui:Toggle name="ToggleHrp" class="chat-opt-check" />
+                            <ui:Label text="HRP" class="chat-opt-check-label l2-color-3" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="chat-opt-check-row">
+                            <ui:Toggle name="ToggleShout" class="chat-opt-check" />
+                            <ui:Label text="Cri" class="chat-opt-check-label l2-color-3" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="chat-opt-check-row">
+                            <ui:Toggle name="ToggleTrade" class="chat-opt-check" />
+                            <ui:Label text="Monde" class="chat-opt-check-label l2-color-3" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="chat-opt-check-row">
+                            <ui:Toggle name="ToggleParty" class="chat-opt-check" />
+                            <ui:Label text="Groupe" class="chat-opt-check-label l2-color-3" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="chat-opt-check-row">
+                            <ui:Toggle name="ToggleClan" class="chat-opt-check" />
+                            <ui:Label text="Clan" class="chat-opt-check-label l2-color-3" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="chat-opt-column">
+                        <ui:VisualElement class="chat-opt-check-row">
+                            <ui:Toggle name="ToggleAlliance" class="chat-opt-check" />
+                            <ui:Label text="Alliance" class="chat-opt-check-label l2-color-3" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="chat-opt-check-row">
+                            <ui:Toggle name="ToggleHero" class="chat-opt-check" />
+                            <ui:Label text="Héros" class="chat-opt-check-label l2-color-3" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="chat-opt-check-row">
+                            <ui:Toggle name="ToggleTell" class="chat-opt-check" />
+                            <ui:Label text="Messages privés" class="chat-opt-check-label l2-color-3" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="chat-opt-check-row">
+                            <ui:Toggle name="ToggleSystem" class="chat-opt-check" />
+                            <ui:Label text="Système" class="chat-opt-check-label l2-color-3" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="chat-opt-group">
+                <ui:Label text="Messages système" class="chat-opt-group-title l2-color-4" />
+                <ui:VisualElement class="chat-opt-check-row">
+                    <ui:Toggle name="SystemWindowToggle" class="chat-opt-check" />
+                    <ui:Label text="Fenêtre séparée au-dessus du chat" class="chat-opt-check-label l2-color-3" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="chat-opt-group">
+                <ui:Label text="Mots indésirables" class="chat-opt-group-title l2-color-4" />
+                <ui:VisualElement class="chat-opt-keyword-row">
+                    <ui:TextField name="Keyword0" max-length="20" class="chat-opt-keyword-input" />
+                    <ui:Instance template="L2Button" name="ClearKeyword0" class="chat-opt-keyword-btn">
+                        <AttributeOverrides element-name="ButtonLabel" text="Vider" />
+                    </ui:Instance>
+                </ui:VisualElement>
+                <ui:VisualElement class="chat-opt-keyword-row">
+                    <ui:TextField name="Keyword1" max-length="20" class="chat-opt-keyword-input" />
+                    <ui:Instance template="L2Button" name="ClearKeyword1" class="chat-opt-keyword-btn">
+                        <AttributeOverrides element-name="ButtonLabel" text="Vider" />
+                    </ui:Instance>
+                </ui:VisualElement>
+                <ui:VisualElement class="chat-opt-keyword-row">
+                    <ui:TextField name="Keyword2" max-length="20" class="chat-opt-keyword-input" />
+                    <ui:Instance template="L2Button" name="ClearKeyword2" class="chat-opt-keyword-btn">
+                        <AttributeOverrides element-name="ButtonLabel" text="Vider" />
+                    </ui:Instance>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:Label text="Un message contenant l'un de ces mots n'apparaît dans aucun onglet." class="chat-opt-hint l2-color-3" />
+            <ui:VisualElement class="chat-opt-footer">
+                <ui:Instance template="L2Button" name="ConfirmButton" class="chat-opt-footer-btn">
+                    <AttributeOverrides element-name="ButtonLabel" text="Confirmer" />
+                </ui:Instance>
+                <ui:Instance template="L2Button" name="CancelButton" class="chat-opt-footer-btn">
+                    <AttributeOverrides element-name="ButtonLabel" text="Annuler" />
+                </ui:Instance>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:Instance>
+</ui:UXML>

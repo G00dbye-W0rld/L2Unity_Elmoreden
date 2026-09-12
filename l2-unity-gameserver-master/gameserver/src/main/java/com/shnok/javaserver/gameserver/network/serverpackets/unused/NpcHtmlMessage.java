@@ -35,7 +35,7 @@ public final class NpcHtmlMessage extends L2GameServerPacket
 			return;
 		
 		if (SHOW_FILE && player.isGM() && _file != null)
-			player.sendPacket(new CreatureSay(SayType.ALL, "HTML", _file));
+			player.sendPacket(new CreatureSay(SayType.ROLE_PLAY, "HTML", _file));
 		
 		player.clearBypass();
 		for (int i = 0; i < _html.length(); i++)
