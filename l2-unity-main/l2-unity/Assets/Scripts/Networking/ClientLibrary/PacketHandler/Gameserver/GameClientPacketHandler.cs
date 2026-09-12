@@ -348,6 +348,26 @@ public class GameClientPacketHandler : ClientPacketHandler
         SendPacket(new RequestPrivateStoreSellPacket(storeObjectId, products));
     }
 
+    public void SendTradeRequest(int targetId)
+    {
+        SendPacket(new TradeRequestPacket(targetId));
+    }
+
+    public void SendAnswerTradeRequest(bool accept)
+    {
+        SendPacket(new AnswerTradeRequestPacket(accept));
+    }
+
+    public void SendAddTradeItem(int objectId, int count)
+    {
+        SendPacket(new AddTradeItemPacket(objectId, count));
+    }
+
+    public void SendTradeDone(bool confirm)
+    {
+        SendPacket(new TradeDonePacket(confirm));
+    }
+
     public void RequestMagicSkillUse(int skillId, bool ctrlPressed, bool shiftPressed)
     {
         RequestMagicSkillUsePacket packet = new RequestMagicSkillUsePacket(skillId, ctrlPressed, shiftPressed);

@@ -42,6 +42,12 @@ public final class TradeRequest extends L2GameClientPacket
 			return;
 		}
 		
+		if (Config.TRADE_MAX_DISTANCE > 0 && !player.isIn3DRadius(target, Config.TRADE_MAX_DISTANCE))
+		{
+			player.sendPacket(SystemMessageId.TARGET_TOO_FAR);
+			return;
+		}
+		
 		if (target.isInOlympiadMode() || player.isInOlympiadMode())
 		{
 			player.sendMessage("Vous ne pouvez pas échanger pendant l'Olympiade.");

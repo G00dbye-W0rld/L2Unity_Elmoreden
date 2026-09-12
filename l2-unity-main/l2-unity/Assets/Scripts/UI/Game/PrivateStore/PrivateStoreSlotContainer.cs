@@ -68,6 +68,27 @@ public class PrivateStoreSlotContainer : L2SlotContainer
         Refresh();
     }
 
+    // Quantite restante envoyee par le serveur (echange) ; 0 retire l'objet.
+    public void SetCount(int objectId, int count)
+    {
+        Product existing = _products.Find(p => p.ObjectId == objectId);
+        if (existing == null)
+        {
+            return;
+        }
+
+        if (count <= 0)
+        {
+            _products.Remove(existing);
+        }
+        else
+        {
+            existing.Count = count;
+        }
+
+        Refresh();
+    }
+
     // Une pile d'inventaire n'a qu'un ObjectId : il identifie aussi bien un
     // objet unique qu'un empilable.
     private Product Find(Product product)

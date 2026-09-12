@@ -3177,6 +3177,50 @@ public final class Player extends Playable
 		onTradeCancel(this);
 	}
 	
+	/**
+	 * Cancel the active trade of that {@link Player}, both partners being too far away from each other.
+	 */
+	public void cancelActiveTradeTooFar()
+	{
+		if (_activeTradeList == null)
+			return;
+		
+		final Player partner = _activeTradeList.getPartner();
+		
+		onTradeTooFar();
+		
+		if (partner != null)
+			partner.onTradeTooFar();
+	}
+	
+	/**
+	 * Close the trade window of that {@link Player}, warning about the distance instead of a cancel.
+	 */
+	private void onTradeTooFar()
+	{
+		if (_activeTradeList == null)
+			return;
+		
+		_activeTradeList.lock();
+		_activeTradeList = null;
+		
+		sendPacket(SendTradeDone.FAIL_STATIC_PACKET);
+		sendPacket(SystemMessageId.TARGET_TOO_FAR);
+	}
+	
+	/**
+	 * Cancel the active trade of that {@link Player} if his partner went out of {@link Config#TRADE_MAX_DISTANCE}.
+	 */
+	public void checkTradeDistance()
+	{
+		if (_activeTradeList == null || Config.TRADE_MAX_DISTANCE <= 0)
+			return;
+		
+		final Player partner = _activeTradeList.getPartner();
+		if (partner != null && !isIn3DRadius(partner, Config.TRADE_MAX_DISTANCE))
+			cancelActiveTradeTooFar();
+	}
+	
 	public void cancelActiveEnchant()
 	{
 		if (_activeEnchantItem == null)

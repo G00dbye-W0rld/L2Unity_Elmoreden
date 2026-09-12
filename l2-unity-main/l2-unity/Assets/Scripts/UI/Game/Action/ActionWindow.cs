@@ -80,6 +80,7 @@ public class ActionWindow : L2PopupWindow
         basicSlotContainer.AssignAction(6, ActionType.PrivateStoreSell);
         basicSlotContainer.AssignAction(7, ActionType.PackageSale);
         basicSlotContainer.AssignAction(8, ActionType.PrivateStoreBuy);
+        basicSlotContainer.AssignAction(9, ActionType.Trade);
 
         L2SlotContainer partySlotContainer = new L2SlotContainer();
         partySlotContainer.Initialize(_partyContainer, SLOTS_PER_ROW, 16);

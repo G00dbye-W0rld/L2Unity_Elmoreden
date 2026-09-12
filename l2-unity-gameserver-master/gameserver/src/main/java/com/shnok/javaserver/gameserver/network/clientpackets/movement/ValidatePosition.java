@@ -97,5 +97,8 @@ public class ValidatePosition extends L2GameClientPacket
 				debug.sendTo(p);
 			});
 		}
+		
+		// Un echange en cours se ferme si les deux joueurs se sont eloignes.
+		player.checkTradeDistance();
 	}
 }

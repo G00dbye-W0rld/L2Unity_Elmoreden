@@ -1,0 +1,35 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Template name="WindowTemplate" src="project://database/Assets/Resources/Data/UI/_Elements/Components/WindowTemplate.uxml?fileID=9197481963319205126&amp;guid=5ca840f56ef6f1044b4dc077c7d3e6e6&amp;type=3#WindowTemplate" />
+    <ui:Template name="L2Button" src="project://database/Assets/Resources/Data/UI/_Elements/Components/L2Button/L2Button.uxml?fileID=9197481963319205126&amp;guid=47796068f89476143b10b5d383be52fc&amp;type=3#L2Button" />
+    <ui:Template name="L2SlotContainer" src="project://database/Assets/Resources/Data/UI/_Elements/Components/L2SlotContainer/L2SlotContainer.uxml?fileID=9197481963319205126&amp;guid=67f2ae460501d60439fd529481631728&amp;type=3#L2SlotContainer" />
+    <ui:Instance template="WindowTemplate" name="WindowTemplate" class="private-store-window trade-window">
+        <AttributeOverrides element-name="windows-name-label" text="Échange" />
+        <ui:VisualElement name="TradeContent" class="private-store-content">
+            <ui:VisualElement name="InventoryList" class="private-store-list private-store-list-top">
+                <ui:Instance template="L2SlotContainer" style="flex-grow: 1;">
+                    <AttributeOverrides element-name="TabLabel" text="Inventaire" />
+                </ui:Instance>
+            </ui:VisualElement>
+            <ui:VisualElement name="OwnOffer" class="private-store-list trade-offer">
+                <ui:Instance template="L2SlotContainer" style="flex-grow: 1;">
+                    <AttributeOverrides element-name="TabLabel" text="Votre offre" />
+                </ui:Instance>
+            </ui:VisualElement>
+            <ui:Label name="OwnStatus" text="En attente" class="l2-color-4 trade-status" />
+            <ui:VisualElement name="OtherOffer" class="private-store-list trade-offer">
+                <ui:Instance template="L2SlotContainer" style="flex-grow: 1;">
+                    <AttributeOverrides element-name="TabLabel" text="Offre de l'autre joueur" />
+                </ui:Instance>
+            </ui:VisualElement>
+            <ui:Label name="OtherStatus" text="En attente" class="l2-color-4 trade-status" />
+            <ui:VisualElement name="ButtonBar" class="shop-button-bar">
+                <ui:Instance template="L2Button" name="OkButton" class="shop-button">
+                    <AttributeOverrides element-name="ButtonLabel" text="Valider" />
+                </ui:Instance>
+                <ui:Instance template="L2Button" name="CancelButton" class="shop-button">
+                    <AttributeOverrides element-name="ButtonLabel" text="Annuler" />
+                </ui:Instance>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:Instance>
+</ui:UXML>

@@ -203,6 +203,16 @@ public class GameServerPacketHandler : ServerPacketHandler
             case GameServerPacketType.PrivateStoreMsgBuy:
                 OnPrivateStoreMsg(data);
                 break;
+            case GameServerPacketType.SendTradeRequest:
+            case GameServerPacketType.TradeStart:
+            case GameServerPacketType.TradeOwnAdd:
+            case GameServerPacketType.TradeOtherAdd:
+            case GameServerPacketType.TradeUpdate:
+            case GameServerPacketType.TradePressOwnOk:
+            case GameServerPacketType.TradePressOtherOk:
+            case GameServerPacketType.SendTradeDone:
+                TradePacketHandler.Handle(packetType, data, _eventProcessor);
+                break;
             case GameServerPacketType.MagicSkillLaunched:
                 OnSkillLaunched(data);
                 break;

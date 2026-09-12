@@ -48,6 +48,10 @@ public enum GameClientPacketType : byte
     RequestPrivateStoreQuitBuy = 0x93,
     SetPrivateStoreMsgBuy = 0x94,
     RequestPrivateStoreSell = 0x96,
+    TradeRequest = 0x15,
+    AddTradeItem = 0x16,
+    TradeDone = 0x17,
+    AnswerTradeRequest = 0x44,
 
 
     //deprecated

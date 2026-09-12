@@ -36,6 +36,10 @@ public class L2GameUI : L2UI
         {
             gameObject.AddComponent<PrivateStoreBuyWindow>();
         }
+        if (GetComponent<TradeWindow>() == null)
+        {
+            gameObject.AddComponent<TradeWindow>();
+        }
     }
 
     private void Start()
@@ -126,6 +130,11 @@ public class L2GameUI : L2UI
         {
             PrivateStoreBuyWindow.Instance.AddWindow(_rootVisualContainer);
             PrivateStoreBuyWindow.Instance.HideWindow(true);
+        }
+        if (TradeWindow.Instance != null)
+        {
+            TradeWindow.Instance.AddWindow(_rootVisualContainer);
+            TradeWindow.Instance.HideWindow(true);
         }
         if (NpcHtmlWindow.Instance != null)
         {

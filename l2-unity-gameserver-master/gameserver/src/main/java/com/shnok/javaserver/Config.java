@@ -255,6 +255,7 @@ public final class Config
 	public static int MAX_PVTSTORE_SLOTS_OTHER;
 	public static boolean PRIVATE_STORE_EVERYWHERE;
 	public static int PRIVATE_STORE_MIN_DISTANCE;
+	public static int TRADE_MAX_DISTANCE;
 	public static boolean OFFLINE_TRADE_ENABLE;
 	public static boolean DEEPBLUE_DROP_RULES;
 	public static boolean ALLOW_DELEVEL;
@@ -784,6 +785,7 @@ public final class Config
 		MAX_PVTSTORE_SLOTS_OTHER = players.getProperty("MaxPvtStoreSlotsOther", 4);
 		PRIVATE_STORE_EVERYWHERE = players.getProperty("PrivateStoreEverywhere", false);
 		PRIVATE_STORE_MIN_DISTANCE = players.getProperty("PrivateStoreMinDistance", 150);
+		TRADE_MAX_DISTANCE = players.getProperty("TradeMaxDistance", 150);
 		OFFLINE_TRADE_ENABLE = players.getProperty("OfflineTradeEnable", false);
 		DEEPBLUE_DROP_RULES = players.getProperty("UseDeepBlueDropRules", true);
 		ALLOW_DELEVEL = players.getProperty("AllowDelevel", true);

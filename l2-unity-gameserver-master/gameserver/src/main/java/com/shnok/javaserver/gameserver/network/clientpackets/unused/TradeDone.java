@@ -1,5 +1,6 @@
 package com.shnok.javaserver.gameserver.network.clientpackets.unused;
 
+import com.shnok.javaserver.Config;
 import com.shnok.javaserver.gameserver.model.World;
 import com.shnok.javaserver.gameserver.model.actor.Player;
 import com.shnok.javaserver.gameserver.model.trade.TradeList;
@@ -46,6 +47,13 @@ public final class TradeDone extends L2GameClientPacket
 		if (partner == null || World.getInstance().getPlayer(partner.getObjectId()) == null)
 		{
 			player.sendPacket(SystemMessageId.TARGET_IS_NOT_FOUND_IN_THE_GAME);
+			return;
+		}
+		
+		// Refuse une validation a distance : le controle au deplacement peut avoir ete manque.
+		if (Config.TRADE_MAX_DISTANCE > 0 && !player.isIn3DRadius(partner, Config.TRADE_MAX_DISTANCE))
+		{
+			player.cancelActiveTradeTooFar();
 			return;
 		}
 		

@@ -35,6 +35,7 @@ public class PlayerActions : MonoBehaviour
         _actions.Add(ActionType.PrivateStoreSell, new ServerAction(ActionType.PrivateStoreSell));
         _actions.Add(ActionType.PackageSale, new ServerAction(ActionType.PackageSale));
         _actions.Add(ActionType.PrivateStoreBuy, new ServerAction(ActionType.PrivateStoreBuy));
+        _actions.Add(ActionType.Trade, new TradeAction());
     }
 
     private void OnDestroy()
