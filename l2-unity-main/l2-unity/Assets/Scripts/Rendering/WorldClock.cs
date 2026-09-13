@@ -109,6 +109,16 @@ public class WorldClock : MonoBehaviour
         Synchronized = true;
     }
 
+    /// Heure du jeu, deduite du ratio de la journee.
+    public TimeSpan TimeOfDay
+    {
+        get
+        {
+            int seconds = (int)(_clock.totalRatio * 86400f);
+            return new TimeSpan(seconds / 3600, (seconds % 3600) / 60, seconds % 60);
+        }
+    }
+
     public bool IsNightTime()
     {
         return _clock.nightRatio > 0 && _clock.nightRatio <= 1 || _clock.dayRatio < 0.25f;

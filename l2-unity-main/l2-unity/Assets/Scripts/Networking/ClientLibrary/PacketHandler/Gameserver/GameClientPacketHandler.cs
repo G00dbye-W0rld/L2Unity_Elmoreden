@@ -133,6 +133,12 @@ public class GameClientPacketHandler : ClientPacketHandler
         SendPacket(packet);
     }
 
+    public void SendPartyMarker(int x, int y, int z)
+    {
+        RequestPartyMarkerPacket packet = new RequestPartyMarkerPacket(x, y, z);
+        SendPacket(packet);
+    }
+
     public void SendRequestChangePartyLeader(string targetName)
     {
         RequestChangePartyLeaderPacket packet = new RequestChangePartyLeaderPacket(targetName);
@@ -346,6 +352,11 @@ public class GameClientPacketHandler : ClientPacketHandler
     public void SendRequestPrivateStoreSell(int storeObjectId, List<Product> products)
     {
         SendPacket(new RequestPrivateStoreSellPacket(storeObjectId, products));
+    }
+
+    public void SendUserCommand(int commandId)
+    {
+        SendPacket(new UserCommandPacket(commandId));
     }
 
     public void SendTradeRequest(int targetId)

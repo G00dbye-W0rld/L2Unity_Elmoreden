@@ -1,0 +1,323 @@
+/* ====================================================================
+   Carte du monde : cadre de fenetre natif, carte a gauche, liste des
+   villes a droite. Le contenu est glisse dans l'emplacement du modele
+   par WorldMapWindow.cs, comme les autres fenetres du projet.
+   ==================================================================== */
+.worldmap-window {
+    position: absolute;
+    width: 880px;
+    height: 640px;
+}
+
+.worldmap-content {
+    position: absolute;
+    top: 44px;
+    right: 15px;
+    bottom: 14px;
+    left: 14px;
+    flex-direction: row;
+}
+
+/* Zone de carte : tout ce qui depasse est masque. */
+.worldmap-viewport {
+    flex-grow: 1;
+    overflow: hidden;
+    background-color: rgb(26, 26, 24);
+    border-width: 1px;
+    border-color: rgba(0, 0, 0, 0.8);
+}
+
+.worldmap-image {
+    position: absolute;
+}
+
+.worldmap-grid {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.worldmap-markers {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+/* Reperes de grille : colles aux bords du cadre, toujours lisibles. */
+.worldmap-ruler-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 15px;
+    background-color: rgba(12, 11, 8, 0.72);
+    border-bottom-width: 1px;
+    border-color: rgba(126, 104, 66, 0.55);
+}
+
+.worldmap-ruler-left {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 15px;
+    background-color: rgba(12, 11, 8, 0.72);
+    border-right-width: 1px;
+    border-color: rgba(126, 104, 66, 0.55);
+}
+
+.worldmap-ruler-label {
+    position: absolute;
+    font-size: 9px;
+    color: rgb(214, 198, 160);
+    -unity-text-align: middle-center;
+}
+
+/* Plan de ville ou de donjon, affiche par-dessus la carte. */
+.worldmap-plan {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: none;
+    overflow: hidden;
+    background-color: rgb(20, 20, 18);
+}
+
+.worldmap-plan-image {
+    position: absolute;
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.worldmap-plan-close {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 132px;
+    flex-grow: 0;
+}
+
+.worldmap-sidebar {
+    width: 196px;
+    flex-shrink: 0;
+    margin-left: 6px;
+    flex-direction: column;
+}
+
+.worldmap-toolbar {
+    flex-direction: row;
+    flex-shrink: 0;
+    margin-bottom: 4px;
+}
+
+.worldmap-tool-btn {
+    width: 26px;
+    height: 22px;
+    margin: 0;
+    margin-right: 3px;
+    padding: 0;
+    border-width: 1px;
+    border-color: rgb(126, 104, 66);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: rgb(210, 200, 180);
+    font-size: 12px;
+    -unity-text-align: middle-center;
+}
+
+.worldmap-tool-btn:hover {
+    background-color: rgba(40, 34, 24, 0.9);
+}
+
+.worldmap-tool-btn.active {
+    background-color: rgba(90, 74, 40, 0.9);
+    color: rgb(255, 245, 220);
+}
+
+.worldmap-zone-list {
+    flex-grow: 1;
+}
+
+.worldmap-zone-btn {
+    height: 20px;
+    margin: 0;
+    margin-bottom: 1px;
+    padding-left: 6px;
+    border-width: 0;
+    background-color: rgba(0, 0, 0, 0.35);
+    color: rgb(200, 192, 172);
+    font-size: 11px;
+    -unity-text-align: middle-left;
+}
+
+.worldmap-zone-btn:hover {
+    background-color: rgba(90, 74, 40, 0.8);
+    color: rgb(255, 245, 220);
+}
+
+/* Ligne de grille : une region du monde. */
+.worldmap-grid-line {
+    position: absolute;
+    background-color: rgba(255, 240, 200, 0.18);
+}
+
+.worldmap-dot {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.worldmap-dot-party {
+    background-image: resource('Data/UI/Assets/Map/DotParty');
+}
+
+.worldmap-dot-quest {
+    background-image: resource('Data/UI/Assets/Map/DotQuest');
+}
+
+.worldmap-dot-target {
+    background-image: resource('Data/UI/Assets/Map/DotTarget');
+}
+
+/* Position du joueur : la fleche du radar, tournee avec la camera. */
+.worldmap-arrow {
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    background-image: resource('Data/UI/Assets/Map/ArrowPos');
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.worldmap-hover {
+    position: absolute;
+    bottom: 8px;
+    left: 12px;
+    font-size: 11px;
+}
+
+/* Bordures saisissables pour agrandir la fenetre. */
+.worldmap-resize-right {
+    position: absolute;
+    top: 0;
+    right: -14px;
+    bottom: 0;
+    width: 6px;
+}
+
+.worldmap-resize-bottom {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -14px;
+    height: 6px;
+}
+
+
+/* Acces aux plans : le "+" natif du jeu, pose sur la ville ou le donjon. */
+.worldmap-places {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.worldmap-place-btn {
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    background-color: rgba(0, 0, 0, 0);
+    background-image: resource('Data/UI/Assets/Map/MapPlus');
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.worldmap-place-btn:hover {
+    background-image: resource('Data/UI/Assets/Map/MapPlus_Over');
+}
+
+.worldmap-place-btn:active {
+    background-image: resource('Data/UI/Assets/Map/MapPlus_Over');
+}
+
+.worldmap-zoom-btn {
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    margin-right: 3px;
+    padding: 0;
+    border-width: 0;
+    background-color: rgba(0, 0, 0, 0);
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.worldmap-zoom-in {
+    background-image: resource('Data/UI/Assets/Map/MapPlus');
+}
+
+.worldmap-zoom-in:hover {
+    background-image: resource('Data/UI/Assets/Map/MapPlus_Over');
+}
+
+.worldmap-zoom-in:active {
+    background-image: resource('Data/UI/Assets/Map/MapPlus_Over');
+}
+
+.worldmap-zoom-out {
+    background-image: resource('Data/UI/Assets/Map/MapMinus');
+}
+
+.worldmap-zoom-out:hover {
+    background-image: resource('Data/UI/Assets/Map/MapMinus_Over');
+}
+
+.worldmap-zoom-out:active {
+    background-image: resource('Data/UI/Assets/Map/MapMinus_Over');
+}
+
+.worldmap-action-btn {
+    margin-right: 3px;
+    height: 22px;
+    flex-grow: 1;
+    margin: 0;
+    padding: 0;
+    border-width: 1px;
+    border-color: rgb(126, 104, 66);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: rgb(210, 200, 180);
+    font-size: 11px;
+    -unity-text-align: middle-center;
+}
+
+.worldmap-action-btn:hover {
+    background-color: rgba(40, 34, 24, 0.9);
+}
+
+.worldmap-action-btn.active {
+    background-color: rgba(90, 74, 40, 0.9);
+    color: rgb(255, 245, 220);
+}
+
+
+/* Filtres du navigateur de zones. */
+.worldmap-filter {
+    margin: 0;
+    margin-bottom: 3px;
+    flex-shrink: 0;
+}
+
+/* Marqueur personnel : epingle posee au clic droit. */
+.worldmap-pin {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    background-color: rgba(0, 0, 0, 0);
+    background-image: resource('Data/UI/Assets/Map/MarkPin');
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.worldmap-pin.shared {
+    -unity-background-image-tint-color: rgb(140, 200, 255);
+}

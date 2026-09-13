@@ -36,6 +36,14 @@ public class L2GameUI : L2UI
         {
             gameObject.AddComponent<PrivateStoreBuyWindow>();
         }
+        if (GetComponent<WorldMapWindow>() == null)
+        {
+            gameObject.AddComponent<WorldMapWindow>();
+        }
+        if (GetComponent<MinimapWindow>() == null)
+        {
+            gameObject.AddComponent<MinimapWindow>();
+        }
         if (GetComponent<SystemChatWindow>() == null)
         {
             gameObject.AddComponent<SystemChatWindow>();
@@ -138,6 +146,15 @@ public class L2GameUI : L2UI
         {
             PrivateStoreBuyWindow.Instance.AddWindow(_rootVisualContainer);
             PrivateStoreBuyWindow.Instance.HideWindow(true);
+        }
+        if (WorldMapWindow.Instance != null)
+        {
+            WorldMapWindow.Instance.AddWindow(_rootVisualContainer);
+            WorldMapWindow.Instance.HideWindow(true);
+        }
+        if (MinimapWindow.Instance != null)
+        {
+            MinimapWindow.Instance.AddWindow(_rootVisualContainer);
         }
         if (SystemChatWindow.Instance != null)
         {

@@ -52,6 +52,7 @@ public enum GameClientPacketType : byte
     AddTradeItem = 0x16,
     TradeDone = 0x17,
     AnswerTradeRequest = 0x44,
+    UserCommand = 0xaa,
 
 
     //deprecated

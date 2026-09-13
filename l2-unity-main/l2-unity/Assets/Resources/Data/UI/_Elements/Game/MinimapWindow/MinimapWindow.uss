@@ -1,0 +1,145 @@
+/* ====================================================================
+   Minimap simple : la carte, un liseré discret, rien d'autre.
+   ==================================================================== */
+.minimap-window {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 180px;
+    height: 200px;
+}
+
+/* Zone de carte : tout ce qui depasse est masque. */
+.minimap-clip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 180px;
+    height: 180px;
+    overflow: hidden;
+    background-color: rgb(22, 30, 28);
+    border-width: 1px;
+    border-color: rgba(0, 0, 0, 0.75);
+}
+
+.minimap-rotor {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    transform-origin: center;
+}
+
+.minimap-image {
+    position: absolute;
+}
+
+.minimap-arrow {
+    position: absolute;
+    top: 74px;
+    left: 74px;
+    width: 32px;
+    height: 32px;
+    background-image: resource('Data/UI/Assets/Map/ArrowMe');
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.minimap-buttons {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    flex-direction: column;
+}
+
+.minimap-zoom-btn {
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    margin-bottom: 2px;
+    padding: 0;
+    border-width: 1px;
+    border-color: rgba(0, 0, 0, 0.75);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: rgb(210, 200, 180);
+    font-size: 11px;
+    -unity-text-align: middle-center;
+}
+
+.minimap-zoom-btn:hover {
+    background-color: rgba(0, 0, 0, 0.75);
+}
+
+
+/* Marqueurs : membres du groupe en vert, points de quete en bleu. */
+.minimap-markers {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.minimap-dot {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.minimap-dot-party {
+    background-image: resource('Data/UI/Assets/Map/DotParty');
+}
+
+.minimap-dot-quest {
+    background-image: resource('Data/UI/Assets/Map/DotQuest');
+}
+
+/* Heure du jeu, en haut a gauche du radar, comme sur la carte d'origine. */
+.minimap-clock {
+    position: absolute;
+    top: 4px;
+    left: 6px;
+    flex-direction: row;
+    align-items: center;
+}
+
+.minimap-clock-icon {
+    width: 18px;
+    height: 18px;
+    background-image: resource('Data/UI/Assets/Map/IconSun');
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.minimap-clock-icon.night {
+    background-image: resource('Data/UI/Assets/Map/IconMoon');
+}
+
+.minimap-clock-label {
+    margin-left: 3px;
+    font-size: 11px;
+    color: rgb(236, 226, 200);
+}
+
+/* Marqueur personnel pose sur la carte du monde. */
+.minimap-pin {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-image: resource('Data/UI/Assets/Map/MarkPin');
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* Nom du lieu, sous le radar, comme la ligne "Current Position" du client. */
+.minimap-zone {
+    position: absolute;
+    top: 183px;
+    left: 0;
+    right: 0;
+    font-size: 11px;
+    color: rgb(236, 226, 200);
+    -unity-text-align: middle-center;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+/* Marqueur d'un membre du groupe : meme epingle, teintee. */
+.minimap-pin.shared {
+    -unity-background-image-tint-color: rgb(140, 200, 255);
+}

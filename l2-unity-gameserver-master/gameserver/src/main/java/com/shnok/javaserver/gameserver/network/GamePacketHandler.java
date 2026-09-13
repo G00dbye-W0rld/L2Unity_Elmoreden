@@ -837,6 +837,11 @@ public final class GamePacketHandler implements IPacketHandler<GameClient>, ICli
 							case 0x30:
 								msg = new RequestDuelSurrender();
 								break;
+							// Marqueur de carte partage avec le groupe : ajout du projet,
+							// hors de la plage utilisee par Interlude.
+							case 0x40:
+								msg = new RequestPartyMarker();
+								break;
 							default:
 								printDebugDoubleOpcode(opcode, id2, buf, state, client);
 								break;

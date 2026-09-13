@@ -6,7 +6,7 @@ using UnityEngine.UIElements;
 // donc tirer vers le haut ou vers la droite agrandit.
 public class EdgeResizeManipulator : PointerManipulator
 {
-    public enum Edge { Right, Top }
+    public enum Edge { Right, Top, Bottom }
 
     private readonly VisualElement _root;
     private readonly Edge _edge;
@@ -68,6 +68,11 @@ public class EdgeResizeManipulator : PointerManipulator
         {
             float width = _originalSize + (evt.position.x - _startMousePosition.x);
             _root.style.width = Mathf.Clamp(width, _min, _max);
+        }
+        else if (_edge == Edge.Bottom)
+        {
+            float height = _originalSize + (evt.position.y - _startMousePosition.y);
+            _root.style.height = Mathf.Clamp(height, _min, _max);
         }
         else
         {

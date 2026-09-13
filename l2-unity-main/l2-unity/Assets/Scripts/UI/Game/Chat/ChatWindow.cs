@@ -259,6 +259,12 @@ public class ChatWindow : L2Window
             {
                 GameClient.Instance.ClientPacketHandler.SendGMCommand(text.Replace("//", ""));
             }
+            else if (text.Equals("/loc", System.StringComparison.OrdinalIgnoreCase))
+            {
+                // Commande du client d'origine : le serveur repond par un
+                // message systeme avec les trois coordonnees.
+                GameClient.Instance.ClientPacketHandler.SendUserCommand(UserCommandPacket.Loc);
+            }
             else if (text.StartsWith("/invite ", System.StringComparison.OrdinalIgnoreCase))
             {
                 // Contrairement aux actions/clic droit, /invite vise un nom

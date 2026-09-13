@@ -43,6 +43,7 @@ public enum GameServerPacketType : int
     MagicSkillUse = 0x48,
     MagicSkillCanceled = 0x49,
     CreatureSay = 0x4a,
+    RadarControl = 0xeb,
     SkillList = 0x58,
     RestartReponse = 0x5F,
     ValidateLocation = 0x61,

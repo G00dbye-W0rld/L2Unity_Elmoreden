@@ -1,0 +1,40 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Template name="WindowTemplate" src="project://database/Assets/Resources/Data/UI/_Elements/Components/WindowTemplate.uxml?fileID=9197481963319205126&amp;guid=5ca840f56ef6f1044b4dc077c7d3e6e6&amp;type=3#WindowTemplate" />
+    <ui:Template name="L2Button" src="project://database/Assets/Resources/Data/UI/_Elements/Components/L2Button/L2Button.uxml?fileID=9197481963319205126&amp;guid=47796068f89476143b10b5d383be52fc&amp;type=3#L2Button" />
+    <Style src="project://database/Assets/Resources/Data/UI/_Elements/L2StyleSheet.uss?fileID=7433441132597879392&amp;guid=72e99cc94b130bf4ba100dceaa830b13&amp;type=3#L2StyleSheet" />
+    <ui:Instance template="WindowTemplate" name="WindowTemplate" class="worldmap-window" style="width: 880px; height: 640px; position: absolute;">
+        <AttributeOverrides element-name="windows-name-label" text="Carte du monde" />
+        <ui:VisualElement name="WorldMapContent" class="worldmap-content">
+            <ui:VisualElement name="Viewport" class="worldmap-viewport">
+                <ui:VisualElement name="MapImage" picking-mode="Ignore" class="worldmap-image">
+                    <ui:VisualElement name="GridLayer" picking-mode="Ignore" class="worldmap-grid" />
+                </ui:VisualElement>
+                <ui:VisualElement name="PlaceLayer" picking-mode="Ignore" class="worldmap-places" />
+                <ui:VisualElement name="MarkerLayer" picking-mode="Ignore" class="worldmap-markers" />
+                <ui:VisualElement name="ColumnRuler" picking-mode="Ignore" class="worldmap-ruler-top" />
+                <ui:VisualElement name="RowRuler" picking-mode="Ignore" class="worldmap-ruler-left" />
+                <ui:VisualElement name="PlanLayer" class="worldmap-plan">
+                    <ui:VisualElement name="PlanImage" picking-mode="Ignore" class="worldmap-plan-image" />
+                    <ui:Button name="PlanCloseBtn" text="Retour &#224; la carte" class="worldmap-action-btn worldmap-plan-close" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="Sidebar" class="worldmap-sidebar">
+                <ui:VisualElement name="Toolbar" class="worldmap-toolbar">
+                    <ui:Button name="ZoomInBtn" class="worldmap-zoom-btn worldmap-zoom-in" />
+                    <ui:Button name="ZoomOutBtn" class="worldmap-zoom-btn worldmap-zoom-out" />
+                    <ui:Button name="CenterBtn" text="Ma position" class="worldmap-action-btn" />
+                </ui:VisualElement>
+                <ui:VisualElement name="Actions" class="worldmap-toolbar">
+                    <ui:Button name="TargetBtn" text="Cible" class="worldmap-action-btn" />
+                    <ui:Button name="GridBtn" text="Grille" class="worldmap-action-btn active" />
+                </ui:VisualElement>
+                <ui:DropdownField name="TerritoryFilter" class="l2-dropdown worldmap-filter" />
+                <ui:DropdownField name="LevelFilter" class="l2-dropdown worldmap-filter" />
+                <ui:ScrollView name="ZoneList" vertical-scroller-visibility="AlwaysVisible" horizontal-scroller-visibility="Hidden" mouse-wheel-scroll-size="4" touch-scroll-type="Clamped" class="l2-scroll-view worldmap-zone-list" />
+            </ui:VisualElement>
+            <ui:Label name="HoverLabel" text="" picking-mode="Ignore" class="worldmap-hover l2-color-4" />
+            <ui:VisualElement name="ResizeRight" class="worldmap-resize-right" />
+            <ui:VisualElement name="ResizeBottom" class="worldmap-resize-bottom" />
+        </ui:VisualElement>
+    </ui:Instance>
+</ui:UXML>

@@ -1,0 +1,20 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement name="MinimapWindow" class="minimap-window">
+        <ui:VisualElement name="Clip" class="minimap-clip">
+            <ui:VisualElement name="Rotor" class="minimap-rotor">
+                <ui:VisualElement name="MapImage" class="minimap-image" />
+            </ui:VisualElement>
+            <ui:VisualElement name="Markers" class="minimap-markers" />
+        </ui:VisualElement>
+        <ui:VisualElement name="Arrow" class="minimap-arrow" />
+        <ui:VisualElement name="Clock" picking-mode="Ignore" class="minimap-clock">
+            <ui:VisualElement name="ClockIcon" picking-mode="Ignore" class="minimap-clock-icon" />
+            <ui:Label name="ClockLabel" text="" picking-mode="Ignore" class="minimap-clock-label" />
+        </ui:VisualElement>
+        <ui:Label name="ZoneLabel" text="" picking-mode="Ignore" class="minimap-zone" />
+        <ui:VisualElement name="Buttons" class="minimap-buttons">
+            <ui:Button name="ZoomInBtn" text="+" class="minimap-zoom-btn" />
+            <ui:Button name="ZoomOutBtn" text="-" class="minimap-zoom-btn" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

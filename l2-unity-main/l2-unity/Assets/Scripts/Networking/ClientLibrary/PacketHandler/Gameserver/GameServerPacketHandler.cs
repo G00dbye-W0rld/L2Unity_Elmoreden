@@ -23,6 +23,9 @@ public class GameServerPacketHandler : ServerPacketHandler
             case GameServerPacketType.CharSelectionInfo:
                 OnCharSelectionInfoReceive(data);
                 break;
+            case GameServerPacketType.RadarControl:
+                OnRadarControl(data);
+                break;
             case GameServerPacketType.CreatureSay:
                 OnMessageReceive(data);
                 break;
@@ -989,11 +992,47 @@ public class GameServerPacketHandler : ServerPacketHandler
             PartyManager.Instance.UpdateMemberVitals(packet.ObjectId, packet.Hp, packet.MaxHp, packet.Mp, packet.MaxMp, packet.Cp, packet.MaxCp));
     }
 
+    // Marqueurs de quete : le serveur pose, retire, ou efface tout.
+    private void OnRadarControl(byte[] data)
+    {
+        RadarControlPacket packet = new RadarControlPacket(data);
+
+        _eventProcessor.QueueEvent(() =>
+        {
+            // Le type 2 est le marqueur pose par un membre du groupe.
+            if (packet.MarkerType == 2)
+            {
+                if (packet.ShowRadar == 0)
+                {
+                    MapMarkers.SetShared(packet.Position);
+                }
+                else
+                {
+                    MapMarkers.ClearShared();
+                }
+
+                return;
+            }
+
+            switch (packet.ShowRadar)
+            {
+                case 0:
+                    MapMarkers.AddQuestMarker(packet.Position);
+                    break;
+                case 1:
+                    MapMarkers.RemoveQuestMarker(packet.Position);
+                    break;
+                default:
+                    MapMarkers.ClearQuestMarkers();
+                    break;
+            }
+        });
+    }
+
     private void OnPartyMemberPosition(byte[] data)
     {
         PartyMemberPositionPacket packet = new PartyMemberPositionPacket(data);
-        // Pas exploite pour l'instant (pas de radar/mini-carte de groupe) - le
-        // paquet est correctement parse et pret a etre branche plus tard.
+        _eventProcessor.QueueEvent(() => MapMarkers.SetPartyPositions(packet.Positions));
     }
 
     private void OnEtcStatusUpdate(byte[] data)
