@@ -85,7 +85,7 @@ public class ChatOptionsWindow : L2PopupWindow
     {
         VisualElement content = GetElementById("OptionsContent");
         VisualElement outer = GetElementById("Content");
-        VisualElement slot = outer != null ? outer.Q<VisualElement>("Content") : null;
+        VisualElement slot = InnerSlot(outer);
 
         if (content == null || slot == null || content.parent == slot)
         {
@@ -94,6 +94,26 @@ public class ChatOptionsWindow : L2PopupWindow
 
         content.RemoveFromHierarchy();
         slot.Add(content);
+    }
+
+    // Q() teste aussi l'element de depart : il renvoyait le conteneur externe au
+    // lieu de l'emplacement, et laissait un cadre vide en haut de la fenetre.
+    private static VisualElement InnerSlot(VisualElement outer)
+    {
+        if (outer == null)
+        {
+            return null;
+        }
+
+        foreach (VisualElement child in outer.Children())
+        {
+            if (child.name == "Content")
+            {
+                return child;
+            }
+        }
+
+        return null;
     }
 
     // Reconstruit a chaque ouverture : au chargement de l'interface, le chat
@@ -154,13 +174,17 @@ public class ChatOptionsWindow : L2PopupWindow
         for (int i = 0; i < _keywordFields.Length; i++)
         {
             int index = i;
-            TextField field = _windowEle.Q<TextField>("Keyword" + i);
+            // Champ du composant L2Input : sa police rend le texte visible.
+            VisualElement holder = _windowEle.Q<VisualElement>("Keyword" + i);
+            TextField field = holder != null ? holder.Q<TextField>("L2Input") : null;
             _keywordFields[i] = field;
 
             if (field == null)
             {
                 continue;
             }
+
+            field.maxLength = 20;
 
             field.RegisterCallback<FocusEvent>(evt => L2GameUI.Instance.IsTyping = true);
             field.RegisterCallback<BlurEvent>(evt => L2GameUI.Instance.IsTyping = false);
