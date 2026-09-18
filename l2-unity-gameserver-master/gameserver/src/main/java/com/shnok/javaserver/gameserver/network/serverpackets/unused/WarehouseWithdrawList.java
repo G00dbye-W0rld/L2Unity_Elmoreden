@@ -1,5 +1,6 @@
 package com.shnok.javaserver.gameserver.network.serverpackets.unused;
 
+import java.util.Collections;
 import java.util.Set;
 
 import com.shnok.javaserver.gameserver.model.actor.Player;
@@ -16,7 +17,7 @@ public class WarehouseWithdrawList extends L2GameServerPacket
 	
 	private int _whType;
 	private int _playerAdena;
-	private Set<ItemInstance> _items;
+	private Set<ItemInstance> _items = Collections.emptySet();
 	
 	public WarehouseWithdrawList(Player player, int type)
 	{

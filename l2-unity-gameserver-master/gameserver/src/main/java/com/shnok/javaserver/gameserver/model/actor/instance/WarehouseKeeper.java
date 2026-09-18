@@ -3,11 +3,13 @@ package com.shnok.javaserver.gameserver.model.actor.instance;
 import java.util.Map;
 
 import com.shnok.javaserver.Config;
+import com.shnok.javaserver.gameserver.data.manager.ZoneManager;
 import com.shnok.javaserver.gameserver.enums.PrivilegeType;
 import com.shnok.javaserver.gameserver.model.actor.Player;
 import com.shnok.javaserver.gameserver.model.actor.template.NpcTemplate;
 import com.shnok.javaserver.gameserver.model.itemcontainer.PcFreight;
 import com.shnok.javaserver.gameserver.model.pledge.Clan;
+import com.shnok.javaserver.gameserver.model.zone.type.TownZone;
 import com.shnok.javaserver.gameserver.network.SystemMessageId;
 import com.shnok.javaserver.gameserver.network.serverpackets.combat.ActionFailed;
 import com.shnok.javaserver.gameserver.network.serverpackets.PackageToList;
@@ -88,7 +90,7 @@ public class WarehouseKeeper extends Folk
 			}
 			
 			final Clan clan = player.getClan();
-			if (clan == null || clan.getLevel() == 0)
+			if (clan == null || clan.getLevel() < Config.CLAN_WAREHOUSE_MIN_LEVEL)
 			{
 				player.sendPacket(SystemMessageId.ONLY_LEVEL_1_CLAN_OR_HIGHER_CAN_USE_WAREHOUSE);
 				return;
@@ -108,7 +110,7 @@ public class WarehouseKeeper extends Folk
 		else if (command.equals("DepositC"))
 		{
 			final Clan clan = player.getClan();
-			if (clan == null || clan.getLevel() == 0)
+			if (clan == null || clan.getLevel() < Config.CLAN_WAREHOUSE_MIN_LEVEL)
 			{
 				player.sendPacket(SystemMessageId.ONLY_LEVEL_1_CLAN_OR_HIGHER_CAN_USE_WAREHOUSE);
 				return;
@@ -127,13 +129,14 @@ public class WarehouseKeeper extends Folk
 			player.sendPacket(ActionFailed.STATIC_PACKET);
 			
 			final PcFreight freight = player.getFreight();
+			if (freight != null)
+				freight.setActiveLocation(getFreightLocationId());
+			
 			if (freight == null || freight.getSize() <= 0)
 			{
 				player.sendPacket(SystemMessageId.NO_ITEM_DEPOSITED_IN_WH);
 				return;
 			}
-			
-			freight.setActiveLocation((Config.REGION_BASED_FREIGHT) ? getRegion().hashCode() : 0);
 			
 			player.setActiveWarehouse(freight);
 			player.sendPacket(new WarehouseWithdrawList(player, WarehouseWithdrawList.FREIGHT));
@@ -166,7 +169,7 @@ public class WarehouseKeeper extends Folk
 			
 			final String id = command.substring(command.lastIndexOf("_") + 1);
 			final PcFreight freight = player.getDepositedFreight(Integer.parseInt(id));
-			freight.setActiveLocation((Config.REGION_BASED_FREIGHT) ? getRegion().hashCode() : 0);
+			freight.setActiveLocation(getFreightLocationId());
 			
 			player.sendPacket(ActionFailed.STATIC_PACKET);
 			player.setActiveWarehouse(freight);
@@ -175,6 +178,17 @@ public class WarehouseKeeper extends Folk
 		}
 		else
 			super.onBypassFeedback(player, command);
+	}
+	
+	// Le fret est lie a la ville du gardien (hashCode de WorldRegion changeait a chaque
+	// redemarrage) ; hors d'une ville, 0 le rend accessible partout.
+	public int getFreightLocationId()
+	{
+		if (!Config.REGION_BASED_FREIGHT)
+			return 0;
+		
+		final TownZone town = ZoneManager.getInstance().getZone(this, TownZone.class);
+		return (town == null) ? 0 : town.getTownId();
 	}
 	
 	@Override

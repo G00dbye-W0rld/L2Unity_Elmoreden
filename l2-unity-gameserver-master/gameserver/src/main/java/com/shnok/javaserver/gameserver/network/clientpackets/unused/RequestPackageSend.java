@@ -7,6 +7,7 @@ import com.shnok.javaserver.Config;
 import com.shnok.javaserver.gameserver.model.actor.Npc;
 import com.shnok.javaserver.gameserver.model.actor.Player;
 import com.shnok.javaserver.gameserver.model.actor.instance.Folk;
+import com.shnok.javaserver.gameserver.model.actor.instance.WarehouseKeeper;
 import com.shnok.javaserver.gameserver.model.holder.IntIntHolder;
 import com.shnok.javaserver.gameserver.model.item.instance.ItemInstance;
 import com.shnok.javaserver.gameserver.model.itemcontainer.ItemContainer;
@@ -61,9 +62,18 @@ public final class RequestPackageSend extends L2GameClientPacket
 		if (warehouse == null)
 			return;
 		
-		final Folk folk = player.getCurrentFolk();
-		if ((folk == null || !player.isIn3DRadius(folk, Npc.INTERACTION_DISTANCE)) && !player.isGM())
+		if (player.isProcessingTransaction())
+		{
+			player.sendPacket(SystemMessageId.ALREADY_TRADING);
 			return;
+		}
+		
+		// Colis envoye chez un gardien d'entrepot uniquement, et lie a sa ville.
+		final Folk folk = player.getCurrentFolk();
+		if (!(folk instanceof WarehouseKeeper keeper) || !player.isIn3DRadius(folk, Npc.INTERACTION_DISTANCE))
+			return;
+		
+		((PcFreight) warehouse).setActiveLocation(keeper.getFreightLocationId());
 		
 		if (warehouse instanceof PcFreight && !player.getAccessLevel().allowTransaction())
 		{
