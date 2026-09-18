@@ -1,8 +1,8 @@
 <html><body>
-	<font color="LEVEL">Bidding is only permitted in one clan hall.</font> When a bid is submitted, the amount of adena bid is <font color="LEVEL">deposited</font> from the clan warehouse into the auction. <font color="LEVEL">10% of the bid amount is a transaction tax</font> and cannot be returned even if the bidding is canceled.<br>
-	<font color="LEVEL">The bid price</font> must be higher than the minimum bid price (or previous bid price when rebidding) and the clan that has written the highest price at the end of the auction wins the auction.<br>
-	There are currently <font color="aaccff">%PLEDGE_ADENA%</font> adena in the clan warehouse. The minimum amount that can be bid is <font color="aaccff">%AGIT_AUCTION_MINBID%</font> adena.<br>
-	How much do you want to bid?
+	<font color="LEVEL">Un clan ne peut enchérir que sur une seule salle à la fois.</font> La somme misée est <font color="LEVEL">prélevée</font> sur l'entrepôt du clan et bloquée jusqu'à la fin de l'enchère. <font color="LEVEL">10 % de la mise servent de taxe</font> et ne sont pas rendus, même si vous annulez.<br>
+	<font color="LEVEL">Votre mise</font> doit dépasser la mise minimale, ou la vôtre si vous surenchérissez. Le clan ayant misé le plus haut à la clôture emporte la salle.<br>
+	L'entrepôt du clan contient <font color="aaccff">%PLEDGE_ADENA%</font> adena. La mise minimale est de <font color="aaccff">%AGIT_AUCTION_MINBID%</font> adena.<br>
+	Combien souhaitez-vous miser ?
 	<table width=270>
 		<tr>
 			<td width=220 align=right><edit var=bidprice width=220 align=right type=number></td>
@@ -13,8 +13,8 @@
 	<table width=270>
 		<tr>
 			<td width=130></td>
-			<td width=70 align=center><button action="%AGIT_LINK_BACK%" value="Back" width=70 height=21 back="L2UI.DefaultButton_click" fore="L2UI.DefaultButton"></td>
-			<td width=70 align=center><button action="bypass -h npc_%objectId%_bid $bidprice" value="Confirm" width=70 height=21 back="L2UI.DefaultButton_click" fore="L2UI.DefaultButton"></td>
+			<td width=70 align=center><button action="%AGIT_LINK_BACK%" value="Retour" width=70 height=21 back="L2UI.DefaultButton_click" fore="L2UI.DefaultButton"></td>
+			<td width=70 align=center><button action="bypass -h npc_%objectId%_bid $bidprice" value="Valider" width=70 height=21 back="L2UI.DefaultButton_click" fore="L2UI.DefaultButton"></td>
 		</tr>
 	</table>
 </body></html>

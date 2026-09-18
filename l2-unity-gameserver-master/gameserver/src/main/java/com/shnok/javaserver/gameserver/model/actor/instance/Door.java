@@ -168,6 +168,9 @@ public class Door extends Creature implements IGeoObject
 			player.setRequestedGate(this);
 			player.sendPacket(new ConfirmDlg((!isOpened()) ? 1140 : 1141));
 		}
+		// Sans reponse, le joueur croit que le clic n'a pas ete pris en compte.
+		else if (_residence instanceof ClanHall)
+			player.sendPacket(SystemMessageId.YOU_ARE_NOT_AUTHORIZED_TO_DO_THAT);
 	}
 	
 	@Override

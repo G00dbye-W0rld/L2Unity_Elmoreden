@@ -8,7 +8,8 @@ public class CursorManager : MonoBehaviour
         Default,
         Attack,
         Talk,
-        Pickup
+        Pickup,
+        Use
     }
 
     [SerializeField] private Texture2D _defaultCursorTexture;
@@ -78,6 +79,7 @@ public class CursorManager : MonoBehaviour
             case CursorType.Talk:
                 UnityEngine.Cursor.SetCursor(_talkCursorTexture, Vector2.zero, CursorMode.Auto);
                 break;
+            case CursorType.Use:
             case CursorType.Pickup:
                 UnityEngine.Cursor.SetCursor(_pickupCursorTexture, Vector2.zero, CursorMode.Auto);
                 break;

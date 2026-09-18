@@ -347,6 +347,9 @@ public final class RestartPointData implements IXmlReader
 			case 912:
 				return "gludio";
 			
+			case 910:
+				return "talking";
+			
 			case 911:
 				return "gludin";
 			

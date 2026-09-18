@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.StringTokenizer;
 import java.util.concurrent.TimeUnit;
 
+import com.shnok.javaserver.Config;
 import com.shnok.javaserver.gameserver.data.xml.ClanHallDecoData;
 import com.shnok.javaserver.gameserver.enums.PrivilegeType;
 import com.shnok.javaserver.gameserver.enums.TeleportType;
@@ -24,49 +25,49 @@ import com.shnok.javaserver.gameserver.network.serverpackets.unused.WarehouseWit
 
 public class ClanHallManagerNpc extends Merchant
 {
-	private static final String REMOVE_HP = "[<a action=\"bypass -h npc_%objectId%_manage recovery hp_cancel\">Remove</a>]";
+	private static final String REMOVE_HP = "[<a action=\"bypass -h npc_%objectId%_manage recovery hp_cancel\">Retirer</a>]";
 	private static final String HP_GRADE_1 = "[<a action=\"bypass -h npc_%objectId%_manage recovery edit_hp 2\">40%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_hp 5\">100%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_hp 8\">160%</a>]";
 	private static final String HP_GRADE_2 = "[<a action=\"bypass -h npc_%objectId%_manage recovery edit_hp 4\">80%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_hp 7\">140%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_hp 10\">200%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_hp 260\">260%</a>]";
 	private static final String HP_GRADE_3 = "[<a action=\"bypass -h npc_%objectId%_manage recovery edit_hp 4\">80%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_hp 6\">120%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_hp 9\">180%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_hp 12\">240%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_hp 15\">300%</a>]";
 	private static final String HP_GRADE_2_SCH = "[<a action=\"bypass -h npc_%objectId%_manage recovery edit_hp 25\">300%</a>]";
 	private static final String HP_GRADE_3_SCH = "[<a action=\"bypass -h npc_%objectId%_manage recovery edit_hp 25\">300%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_hp 30\">400%</a>]";
 	
-	private static final String REMOVE_EXP = "[<a action=\"bypass -h npc_%objectId%_manage recovery exp_cancel\">Remove</a>]";
+	private static final String REMOVE_EXP = "[<a action=\"bypass -h npc_%objectId%_manage recovery exp_cancel\">Retirer</a>]";
 	private static final String EXP_GRADE_1 = "[<a action=\"bypass -h npc_%objectId%_manage recovery edit_exp 1\">5%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_exp 3\">15%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_exp 6\">30%</a>]";
 	private static final String EXP_GRADE_2 = "[<a action=\"bypass -h npc_%objectId%_manage recovery edit_exp 1\">5%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_exp 3\">15%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_exp 5\">25%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_exp 8\">40%</a>]";
 	private static final String EXP_GRADE_3 = "[<a action=\"bypass -h npc_%objectId%_manage recovery edit_exp 3\">15%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_exp 5\">25%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_exp 7\">35%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_exp 10\">50%</a>]";
 	private static final String EXP_GRADE_2_SCH = "[<a action=\"bypass -h npc_%objectId%_manage recovery edit_exp 19\">45%</a>]";
 	private static final String EXP_GRADE_3_SCH = "[<a action=\"bypass -h npc_%objectId%_manage recovery edit_exp 19\">45%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_exp 20\">50%</a>]";
 	
-	private static final String REMOVE_MP = "[<a action=\"bypass -h npc_%objectId%_manage recovery mp_cancel\">Remove</a>]";
+	private static final String REMOVE_MP = "[<a action=\"bypass -h npc_%objectId%_manage recovery mp_cancel\">Retirer</a>]";
 	private static final String MP_GRADE_1 = "[<a action=\"bypass -h npc_%objectId%_manage recovery edit_mp 1\">5%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_mp 3\">15%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_mp 5\">25%</a>]";
 	private static final String MP_GRADE_2 = "[<a action=\"bypass -h npc_%objectId%_manage recovery edit_mp 1\">5%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_mp 3\">15%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_mp 6\">30%</a>]";
 	private static final String MP_GRADE_3 = "[<a action=\"bypass -h npc_%objectId%_manage recovery edit_mp 1\">5%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_mp 3\">15%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_mp 6\">30%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_mp 8\">40%</a>]";
 	private static final String MP_GRADE_2_SCH = "[<a action=\"bypass -h npc_%objectId%_manage recovery edit_mp 18\">40%</a>]";
 	private static final String MP_GRADE_3_SCH = "[<a action=\"bypass -h npc_%objectId%_manage recovery edit_mp 18\">40%</a>][<a action=\"bypass -h npc_%objectId%_manage recovery edit_mp 20\">50%</a>]";
 	
-	private static final String REMOVE_SUPPORT = "[<a action=\"bypass -h npc_%objectId%_manage other support_cancel\">Remove</a>]";
-	private static final String SUPPORT_GRADE_1 = "[<a action=\"bypass -h npc_%objectId%_manage other edit_support 1\">Level 1</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_support 2\">Level 2</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_support 4\">Level 4</a>]";
-	private static final String SUPPORT_GRADE_2 = "[<a action=\"bypass -h npc_%objectId%_manage other edit_support 3\">Level 3</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_support 4\">Level 4</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_support 5\">Level 5</a>]";
-	private static final String SUPPORT_GRADE_3 = "[<a action=\"bypass -h npc_%objectId%_manage other edit_support 3\">Level 3</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_support 5\">Level 5</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_support 7\">Level 7</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_support 8\">Level 8</a>]";
-	private static final String SUPPORT_GRADE_2_SCH = "[<a action=\"bypass -h npc_%objectId%_manage other edit_support 15\">Level 5</a>]";
-	private static final String SUPPORT_GRADE_3_SCH = "[<a action=\"bypass -h npc_%objectId%_manage other edit_support 15\">Level 5</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_support 18\">Level 8</a>]";
+	private static final String REMOVE_SUPPORT = "[<a action=\"bypass -h npc_%objectId%_manage other support_cancel\">Retirer</a>]";
+	private static final String SUPPORT_GRADE_1 = "[<a action=\"bypass -h npc_%objectId%_manage other edit_support 1\">Niveau 1</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_support 2\">Niveau 2</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_support 4\">Niveau 4</a>]";
+	private static final String SUPPORT_GRADE_2 = "[<a action=\"bypass -h npc_%objectId%_manage other edit_support 3\">Niveau 3</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_support 4\">Niveau 4</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_support 5\">Niveau 5</a>]";
+	private static final String SUPPORT_GRADE_3 = "[<a action=\"bypass -h npc_%objectId%_manage other edit_support 3\">Niveau 3</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_support 5\">Niveau 5</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_support 7\">Niveau 7</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_support 8\">Niveau 8</a>]";
+	private static final String SUPPORT_GRADE_2_SCH = "[<a action=\"bypass -h npc_%objectId%_manage other edit_support 15\">Niveau 5</a>]";
+	private static final String SUPPORT_GRADE_3_SCH = "[<a action=\"bypass -h npc_%objectId%_manage other edit_support 15\">Niveau 5</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_support 18\">Niveau 8</a>]";
 	
-	private static final String REMOVE_ITEM = "[<a action=\"bypass -h npc_%objectId%_manage other item_cancel\">Remove</a>]";
-	private static final String ITEM = "[<a action=\"bypass -h npc_%objectId%_manage other edit_item 1\">Level 1</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_item 2\">Level 2</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_item 3\">Level 3</a>]";
-	private static final String ITEM_SCH = "[<a action=\"bypass -h npc_%objectId%_manage other edit_item 11\">Level 1</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_item 12\">Level 2</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_item 13\">Level 3</a>]";
+	private static final String REMOVE_ITEM = "[<a action=\"bypass -h npc_%objectId%_manage other item_cancel\">Retirer</a>]";
+	private static final String ITEM = "[<a action=\"bypass -h npc_%objectId%_manage other edit_item 1\">Niveau 1</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_item 2\">Niveau 2</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_item 3\">Niveau 3</a>]";
+	private static final String ITEM_SCH = "[<a action=\"bypass -h npc_%objectId%_manage other edit_item 11\">Niveau 1</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_item 12\">Niveau 2</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_item 13\">Niveau 3</a>]";
 	
-	private static final String REMOVE_TELE = "[<a action=\"bypass -h npc_%objectId%_manage other tele_cancel\">Remove</a>]";
-	private static final String TELE = "[<a action=\"bypass -h npc_%objectId%_manage other edit_tele 1\">Level 1</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_tele 2\">Level 2</a>]";
-	private static final String TELE_SCH = "[<a action=\"bypass -h npc_%objectId%_manage other edit_tele 11\">Level 1</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_tele 12\">Level 2</a>]";
+	private static final String REMOVE_TELE = "[<a action=\"bypass -h npc_%objectId%_manage other tele_cancel\">Retirer</a>]";
+	private static final String TELE = "[<a action=\"bypass -h npc_%objectId%_manage other edit_tele 1\">Niveau 1</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_tele 2\">Niveau 2</a>]";
+	private static final String TELE_SCH = "[<a action=\"bypass -h npc_%objectId%_manage other edit_tele 11\">Niveau 1</a>][<a action=\"bypass -h npc_%objectId%_manage other edit_tele 12\">Niveau 2</a>]";
 	
-	private static final String REMOVE_CURTAINS = "[<a action=\"bypass -h npc_%objectId%_manage deco curtains_cancel\">Remove</a>]";
-	private static final String CURTAINS = "[<a action=\"bypass -h npc_%objectId%_manage deco edit_curtains 1\">Level 1</a>][<a action=\"bypass -h npc_%objectId%_manage deco edit_curtains 2\">Level 2</a>]";
+	private static final String REMOVE_CURTAINS = "[<a action=\"bypass -h npc_%objectId%_manage deco curtains_cancel\">Retirer</a>]";
+	private static final String CURTAINS = "[<a action=\"bypass -h npc_%objectId%_manage deco edit_curtains 1\">Niveau 1</a>][<a action=\"bypass -h npc_%objectId%_manage deco edit_curtains 2\">Niveau 2</a>]";
 	
-	private static final String REMOVE_FIXTURES = "[<a action=\"bypass -h npc_%objectId%_manage deco fixtures_cancel\">Remove</a>]";
-	private static final String FIXTURES = "[<a action=\"bypass -h npc_%objectId%_manage deco edit_fixtures 1\">Level 1</a>][<a action=\"bypass -h npc_%objectId%_manage deco edit_fixtures 2\">Level 2</a>]";
+	private static final String REMOVE_FIXTURES = "[<a action=\"bypass -h npc_%objectId%_manage deco fixtures_cancel\">Retirer</a>]";
+	private static final String FIXTURES = "[<a action=\"bypass -h npc_%objectId%_manage deco edit_fixtures 1\">Niveau 1</a>][<a action=\"bypass -h npc_%objectId%_manage deco edit_fixtures 2\">Niveau 2</a>]";
 	
-	private static final String NONE = "none";
+	private static final String NONE = "aucune";
 	
 	public ClanHallManagerNpc(int objectId, NpcTemplate template)
 	{
@@ -259,7 +260,7 @@ public class ClanHallManagerNpc extends Merchant
 					{
 						final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
 						html.setFile("data/html/clanHallManager/functions-apply.htm");
-						html.replace("%name%", "Fireplace (HP Recovery Device)");
+						html.replace("%name%", "Cheminée (récupération des PV)");
 						
 						int level = Integer.parseInt(st.nextToken());
 						final int funcLvl = level;
@@ -269,8 +270,8 @@ public class ClanHallManagerNpc extends Merchant
 							level -= 10;
 						final int percent = level * 20;
 						
-						html.replace("%cost%", cost + "</font> Adena / " + days + " day(s)</font>)");
-						html.replace("%use%", "Provides additional HP recovery for clan members in the clan hall.<font color=\"00FFFF\">" + percent + "%</font>");
+						html.replace("%cost%", cost + "</font> Adena / " + days + " jour(s)</font>)");
+						html.replace("%use%", "Récupération de PV supplémentaire pour les membres du clan dans la salle : <font color=\"00FFFF\">" + percent + "%</font>");
 						html.replace("%apply%", "recovery hp " + funcLvl);
 						html.replace("%objectId%", getObjectId());
 						player.sendPacket(html);
@@ -279,7 +280,7 @@ public class ClanHallManagerNpc extends Merchant
 					{
 						final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
 						html.setFile("data/html/clanHallManager/functions-apply.htm");
-						html.replace("%name%", "Carpet (MP Recovery)");
+						html.replace("%name%", "Tapis (récupération des PM)");
 						
 						int level = Integer.parseInt(st.nextToken());
 						final int funcLvl = level;
@@ -289,8 +290,8 @@ public class ClanHallManagerNpc extends Merchant
 							level -= 10;
 						final int percent = level * 5;
 						
-						html.replace("%cost%", cost + "</font> Adena / " + days + " day(s)</font>)");
-						html.replace("%use%", "Provides additional MP recovery for clan members in the clan hall.<font color=\"00FFFF\">" + percent + "%</font>");
+						html.replace("%cost%", cost + "</font> Adena / " + days + " jour(s)</font>)");
+						html.replace("%use%", "Récupération de PM supplémentaire pour les membres du clan dans la salle : <font color=\"00FFFF\">" + percent + "%</font>");
 						html.replace("%apply%", "recovery mp " + funcLvl);
 						html.replace("%objectId%", getObjectId());
 						player.sendPacket(html);
@@ -299,7 +300,7 @@ public class ClanHallManagerNpc extends Merchant
 					{
 						final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
 						html.setFile("data/html/clanHallManager/functions-apply.htm");
-						html.replace("%name%", "Chandelier (EXP Recovery Device)");
+						html.replace("%name%", "Lustre (expérience rendue)");
 						
 						int level = Integer.parseInt(st.nextToken());
 						final int funcLvl = level;
@@ -309,8 +310,8 @@ public class ClanHallManagerNpc extends Merchant
 							level -= 10;
 						final int percent = level * 5;
 						
-						html.replace("%cost%", cost + "</font> Adena / " + days + " day(s)</font>)");
-						html.replace("%use%", "Restores the Exp of any clan member who is resurrected in the clan hall.<font color=\"00FFFF\">" + percent + "%</font>");
+						html.replace("%cost%", cost + "</font> Adena / " + days + " jour(s)</font>)");
+						html.replace("%use%", "Rend l'expérience perdue aux membres du clan ressuscités dans la salle : <font color=\"00FFFF\">" + percent + "%</font>");
 						html.replace("%apply%", "recovery exp " + funcLvl);
 						html.replace("%objectId%", getObjectId());
 						player.sendPacket(html);
@@ -443,8 +444,8 @@ public class ClanHallManagerNpc extends Merchant
 					if (chf != null)
 					{
 						final int days = ClanHallDecoData.getInstance().getDecoDays(ClanHall.FUNC_RESTORE_HP, chf.getFuncLvl());
-						html.replace("%hp_recovery%", chf.getLvl() + "%</font> (<font color=\"FFAABB\">" + chf.getLease() + "</font> Adena / " + days + " day(s))");
-						html.replace("%hp_period%", "Next fee at " + new SimpleDateFormat("dd-MM-yyyy HH:mm").format(chf.getEndTime()));
+						html.replace("%hp_recovery%", chf.getLvl() + "%</font> (<font color=\"FFAABB\">" + chf.getLease() + "</font> Adena / " + days + " jour(s))");
+						html.replace("%hp_period%", "Prochain prélèvement le " + new SimpleDateFormat("dd-MM-yyyy HH:mm").format(chf.getEndTime()));
 						
 						switch (grade)
 						{
@@ -487,8 +488,8 @@ public class ClanHallManagerNpc extends Merchant
 					if (chf != null)
 					{
 						final int days = ClanHallDecoData.getInstance().getDecoDays(ClanHall.FUNC_RESTORE_EXP, chf.getFuncLvl());
-						html.replace("%exp_recovery%", chf.getLvl() + "%</font> (<font color=\"FFAABB\">" + chf.getLease() + "</font> Adena / " + days + " day(s))");
-						html.replace("%exp_period%", "Next fee at " + new SimpleDateFormat("dd-MM-yyyy HH:mm").format(chf.getEndTime()));
+						html.replace("%exp_recovery%", chf.getLvl() + "%</font> (<font color=\"FFAABB\">" + chf.getLease() + "</font> Adena / " + days + " jour(s))");
+						html.replace("%exp_period%", "Prochain prélèvement le " + new SimpleDateFormat("dd-MM-yyyy HH:mm").format(chf.getEndTime()));
 						
 						switch (grade)
 						{
@@ -531,8 +532,8 @@ public class ClanHallManagerNpc extends Merchant
 					if (chf != null)
 					{
 						final int days = ClanHallDecoData.getInstance().getDecoDays(ClanHall.FUNC_RESTORE_MP, chf.getFuncLvl());
-						html.replace("%mp_recovery%", chf.getLvl() + "%</font> (<font color=\"FFAABB\">" + chf.getLease() + "</font> Adena / " + days + " day(s))");
-						html.replace("%mp_period%", "Next fee at " + new SimpleDateFormat("dd-MM-yyyy HH:mm").format(chf.getEndTime()));
+						html.replace("%mp_recovery%", chf.getLvl() + "%</font> (<font color=\"FFAABB\">" + chf.getLease() + "</font> Adena / " + days + " jour(s))");
+						html.replace("%mp_period%", "Prochain prélèvement le " + new SimpleDateFormat("dd-MM-yyyy HH:mm").format(chf.getEndTime()));
 						
 						switch (grade)
 						{
@@ -610,7 +611,7 @@ public class ClanHallManagerNpc extends Merchant
 					{
 						final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
 						html.setFile("data/html/clanHallManager/functions-apply.htm");
-						html.replace("%name%", "Magic Equipment (Item Production Facilities)");
+						html.replace("%name%", "Équipement magique (fabrication d'objets)");
 						
 						int level = Integer.parseInt(st.nextToken());
 						final int funcLvl = level;
@@ -619,8 +620,8 @@ public class ClanHallManagerNpc extends Merchant
 						if (level > 10)
 							level -= 10;
 						
-						html.replace("%cost%", cost + "</font> Adena / " + days + " day(s)</font>)");
-						html.replace("%use%", "Allow the purchase of special items at fixed intervals.");
+						html.replace("%cost%", cost + "</font> Adena / " + days + " jour(s)</font>)");
+						html.replace("%use%", "Permet d'acheter des objets spéciaux à intervalles réguliers.");
 						html.replace("%apply%", "other item " + funcLvl);
 						html.replace("%objectId%", getObjectId());
 						player.sendPacket(html);
@@ -629,7 +630,7 @@ public class ClanHallManagerNpc extends Merchant
 					{
 						final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
 						html.setFile("data/html/clanHallManager/functions-apply.htm");
-						html.replace("%name%", "Insignia (Supplementary Magic)");
+						html.replace("%name%", "Insigne (magie de soutien)");
 						
 						int level = Integer.parseInt(st.nextToken());
 						final int funcLvl = level;
@@ -638,8 +639,8 @@ public class ClanHallManagerNpc extends Merchant
 						if (level > 10)
 							level -= 10;
 						
-						html.replace("%cost%", cost + "</font> Adena / " + days + " day(s)</font>)");
-						html.replace("%use%", "Enables the use of supplementary magic.");
+						html.replace("%cost%", cost + "</font> Adena / " + days + " jour(s)</font>)");
+						html.replace("%use%", "Permet de recevoir la magie de soutien de la gérance.");
 						html.replace("%apply%", "other support " + funcLvl);
 						html.replace("%objectId%", getObjectId());
 						player.sendPacket(html);
@@ -648,7 +649,7 @@ public class ClanHallManagerNpc extends Merchant
 					{
 						final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
 						html.setFile("data/html/clanHallManager/functions-apply.htm");
-						html.replace("%name%", "Mirror (Teleportation Device)");
+						html.replace("%name%", "Miroir (téléportation)");
 						
 						int level = Integer.parseInt(st.nextToken());
 						final int funcLvl = level;
@@ -657,8 +658,8 @@ public class ClanHallManagerNpc extends Merchant
 						if (level > 10)
 							level -= 10;
 						
-						html.replace("%cost%", cost + "</font> Adena / " + days + " day(s)</font>)");
-						html.replace("%use%", "Teleports clan members in a clan hall to the target <font color=\"00FFFF\">Stage " + level + "</font> staging area");
+						html.replace("%cost%", cost + "</font> Adena / " + days + " jour(s)</font>)");
+						html.replace("%use%", "Téléporte les membres du clan vers les destinations de <font color=\"00FFFF\">niveau " + level + "</font>");
 						html.replace("%apply%", "other tele " + funcLvl);
 						html.replace("%objectId%", getObjectId());
 						player.sendPacket(html);
@@ -680,7 +681,7 @@ public class ClanHallManagerNpc extends Merchant
 						if (chf != null && chf.getLvl() == level)
 						{
 							html.setFile("data/html/clanHallManager/functions-used.htm");
-							html.replace("%val%", "Stage " + val);
+							html.replace("%val%", "Niveau " + val);
 							html.replace("%objectId%", getObjectId());
 							player.sendPacket(html);
 							return;
@@ -717,7 +718,7 @@ public class ClanHallManagerNpc extends Merchant
 						if (chf != null && chf.getLvl() == level)
 						{
 							html.setFile("data/html/clanHallManager/functions-used.htm");
-							html.replace("%val%", "Stage " + level);
+							html.replace("%val%", "Niveau " + level);
 							html.replace("%objectId%", getObjectId());
 							player.sendPacket(html);
 							return;
@@ -754,7 +755,7 @@ public class ClanHallManagerNpc extends Merchant
 						if (chf != null && chf.getLvl() == level)
 						{
 							html.setFile("data/html/clanHallManager/functions-used.htm");
-							html.replace("%val%", "Stage " + val);
+							html.replace("%val%", "Niveau " + val);
 							html.replace("%objectId%", getObjectId());
 							player.sendPacket(html);
 							return;
@@ -793,8 +794,8 @@ public class ClanHallManagerNpc extends Merchant
 					if (chf != null)
 					{
 						final int days = ClanHallDecoData.getInstance().getDecoDays(ClanHall.FUNC_TELEPORT, chf.getFuncLvl());
-						html.replace("%tele%", "Stage " + chf.getLvl() + "</font> (<font color=\"FFAABB\">" + chf.getLease() + "</font> Adena / " + days + " day(s))");
-						html.replace("%tele_period%", "Next fee at " + new SimpleDateFormat("dd-MM-yyyy HH:mm").format(chf.getEndTime()));
+						html.replace("%tele%", "Niveau " + chf.getLvl() + "</font> (<font color=\"FFAABB\">" + chf.getLease() + "</font> Adena / " + days + " jour(s))");
+						html.replace("%tele_period%", "Prochain prélèvement le " + new SimpleDateFormat("dd-MM-yyyy HH:mm").format(chf.getEndTime()));
 						html.replace("%change_tele%", REMOVE_TELE + (isSCH ? TELE_SCH : TELE));
 					}
 					else
@@ -810,8 +811,8 @@ public class ClanHallManagerNpc extends Merchant
 					if (chf != null)
 					{
 						final int days = ClanHallDecoData.getInstance().getDecoDays(ClanHall.FUNC_SUPPORT_MAGIC, chf.getFuncLvl());
-						html.replace("%support%", "Stage " + chf.getLvl() + "</font> (<font color=\"FFAABB\">" + chf.getLease() + "</font> Adena / " + days + " day(s))");
-						html.replace("%support_period%", "Next fee at " + new SimpleDateFormat("dd-MM-yyyy HH:mm").format(chf.getEndTime()));
+						html.replace("%support%", "Niveau " + chf.getLvl() + "</font> (<font color=\"FFAABB\">" + chf.getLease() + "</font> Adena / " + days + " jour(s))");
+						html.replace("%support_period%", "Prochain prélèvement le " + new SimpleDateFormat("dd-MM-yyyy HH:mm").format(chf.getEndTime()));
 						
 						switch (grade)
 						{
@@ -853,8 +854,8 @@ public class ClanHallManagerNpc extends Merchant
 					if (chf != null)
 					{
 						final int days = ClanHallDecoData.getInstance().getDecoDays(ClanHall.FUNC_CREATE_ITEM, chf.getFuncLvl());
-						html.replace("%item%", "Stage " + chf.getLvl() + "</font> (<font color=\"FFAABB\">" + chf.getLease() + "</font> Adena / " + days + " day(s))");
-						html.replace("%item_period%", "Next fee at " + new SimpleDateFormat("dd-MM-yyyy HH:mm").format(chf.getEndTime()));
+						html.replace("%item%", "Niveau " + chf.getLvl() + "</font> (<font color=\"FFAABB\">" + chf.getLease() + "</font> Adena / " + days + " jour(s))");
+						html.replace("%item_period%", "Prochain prélèvement le " + new SimpleDateFormat("dd-MM-yyyy HH:mm").format(chf.getEndTime()));
 						html.replace("%change_item%", REMOVE_ITEM + (isSCH ? ITEM_SCH : ITEM));
 					}
 					else
@@ -895,7 +896,7 @@ public class ClanHallManagerNpc extends Merchant
 					{
 						final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
 						html.setFile("data/html/clanHallManager/functions-apply.htm");
-						html.replace("%name%", "Curtains (Decoration)");
+						html.replace("%name%", "Tentures (décoration)");
 						
 						int level = Integer.parseInt(st.nextToken());
 						final int funcLvl = level;
@@ -904,8 +905,8 @@ public class ClanHallManagerNpc extends Merchant
 						if (level > 10)
 							level -= 10;
 						
-						html.replace("%cost%", cost + "</font> Adena / " + days + " day(s)</font>)");
-						html.replace("%use%", "These curtains can be used to decorate the clan hall.");
+						html.replace("%cost%", cost + "</font> Adena / " + days + " jour(s)</font>)");
+						html.replace("%use%", "Des tentures pour décorer la salle de clan.");
 						html.replace("%apply%", "deco curtains " + funcLvl);
 						html.replace("%objectId%", getObjectId());
 						player.sendPacket(html);
@@ -914,7 +915,7 @@ public class ClanHallManagerNpc extends Merchant
 					{
 						final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
 						html.setFile("data/html/clanHallManager/functions-apply.htm");
-						html.replace("%name%", "Front Platform (Decoration)");
+						html.replace("%name%", "Estrade (décoration)");
 						
 						int level = Integer.parseInt(st.nextToken());
 						final int funcLvl = level;
@@ -923,8 +924,8 @@ public class ClanHallManagerNpc extends Merchant
 						if (level > 10)
 							level -= 10;
 						
-						html.replace("%cost%", cost + "</font> Adena / " + days + " day(s)</font>)");
-						html.replace("%use%", "Used to decorate the clan hall.");
+						html.replace("%cost%", cost + "</font> Adena / " + days + " jour(s)</font>)");
+						html.replace("%use%", "Sert à décorer la salle de clan.");
 						html.replace("%apply%", "deco fixtures " + funcLvl);
 						html.replace("%objectId%", getObjectId());
 						player.sendPacket(html);
@@ -943,7 +944,7 @@ public class ClanHallManagerNpc extends Merchant
 						if (chf != null && chf.getLvl() == level)
 						{
 							html.setFile("data/html/clanHallManager/functions-used.htm");
-							html.replace("%val%", "Stage " + val);
+							html.replace("%val%", "Niveau " + val);
 							html.replace("%objectId%", getObjectId());
 							player.sendPacket(html);
 							return;
@@ -980,7 +981,7 @@ public class ClanHallManagerNpc extends Merchant
 						if (chf != null && chf.getLvl() == level)
 						{
 							html.setFile("data/html/clanHallManager/functions-used.htm");
-							html.replace("%val%", "Stage " + val);
+							html.replace("%val%", "Niveau " + val);
 							html.replace("%objectId%", getObjectId());
 							player.sendPacket(html);
 							return;
@@ -1013,8 +1014,8 @@ public class ClanHallManagerNpc extends Merchant
 					if (chf != null)
 					{
 						final int days = ClanHallDecoData.getInstance().getDecoDays(ClanHall.FUNC_DECO_CURTAINS, chf.getFuncLvl());
-						html.replace("%curtain%", "Stage " + chf.getLvl() + "</font>&nbsp;(<font color=\"FFAABB\">" + chf.getLease() + "</font> Adena / " + days + " day(s))");
-						html.replace("%curtain_period%", "Next fee at " + new SimpleDateFormat("dd-MM-yyyy HH:mm").format(chf.getEndTime()));
+						html.replace("%curtain%", "Niveau " + chf.getLvl() + "</font>&nbsp;(<font color=\"FFAABB\">" + chf.getLease() + "</font> Adena / " + days + " jour(s))");
+						html.replace("%curtain_period%", "Prochain prélèvement le " + new SimpleDateFormat("dd-MM-yyyy HH:mm").format(chf.getEndTime()));
 						html.replace("%change_curtain%", REMOVE_CURTAINS + CURTAINS);
 					}
 					else
@@ -1028,8 +1029,8 @@ public class ClanHallManagerNpc extends Merchant
 					if (chf != null)
 					{
 						final int days = ClanHallDecoData.getInstance().getDecoDays(ClanHall.FUNC_DECO_FIXTURES, chf.getFuncLvl());
-						html.replace("%fixture%", "Stage " + chf.getLvl() + "</font>&nbsp;(<font color=\"FFAABB\">" + chf.getLease() + "</font> Adena / " + days + " day(s))");
-						html.replace("%fixture_period%", "Next fee at " + new SimpleDateFormat("dd-MM-yyyy HH:mm").format(chf.getEndTime()));
+						html.replace("%fixture%", "Niveau " + chf.getLvl() + "</font>&nbsp;(<font color=\"FFAABB\">" + chf.getLease() + "</font> Adena / " + days + " jour(s))");
+						html.replace("%fixture_period%", "Prochain prélèvement le " + new SimpleDateFormat("dd-MM-yyyy HH:mm").format(chf.getEndTime()));
 						html.replace("%change_fixture%", REMOVE_FIXTURES + FIXTURES);
 					}
 					else
@@ -1064,7 +1065,7 @@ public class ClanHallManagerNpc extends Merchant
 			if (player.isCursedWeaponEquipped())
 			{
 				// Custom system message
-				player.sendMessage("The wielder of a cursed weapon cannot receive outside heals or buffs");
+				player.sendMessage("Le porteur d'une arme maudite ne peut recevoir ni soin ni bienfait.");
 				return;
 			}
 			
@@ -1079,7 +1080,7 @@ public class ClanHallManagerNpc extends Merchant
 			}
 			catch (Exception e)
 			{
-				player.sendMessage("Invalid skill, contact your server support.");
+				player.sendMessage("Compétence invalide, prévenez l'administrateur du serveur.");
 			}
 		}
 		else if (actualCommand.equalsIgnoreCase("list_back"))
@@ -1114,7 +1115,7 @@ public class ClanHallManagerNpc extends Merchant
 			}
 			
 			final Clan clan = player.getClan();
-			if (clan == null || clan.getLevel() == 0)
+			if (clan == null || clan.getLevel() < Config.CLAN_WAREHOUSE_MIN_LEVEL)
 			{
 				player.sendPacket(SystemMessageId.ONLY_LEVEL_1_CLAN_OR_HIGHER_CAN_USE_WAREHOUSE);
 				return;
@@ -1127,7 +1128,7 @@ public class ClanHallManagerNpc extends Merchant
 		else if (actualCommand.equalsIgnoreCase("DepositC"))
 		{
 			final Clan clan = player.getClan();
-			if (clan == null || clan.getLevel() == 0)
+			if (clan == null || clan.getLevel() < Config.CLAN_WAREHOUSE_MIN_LEVEL)
 			{
 				player.sendPacket(SystemMessageId.ONLY_LEVEL_1_CLAN_OR_HIGHER_CAN_USE_WAREHOUSE);
 				return;

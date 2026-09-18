@@ -33,14 +33,36 @@ import org.w3c.dom.Document;
 public class ClanHallManager implements IXmlReader
 {
 	private static final String LOAD_CLANHALLS = "SELECT * FROM clanhall";
+	private static final String INSERT_CLANHALL = "INSERT IGNORE INTO clanhall (id) VALUES (?)";
 	private static final String LOAD_FUNCTIONS = "SELECT * FROM clanhall_functions WHERE hall_id = ?";
 	
 	private final Map<Integer, ClanHall> _clanHalls = new HashMap<>();
+	
+	private void createMissingRows()
+	{
+		try (Connection con = ConnectionPool.getConnection();
+			PreparedStatement ps = con.prepareStatement(INSERT_CLANHALL))
+		{
+			for (int id : _clanHalls.keySet())
+			{
+				ps.setInt(1, id);
+				ps.addBatch();
+			}
+			ps.executeBatch();
+		}
+		catch (Exception e)
+		{
+			LOGGER.error("Couldn't create missing ClanHall rows.", e);
+		}
+	}
 	
 	protected ClanHallManager()
 	{
 		// Build ClanHalls objects with static data.
 		load();
+		
+		// Une salle ajoutee au XML n'a pas encore sa ligne : sans elle, ni enchere ni proprietaire.
+		createMissingRows();
 		
 		// Add dynamic data.
 		try (Connection con = ConnectionPool.getConnection();
@@ -209,6 +231,14 @@ public class ClanHallManager implements IXmlReader
 	 * @param location : The location name used as parameter.
 	 * @return a {@link List} with all {@link ClanHall}s which are in a given location.
 	 */
+	/**
+	 * @return les lieux des salles existantes, tries, sans doublon.
+	 */
+	public final List<String> getLocations()
+	{
+		return _clanHalls.values().stream().map(ClanHall::getTownName).distinct().sorted().toList();
+	}
+	
 	public final List<ClanHall> getClanHallsByLocation(String location)
 	{
 		return _clanHalls.values().stream().filter(ch -> ch.getTownName().equalsIgnoreCase(location)).toList();

@@ -1253,4 +1253,38 @@ Talking Island
 		</ai>
 		<npc id="32131" pos="-86720;241232;-3704;51584" total="1" respawn="1min"/>
 	</npcmaker>
+	<!-- Maison des Murmures : gerante a l'interieur, portier devant l'entree,
+	     huissier des encheres sur la place du village. -->
+	<territory name="talking_agit001_in" minZ="-3800" maxZ="-3600">
+		<node x="-85219" y="241293"/>
+		<node x="-85119" y="241293"/>
+		<node x="-85119" y="241393"/>
+		<node x="-85219" y="241393"/>
+	</territory>
+	<npcmaker name="talking_agit001_manager" territory="talking_agit001_in" maximumNpcs="1">
+		<ai type="default_maker"/>
+		<npc id="50110" pos="-85169;241343;-3751;16384" total="1" respawn="1min"/>
+	</npcmaker>
+
+	<territory name="talking_agit001_out" minZ="-3800" maxZ="-3600">
+		<node x="-85371" y="241348"/>
+		<node x="-85271" y="241348"/>
+		<node x="-85271" y="241448"/>
+		<node x="-85371" y="241448"/>
+	</territory>
+	<npcmaker name="talking_agit001_doorman" territory="talking_agit001_out" maximumNpcs="1">
+		<ai type="default_maker"/>
+		<npc id="50111" pos="-85321;241398;-3755;16384" total="1" respawn="1min"/>
+	</npcmaker>
+
+	<territory name="talking_auction" minZ="-3800" maxZ="-3600">
+		<node x="-84310" y="242160"/>
+		<node x="-84200" y="242160"/>
+		<node x="-84200" y="242270"/>
+		<node x="-84310" y="242270"/>
+	</territory>
+	<npcmaker name="talking_auctioneer" territory="talking_auction" maximumNpcs="1">
+		<ai type="default_maker"/>
+		<npc id="30767" pos="-84253;242211;-3755;32768" total="1" respawn="1min"/>
+	</npcmaker>
 </list>

@@ -24,19 +24,6 @@ public class AdminClanHall implements IAdminCommandHandler
 		"admin_ch"
 	};
 	
-	private static final String[] LOCS =
-	{
-		"Aden",
-		"Dion",
-		"Giran",
-		"Gludin",
-		"Gludio",
-		"Goddard",
-		"Oren",
-		"Rune",
-		"Schuttgart"
-	};
-	
 	@Override
 	public void useAdminCommand(String command, Player player)
 	{
@@ -86,16 +73,16 @@ public class AdminClanHall implements IAdminCommandHandler
 					if (targetPlayer == null || targetPlayer.getClan() == null)
 						player.sendPacket(SystemMessageId.TARGET_IS_INCORRECT);
 					else if (!ch.isFree())
-						player.sendMessage("This ClanHall isn't free.");
+						player.sendMessage("Cette salle de clan n'est pas libre.");
 					else if (targetPlayer.getClan().hasClanHall())
-						player.sendMessage("Your target already owns a ClanHall.");
+						player.sendMessage("La cible possede deja une salle de clan.");
 					else
 						ch.setOwner(targetPlayer.getClan());
 					break;
 				
 				case "remove":
 					if (ch.isFree())
-						player.sendMessage("This ClanHall is already free.");
+						player.sendMessage("Cette salle de clan est deja libre.");
 					else
 						ch.free();
 					break;
@@ -115,7 +102,7 @@ public class AdminClanHall implements IAdminCommandHandler
 				case "end":
 					final Auction auction = ch.getAuction();
 					if (auction == null)
-						player.sendMessage("This ClanHall doesn't hold an auction.");
+						player.sendMessage("Aucune enchere en cours sur cette salle.");
 					else
 						auction.endAuction();
 					break;
@@ -124,7 +111,7 @@ public class AdminClanHall implements IAdminCommandHandler
 					if (param2 == null || StringUtil.isDigit(param2))
 						player.sendMessage("Usage: //ch siege start|end chId.");
 					else if (!(ch instanceof SiegableHall sh))
-						player.sendMessage("This ClanHall isn't siegable.");
+						player.sendMessage("Cette salle de clan ne peut pas etre assiegee.");
 					else
 					{
 						switch (param2)
@@ -209,9 +196,10 @@ public class AdminClanHall implements IAdminCommandHandler
 		final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		final StringBuilder sb = new StringBuilder();
 		
-		for (String loc : LOCS)
+		// Les lieux sont deduits des salles : une salle ajoutee au XML apparait sans retouche.
+		for (String loc : ClanHallManager.getInstance().getLocations())
 		{
-			StringUtil.append(sb, "<font color=\"LEVEL\">", loc, "</font><br><table width=270><tr><td width=130>Clan Hall Name</td><td width=70>End Date</td><td width=70>Min Bid</td></tr>");
+			StringUtil.append(sb, "<font color=\"LEVEL\">", loc, "</font><br><table width=270><tr><td width=130>Salle de clan</td><td width=70>Cl&#244;ture</td><td width=70>Mise mini</td></tr>");
 			
 			for (ClanHall ch : ClanHallManager.getInstance().getClanHallsByLocation(loc))
 			{

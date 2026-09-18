@@ -266,8 +266,9 @@ public class NpcHtmlWindow : L2PopupWindow
     {
         // Remove newlines and normalize spaces
         string processed = Regex.Replace(html, @"\s{2,}", "");
+        processed = Regex.Replace(processed, @"<!--.*?-->", "", RegexOptions.Singleline);
 
-        if (processed.Contains("<center>"))
+        if (Regex.IsMatch(processed, @"</?center>", RegexOptions.IgnoreCase))
         {
             _centerEverything = true;
             _content.style.alignContent = Align.Center;
@@ -287,10 +288,15 @@ public class NpcHtmlWindow : L2PopupWindow
             .Replace("</body>", "")
             .Replace("%objectId%", npcId.ToString())
             .Replace("%item%", itemId.ToString())
-            .Replace("<center>", "")
-            .Replace("</center>", "")
             .Replace("<p>", "<br1>")
-            .Replace("</p>", "<br1>");
+            .Replace("</p>", "<br1>")
+            .Replace("&nbsp;", "\u00A0")
+            .Replace("&lsquo;", "\u2018")
+            .Replace("&rsquo;", "\u2019");
+
+        // Balises de centrage : retirees quelle que soit la casse, le centrage est
+        // deja pris en compte plus haut.
+        processed = Regex.Replace(processed, @"</?center>", "", RegexOptions.IgnoreCase);
 
         processed = ReplaceItemNames(processed);
         processed = ReplaceSysStrings(processed);
@@ -344,6 +350,14 @@ public class NpcHtmlWindow : L2PopupWindow
 
     private string ReplaceFontColors(string processed)
     {
+        // <font><a>..</a></font> : la couleur passe dans le lien, sinon elle
+        // reste seule dans un libelle a part et le lien garde sa couleur par defaut.
+        processed = Regex.Replace(
+            processed,
+            @"<font\s+(color\s*=[^>]*)>\s*<a\s+([^>]*)>(.*?)</a>\s*</font>",
+            "<a $2><font $1>$3</font></a>",
+            RegexOptions.Singleline | RegexOptions.IgnoreCase);
+
         // <font color="X">...</font> -> <color=#X>...</color> (rich text Unity).
         // Robuste : guillemets simples/doubles ou absents, espaces autour du '=',
         // casse quelconque, prefixe '#' optionnel dans la valeur (evite un '##'
@@ -554,7 +568,7 @@ public class NpcHtmlWindow : L2PopupWindow
                         Match actionMatch = Regex.Match(linkTag, @"action=""([^""]+)"".*?>(.*?)$");
                         if (actionMatch.Success)
                         {
-                            nodes.Add(new HtmlNode
+                            HtmlNode linkNode = new HtmlNode
                             {
                                 Type = NodeType.Link,
                                 Attributes = new Dictionary<string, string>
@@ -562,7 +576,13 @@ public class NpcHtmlWindow : L2PopupWindow
                                     ["action"] = actionMatch.Groups[1].Value.Replace("bypass", "").Replace("-h", "").Trim(),
                                     ["value"] = actionMatch.Groups[2].Value
                                 }
-                            });
+                            };
+                            Match msgMatch = Regex.Match(linkTag, @"msg=""?(\d+)");
+                            if (msgMatch.Success)
+                            {
+                                linkNode.Attributes["msg"] = msgMatch.Groups[1].Value;
+                            }
+                            nodes.Add(linkNode);
                         }
                         currentPos = linkEnd + 4;
                     }
@@ -628,7 +648,8 @@ public class NpcHtmlWindow : L2PopupWindow
             ["value"] = @"value=[""']([^""']*)[""']",
             ["src"] = @"src=[""']?([^""'>\s]+)[""']?",
             ["var"] = @"var=[""']?([^""'>\s]+)[""']?",
-            ["list"] = @"list=[""']?([^""'>\s]+)[""']?"
+            ["list"] = @"list=[""']?([^""'>\s]+)[""']?",
+            ["msg"] = @"msg=[""']?(\d+)[""']?"
         };
 
         foreach (KeyValuePair<string, string> pattern in patterns)
@@ -748,7 +769,7 @@ public class NpcHtmlWindow : L2PopupWindow
     {
         if (string.IsNullOrEmpty(text)) return;
 
-        Label label = new Label { text = text };
+        Label label = new Label { text = text.Replace("&gt;", ">").Replace("&amp;", "&") };
         label.enableRichText = true;
         label.AddToClassList("l2-color-4");
         label.AddToClassList("html-window-label");
@@ -773,7 +794,8 @@ public class NpcHtmlWindow : L2PopupWindow
         }
         if (attributes.TryGetValue("action", out string action))
         {
-            button.clicked += () => ButtonClicked(action);
+            attributes.TryGetValue("msg", out string msg);
+            button.clicked += () => ButtonClicked(action, msg);
         }
         if (attributes.TryGetValue("value", out string value))
         {
@@ -804,7 +826,8 @@ public class NpcHtmlWindow : L2PopupWindow
         }
         if (attributes.TryGetValue("action", out string action))
         {
-            button.clicked += () => ButtonClicked(action);
+            attributes.TryGetValue("msg", out string msg);
+            button.clicked += () => ButtonClicked(action, msg);
         }
         if (attributes.TryGetValue("value", out string value))
         {
@@ -834,9 +857,39 @@ public class NpcHtmlWindow : L2PopupWindow
             }
         }
 
+        FitLabel(button, label);
         button.AddManipulator(new ButtonClickSoundManipulator(button));
 
         container.Add(button);
+    }
+
+    // Les libelles francais sont plus longs que les boutons prevus pour l'anglais :
+    // on reduit la police, puis on elargit le bouton si cela ne suffit pas.
+    private static void FitLabel(Button button, Label label)
+    {
+        label.RegisterCallback<GeometryChangedEvent>(evt =>
+        {
+            float available = button.resolvedStyle.width - 8f;
+            if (available <= 0f || string.IsNullOrEmpty(label.text)) return;
+
+            float size = label.resolvedStyle.fontSize;
+            float needed = label.MeasureTextSize(label.text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined).x;
+            if (needed <= available) return;
+
+            float fitted = Mathf.Max(9f, Mathf.Floor(size * available / needed));
+            if (fitted < size)
+            {
+                label.style.fontSize = fitted;
+                needed *= fitted / size;
+            }
+
+            if (needed > available)
+            {
+                float width = Mathf.Ceil(needed + 14f);
+                button.style.width = width;
+                button.style.minWidth = width;
+            }
+        });
     }
 
     private void AddInputField(VisualElement container, Dictionary<string, string> attributes)
@@ -883,21 +936,18 @@ public class NpcHtmlWindow : L2PopupWindow
     {
         VisualElement imageContainer = new VisualElement();
 
-        Texture2D exampleImage = Resources.Load<Texture2D>("Data/SysTextures/Icon/accessary_magic_ring_i00");
-
         Image image = new Image();
         image.scaleMode = ScaleMode.StretchToFill;
 
+        // Une image absente laisse un emplacement vide plutot qu'une icone de remplacement
+        // etiree, qui passait pour une image cassee.
         if (attributes.TryGetValue("src", out string src))
         {
-            Texture2D srcImage = Resources.Load<Texture2D>("Data/UI/Assets/html/" + src.Split(".")[1]);
-            if (srcImage != null)
+            string name = src.Substring(src.LastIndexOf('.') + 1);
+            image.image = Resources.Load<Texture2D>("Data/UI/Assets/html/" + name);
+            if (image.image == null)
             {
-                image.image = srcImage;
-            }
-            else
-            {
-                image.image = exampleImage;
+                Debug.LogWarning($"Image HTML introuvable : Data/UI/Assets/html/{name}");
             }
         }
         if (attributes.TryGetValue("width", out string width))
@@ -1052,8 +1102,15 @@ public class NpcHtmlWindow : L2PopupWindow
         container.Add(wrapper);
     }
 
-    private void ButtonClicked(string action)
+    // msg="id" : le jeu d'origine demande confirmation avant d'envoyer l'action.
+    private void ButtonClicked(string action, string msg)
     {
+        if (!string.IsNullOrEmpty(msg) && int.TryParse(msg, out int messageId))
+        {
+            L2ConfirmWindow.Instance.ShowWindow(messageId, () => ButtonClicked(action, null), () => { });
+            return;
+        }
+
         // Remplace TOUTES les variables $var par la valeur du champ de saisie /
         // de la liste correspondante avant l'envoi au serveur (une action peut en
         // referencer plusieurs, ex. "$search"). Une variable inconnue reste

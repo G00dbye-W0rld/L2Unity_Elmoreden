@@ -4,6 +4,8 @@ public class ColorUtils
 {
     public static Color HexToColor(string hex)
     {
+        // Les HTM ecrivent la couleur avec ou sans "#" (bgcolor="#000000").
+        hex = hex.TrimStart('#');
         // Remove the alpha channel from the string (last two characters)
         hex = hex.Substring(0, 6);
 

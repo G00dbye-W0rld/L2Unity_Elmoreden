@@ -30,5 +30,11 @@ public class DoorInfo extends L2GameServerPacket
 		writeD((int) _door.getStatus().getHp());
 		writeD(0); // ??? (show HP)
 		writeD(0); // ??? (Damage)
+		
+		// Le client Unity ne connait pas la geometrie des portes : il lui faut
+		// la position pour retrouver le bon battant dans la scene.
+		writeD(_door.getX());
+		writeD(_door.getY());
+		writeD(_door.getZ());
 	}
 }

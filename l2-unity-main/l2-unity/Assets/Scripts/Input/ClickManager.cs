@@ -139,7 +139,11 @@ public class ClickManager : MonoBehaviour
                 // sinon un objet au sol dont le collider tombe sur un layer
                 // inclus dans _entityMask est route vers OnClickOnEntity()
                 // (-> tentative d'attaque cote serveur) au lieu du ramassage.
-                if (_targetObjectData.ObjectTag == "Pickup")
+                if (DoorManager.TryFindDoor(hit.collider.transform, out int doorObjectId, out Vector3 doorPosition))
+                {
+                    OnClickOnDoor(doorObjectId, doorPosition);
+                }
+                else if (_targetObjectData.ObjectTag == "Pickup")
                 {
                     OnClickOnPickupItem();
                 }
@@ -153,7 +157,12 @@ public class ClickManager : MonoBehaviour
                 }
             }
 
-            if (_hoverObjectData.ObjectTransform != null && _hoverObjectData.ObjectTag == "Pickup")
+            if (DoorManager.TryFindDoor(hit.collider.transform, out _, out _))
+            {
+                UpdateItemHighlight(null);
+                CursorManager.Instance.ChangeCursor(CursorManager.CursorType.Use);
+            }
+            else if (_hoverObjectData.ObjectTransform != null && _hoverObjectData.ObjectTag == "Pickup")
             {
                 CursorManager.Instance.ChangeCursor(CursorManager.CursorType.Pickup);
                 UpdateItemHighlight(_hoverObjectData.ObjectTransform.GetComponent<WorldItem>());
@@ -162,7 +171,9 @@ public class ClickManager : MonoBehaviour
             {
                 UpdateItemHighlight(null);
 
-                if (_hoverObjectData.ObjectTag == "Monster" && !_hoverObjectData.Entity.Status.IsDead)
+                // Un joueur attaquable sans Ctrl (ennemi de guerre, karma) montre aussi le curseur d'attaque.
+                bool autoAttackable = _hoverObjectData.Entity != null && _hoverObjectData.Entity.Identity.EntityType == EntityType.User && _hoverObjectData.Entity.Identity.AutoAttackable;
+                if ((_hoverObjectData.ObjectTag == "Monster" || autoAttackable) && !_hoverObjectData.Entity.Status.IsDead)
                 {
                     CursorManager.Instance.ChangeCursor(CursorManager.CursorType.Attack);
                 }
@@ -213,6 +224,7 @@ public class ClickManager : MonoBehaviour
 
     public void OnClickToMove(RaycastHit hit)
     {
+        CancelDoorApproach();
         _lastClickPosition = hit.point;
         //  PlayerCombatController.Instance.RunningToTarget = false;
 
@@ -240,8 +252,73 @@ public class ClickManager : MonoBehaviour
         }
     }
 
+    // Le client deplace lui-meme le joueur : on l'amene devant la porte, puis le
+    // premier Action la cible cote serveur et le second declenche la confirmation.
+    private const float DoorReach = 1.6f;
+    private int _doorTargetId;
+    private Coroutine _doorApproach;
+
+    private void OnClickOnDoor(int objectId, Vector3 doorPosition)
+    {
+        HideLocator(false);
+        CancelDoorApproach();
+        _doorApproach = StartCoroutine(ApproachDoor(objectId, doorPosition));
+    }
+
+    private void CancelDoorApproach()
+    {
+        if (_doorApproach != null)
+        {
+            StopCoroutine(_doorApproach);
+            _doorApproach = null;
+        }
+    }
+
+    private IEnumerator ApproachDoor(int objectId, Vector3 doorPosition)
+    {
+        Transform player = PlayerEntity.Instance.transform;
+        Vector3 away = player.position - doorPosition;
+        away.y = 0f;
+
+        if (away.magnitude > DoorReach)
+        {
+            Vector3 stop = doorPosition + away.normalized * (DoorReach - 0.4f);
+            stop.y = player.position.y;
+            PlayerStateMachine.Instance.NotifyEvent(Event.CLICK_TO_MOVE, stop);
+
+            float giveUp = Time.time + 15f;
+            while (FlatDistance(player.position, doorPosition) > DoorReach)
+            {
+                if (Time.time > giveUp || InputManager.Instance.Move || InputManager.Instance.MoveForward)
+                {
+                    _doorApproach = null;
+                    yield break;
+                }
+                yield return null;
+            }
+        }
+
+        if (_doorTargetId != objectId)
+        {
+            GameClient.Instance.ClientPacketHandler.SendRequestAction(objectId);
+            _doorTargetId = objectId;
+        }
+
+        GameClient.Instance.ClientPacketHandler.SendRequestAction(objectId);
+        _doorApproach = null;
+    }
+
+    private static float FlatDistance(Vector3 a, Vector3 b)
+    {
+        a.y = 0f;
+        b.y = 0f;
+        return Vector3.Distance(a, b);
+    }
+
     public void OnClickOnEntity()
     {
+        CancelDoorApproach();
+        _doorTargetId = 0;
         // Debug.Log("Click on entity");
         if (TargetManager.Instance.HasTarget() && TargetManager.Instance.Target.transform == _targetObjectData.ObjectTransform)
         {

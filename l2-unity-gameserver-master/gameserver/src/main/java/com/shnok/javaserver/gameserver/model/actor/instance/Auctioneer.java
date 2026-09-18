@@ -73,7 +73,7 @@ public final class Auctioneer extends Folk
 						html.replace("%AGIT_LEASE%", ch.getLease());
 						html.replace("%AGIT_LOCATION%", ch.getTownName());
 						html.replace("%AGIT_AUCTION_END%", new SimpleDateFormat("dd-MM-yyyy HH:mm").format(auction.getEndDate()));
-						html.replace("%AGIT_AUCTION_REMAIN%", (remainingTime / 3600000) + " hours " + ((remainingTime / 60000) % 60) + " minutes");
+						html.replace("%AGIT_AUCTION_REMAIN%", (remainingTime / 3600000) + " h " + ((remainingTime / 60000) % 60) + " min");
 						html.replace("%AGIT_AUCTION_MINBID%", auction.getMinimumBid());
 						html.replace("%AGIT_AUCTION_COUNT%", auction.getBidders().size());
 						html.replace("%AGIT_AUCTION_DESC%", ch.getDesc());
@@ -508,7 +508,7 @@ public final class Auctioneer extends Folk
 			html.replace("%AGIT_LEASE%", ch.getLease());
 			html.replace("%AGIT_LOCATION%", ch.getTownName());
 			html.replace("%AGIT_AUCTION_END%", new SimpleDateFormat("dd-MM-yyyy HH:mm").format(auction.getEndDate()));
-			html.replace("%AGIT_AUCTION_REMAIN%", (remainingTime / 3600000) + " hours " + ((remainingTime / 60000) % 60) + " minutes");
+			html.replace("%AGIT_AUCTION_REMAIN%", (remainingTime / 3600000) + " h " + ((remainingTime / 60000) % 60) + " min");
 			html.replace("%AGIT_AUCTION_MYBID%", auction.getBidders().get(player.getClanId()).getBid());
 			html.replace("%AGIT_AUCTION_DESC%", ch.getDesc());
 			html.replace("%objectId%", getObjectId());
@@ -557,7 +557,7 @@ public final class Auctioneer extends Folk
 				html.replace("%AGIT_LEASE%", ch.getLease());
 				html.replace("%AGIT_LOCATION%", ch.getTownName());
 				html.replace("%AGIT_AUCTION_END%", new SimpleDateFormat("dd-MM-yyyy HH:mm").format(auction.getEndDate()));
-				html.replace("%AGIT_AUCTION_REMAIN%", (remainingTime / 3600000) + " hours " + ((remainingTime / 60000) % 60) + " minutes");
+				html.replace("%AGIT_AUCTION_REMAIN%", (remainingTime / 3600000) + " h " + ((remainingTime / 60000) % 60) + " min");
 				html.replace("%AGIT_AUCTION_MINBID%", seller.getBid());
 				html.replace("%AGIT_AUCTION_BIDCOUNT%", auction.getBidders().size());
 				html.replace("%AGIT_AUCTION_DESC%", ch.getDesc());
