@@ -106,6 +106,8 @@ public class WorldNameplate
     // (couleur, bulle) de l'entite precedente qui l'occupait.
     public void Bind(Entity entity)
     {
+        _iconsMeasuredName = null;
+        AdoptRecycledParts();
         Target = entity.transform;
         Entity = entity;
         _nameText.text = entity.Identity.Name;
@@ -131,6 +133,35 @@ public class WorldNameplate
         {
             _chatBubble.SetActive(false);
         }
+    }
+
+    // Le GameObject recycle garde les elements crees pour l'entite precedente :
+    // on les reprend et on les eteint, au lieu d'en creer des doublons.
+    private void AdoptRecycledParts()
+    {
+        _crestIcon = null;
+        _allyIcon = null;
+        _warIcon = null;
+        HideIcon(FindIcon("CrestIcon"));
+        HideIcon(FindIcon("AllyCrestIcon"));
+        HideIcon(FindIcon("WarIcon"));
+
+        if (_chatBubble == null)
+        {
+            Transform bubble = _root.transform.Find(ChatBubbleName);
+            if (bubble != null)
+            {
+                _chatBubble = bubble.gameObject;
+                Transform text = bubble.Find("Text");
+                _chatText = text != null ? text.GetComponent<TMP_Text>() : null;
+            }
+        }
+    }
+
+    private NameIcon FindIcon(string name)
+    {
+        MeshRenderer renderer = FindNameIcon(name);
+        return renderer != null ? new NameIcon { Renderer = renderer } : null;
     }
 
     private OperateType _shownOperateType = (OperateType)255;
@@ -424,9 +455,210 @@ public class WorldNameplate
     // priorite (karma > PvP flag fixe > PvP flag clignotant > couleur
     // serveur par defaut) et memes champs de detection de changement pour
     // eviter de reecrire la couleur a chaque frame.
+    // Icones autour du nom : blasons d'alliance et de clan a gauche, symbole de
+    // guerre a droite. Des quads comme l'icone de la plaque : texture posee par
+    // MaterialPropertyBlock, materiau partage entre toutes les plaques.
+    private const float IconGap = 0.35f;
+    private static readonly int BaseMapId = Shader.PropertyToID("_BaseMap");
+    private static readonly Color MutualWarNameColor = new Color(1f, 0.45f, 0.35f);
+    private static readonly Color OneSidedWarNameColor = new Color(1f, 0.7f, 0.35f);
+    private static Material _iconMaterial;
+    private static Mesh _iconMesh;
+    private static Texture2D _warSingle;
+    private static Texture2D _warDouble;
+
+    private sealed class NameIcon
+    {
+        public MeshRenderer Renderer;
+        public MaterialPropertyBlock Mpb;
+        public Texture2D Shown;
+        public float Alpha = -1f;
+    }
+
+    private NameIcon _crestIcon;
+    private NameIcon _allyIcon;
+    private NameIcon _warIcon;
+    private string _iconsMeasuredName;
+    private Bounds _nameBounds;
+
+    private void UpdateNameIcons()
+    {
+        NetworkIdentity identity = Entity.Identity;
+        bool isPlayer = identity.EntityType == EntityType.Player || identity.EntityType == EntityType.User;
+
+        Texture2D crest = null;
+        Texture2D ally = null;
+        Texture2D war = null;
+
+        if (isPlayer)
+        {
+            ClanCrests.Request(identity.ClanCrestId);
+            ClanCrests.RequestAlly(identity.AllyCrestId);
+            crest = identity.ClanCrestId != 0 ? ClanCrests.Get(identity.ClanCrestId) : null;
+            ally = identity.AllyCrestId != 0 ? ClanCrests.GetAlly(identity.AllyCrestId) : null;
+
+            if (identity.EntityType == EntityType.User && (identity.IsMutualWar || identity.IsOneSidedWar))
+            {
+                LoadWarIcons();
+                war = identity.IsMutualWar ? _warDouble : _warSingle;
+            }
+        }
+
+        if (crest == null && ally == null && war == null)
+        {
+            HideIcon(_crestIcon);
+            HideIcon(_allyIcon);
+            HideIcon(_warIcon);
+            _iconsMeasuredName = null;
+            return;
+        }
+
+        // Mesure faite seulement quand le nom change, et apres ForceMeshUpdate :
+        // sans lui TMP n'a pas encore de dimensions. fontSize n'est pas en unites locales.
+        if (_nameText.text != _iconsMeasuredName)
+        {
+            _nameText.ForceMeshUpdate();
+            Bounds bounds = _nameText.textBounds;
+            if (bounds.size.y <= 0f)
+            {
+                return;
+            }
+
+            _nameBounds = bounds;
+            _iconsMeasuredName = _nameText.text;
+        }
+
+        float size = _nameBounds.size.y * 1.3f;
+        float left = _nameBounds.min.x - IconGap * size;
+
+        if (crest != null)
+        {
+            ShowIcon(ref _crestIcon, "CrestIcon", crest, left - size * 0.5f, size);
+            left -= size * 1.1f;
+        }
+        else
+        {
+            HideIcon(_crestIcon);
+        }
+
+        if (ally != null)
+        {
+            ShowIcon(ref _allyIcon, "AllyCrestIcon", ally, left - size * 0.5f, size);
+        }
+        else
+        {
+            HideIcon(_allyIcon);
+        }
+
+        if (war != null)
+        {
+            ShowIcon(ref _warIcon, "WarIcon", war, _nameBounds.max.x + IconGap * size + size * 0.5f, size);
+        }
+        else
+        {
+            HideIcon(_warIcon);
+        }
+    }
+
+    private static void LoadWarIcons()
+    {
+        if (_warSingle == null)
+        {
+            _warSingle = Resources.Load<Texture2D>("Data/UI/Assets/Clan/WarSingle");
+            _warDouble = Resources.Load<Texture2D>("Data/UI/Assets/Clan/WarDouble");
+        }
+    }
+
+    private void ShowIcon(ref NameIcon icon, string name, Texture2D texture, float x, float size)
+    {
+        if (icon == null)
+        {
+            icon = new NameIcon { Renderer = FindNameIcon(name) ?? CreateNameIcon(name), Mpb = new MaterialPropertyBlock() };
+        }
+
+        if (!icon.Renderer.gameObject.activeSelf)
+        {
+            icon.Renderer.gameObject.SetActive(true);
+        }
+
+        Transform t = icon.Renderer.transform;
+        t.localScale = new Vector3(size, size, 1f);
+        t.localPosition = new Vector3(x, _nameBounds.center.y, 0f);
+
+        // Appele a chaque image : on ne reecrit le bloc que si l'image ou le fondu change.
+        float alpha = Mathf.Max(0f, _currentAlpha);
+        if (texture == icon.Shown && Mathf.Abs(alpha - icon.Alpha) < 0.004f)
+        {
+            return;
+        }
+
+        icon.Shown = texture;
+        icon.Alpha = alpha;
+        icon.Renderer.GetPropertyBlock(icon.Mpb);
+        icon.Mpb.SetTexture(BaseMapId, texture);
+        icon.Mpb.SetColor(BaseColorId, new Color(1f, 1f, 1f, alpha));
+        icon.Renderer.SetPropertyBlock(icon.Mpb);
+    }
+
+    private static void HideIcon(NameIcon icon)
+    {
+        if (icon != null && icon.Renderer.gameObject.activeSelf)
+        {
+            icon.Renderer.gameObject.SetActive(false);
+            icon.Shown = null;
+        }
+    }
+
+    // La plaque vient d'un pool : ses icones survivent au recyclage. Sans cette
+    // reprise, un PNJ heritait du blason du joueur precedent.
+    private MeshRenderer FindNameIcon(string name)
+    {
+        Transform existing = _nameText.transform.Find(name);
+        return existing != null ? existing.GetComponent<MeshRenderer>() : null;
+    }
+
+    private MeshRenderer CreateNameIcon(string name)
+    {
+        if (_iconMaterial == null)
+        {
+            _iconMaterial = WorldBubbleVisual.CreateMaterial(_bubbleIcon.sharedMaterial, _nameText.fontSharedMaterial.renderQueue);
+            _iconMaterial.name = "WorldNameIcon";
+        }
+
+        if (_iconMesh == null)
+        {
+            _iconMesh = BuildQuad();
+        }
+
+        GameObject go = new GameObject(name);
+        go.transform.SetParent(_nameText.transform, false);
+        go.AddComponent<MeshFilter>().sharedMesh = _iconMesh;
+
+        MeshRenderer renderer = go.AddComponent<MeshRenderer>();
+        renderer.sharedMaterial = _iconMaterial;
+        renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        renderer.receiveShadows = false;
+        return renderer;
+    }
+
+    private static Mesh BuildQuad()
+    {
+        Mesh mesh = new Mesh { name = "CrestQuad" };
+        mesh.vertices = new[]
+        {
+            new Vector3(-0.5f, -0.5f, 0f), new Vector3(0.5f, -0.5f, 0f),
+            new Vector3(-0.5f, 0.5f, 0f), new Vector3(0.5f, 0.5f, 0f)
+        };
+        mesh.uv = new[] { new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0f, 1f), new Vector2(1f, 1f) };
+        mesh.triangles = new[] { 0, 2, 1, 2, 3, 1 };
+        mesh.RecalculateBounds();
+        return mesh;
+    }
+
     public void ManageColors()
     {
         UpdateStoreTitle();
+        UpdateNameIcons();
 
         if (_chatBubble != null && _chatBubble.activeSelf)
         {
@@ -469,6 +701,14 @@ public class WorldNameplate
                 _nameText.color = _blink ? Nameplate.FLAG_COLOR : _previousServerNameColorValue;
                 _lastBlinkTime = Time.time;
             }
+        }
+        else if (Entity.Identity.EntityType == EntityType.User && (Entity.Identity.IsMutualWar || Entity.Identity.IsOneSidedWar))
+        {
+            // Ennemi de guerre : rouge si la guerre est mutuelle, orange sinon.
+            _lastFlag = 0;
+            _previousKarmaAmount = 0;
+            _previousServerNameColor = -1;
+            _nameText.color = Entity.Identity.IsMutualWar ? MutualWarNameColor : OneSidedWarNameColor;
         }
         else if (PartyManager.Instance.IsMember(Entity) && Entity.Identity.Id != PlayerEntity.Instance.Identity.Id)
         {

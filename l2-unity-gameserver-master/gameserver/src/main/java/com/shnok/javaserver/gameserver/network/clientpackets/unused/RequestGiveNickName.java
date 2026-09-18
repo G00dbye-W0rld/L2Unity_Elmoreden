@@ -1,5 +1,6 @@
 package com.shnok.javaserver.gameserver.network.clientpackets.unused;
 
+import com.shnok.javaserver.Config;
 import com.shnok.javaserver.commons.lang.StringUtil;
 
 import com.shnok.javaserver.gameserver.enums.PrivilegeType;
@@ -28,7 +29,8 @@ public class RequestGiveNickName extends L2GameClientPacket
 		if (player == null)
 			return;
 		
-		if (!StringUtil.isValidString(_title, "^[a-zA-Z0-9 !@#$&()\\-`.+,/\"]*{0,16}$"))
+		// Lettres accentuees acceptees (jeu en francais) ; 16 caracteres au plus.
+		if (_title == null || !StringUtil.isValidString(_title, "^[\\p{L}0-9 !@#$&()\\-`.+,/\"']{0,16}$"))
 		{
 			player.sendPacket(SystemMessageId.NOT_WORKING_PLEASE_TRY_AGAIN_LATER);
 			return;
@@ -50,7 +52,7 @@ public class RequestGiveNickName extends L2GameClientPacket
 				return;
 			}
 			
-			if (player.getClan().getLevel() < 3)
+			if (player.getClan().getLevel() < Config.CLAN_TITLE_MIN_LEVEL)
 			{
 				player.sendPacket(SystemMessageId.CLAN_LVL_3_NEEDED_TO_ENDOWE_TITLE);
 				return;

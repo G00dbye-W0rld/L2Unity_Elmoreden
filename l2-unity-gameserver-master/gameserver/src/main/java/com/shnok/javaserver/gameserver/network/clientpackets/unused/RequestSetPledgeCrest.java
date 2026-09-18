@@ -1,5 +1,6 @@
 package com.shnok.javaserver.gameserver.network.clientpackets.unused;
 
+import com.shnok.javaserver.Config;
 import com.shnok.javaserver.gameserver.data.cache.CrestCache;
 import com.shnok.javaserver.gameserver.enums.CrestType;
 import com.shnok.javaserver.gameserver.enums.PrivilegeType;
@@ -11,6 +12,8 @@ import com.shnok.javaserver.gameserver.network.clientpackets.L2GameClientPacket;
 
 public final class RequestSetPledgeCrest extends L2GameClientPacket
 {
+	private static final int MAX_SIDE = 256;
+	
 	private int _length;
 	private byte[] _data;
 	
@@ -18,7 +21,7 @@ public final class RequestSetPledgeCrest extends L2GameClientPacket
 	protected void readImpl()
 	{
 		_length = readD();
-		if (_length > 256)
+		if (_length > CrestType.PLEDGE.getSize())
 			return;
 		
 		_data = new byte[_length];
@@ -28,7 +31,7 @@ public final class RequestSetPledgeCrest extends L2GameClientPacket
 	@Override
 	protected void runImpl()
 	{
-		if (_length < 0 || _length > 256)
+		if (_length < 0 || _length > CrestType.PLEDGE.getSize())
 			return;
 		
 		final Player player = getClient().getPlayer();
@@ -61,9 +64,15 @@ public final class RequestSetPledgeCrest extends L2GameClientPacket
 		}
 		else
 		{
-			if (clan.getLevel() < 3)
+			if (clan.getLevel() < Config.CLAN_CREST_MIN_LEVEL)
 			{
 				player.sendPacket(SystemMessageId.CLAN_LVL_3_NEEDED_TO_SET_CREST);
+				return;
+			}
+			
+			if (!CrestCache.isAcceptedImage(_data, MAX_SIDE))
+			{
+				player.sendPacket(SystemMessageId.YOU_ARE_NOT_AUTHORIZED_TO_DO_THAT);
 				return;
 			}
 			

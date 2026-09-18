@@ -1,0 +1,58 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Template name="WindowTemplate" src="project://database/Assets/Resources/Data/UI/_Elements/Components/WindowTemplate.uxml?fileID=9197481963319205126&amp;guid=5ca840f56ef6f1044b4dc077c7d3e6e6&amp;type=3#WindowTemplate" />
+    <ui:Template name="L2Input" src="project://database/Assets/Resources/Data/UI/_Elements/Components/L2Input/L2Input.uxml?fileID=9197481963319205126&amp;guid=dce83b8dcd7f5614280886eaaa82f0f7&amp;type=3#L2Input" />
+
+    <Style src="project://database/Assets/Resources/Data/UI/_Elements/L2StyleSheet.uss?fileID=7433441132597879392&amp;guid=72e99cc94b130bf4ba100dceaa830b13&amp;type=3#L2StyleSheet" />
+    <Style src="project://database/Assets/Resources/Data/UI/_Elements/Game/ClanWindow/ClanWindow.uss?fileID=7433441132597879392&amp;guid=b14b580038eb187f984058fbaa33cd92&amp;type=3#ClanWindow" />
+    <ui:Instance template="WindowTemplate" name="WindowTemplate" class="clan-member-window" style="width: 320px; height: 420px; position: absolute;">
+        <AttributeOverrides element-name="windows-name-label" text="Fiche du membre" />
+        <ui:VisualElement name="MemberContent" class="clan-rank-content member-content">
+            <ui:VisualElement class="rank-card member-card">
+                <ui:VisualElement class="member-head">
+                    <ui:VisualElement name="MemberClassIcon" picking-mode="Ignore" class="member-class-icon" />
+                    <ui:VisualElement class="member-head-text">
+                        <ui:Label name="MemberName" text="" class="rank-member-name" />
+                        <ui:Label name="MemberClass" text="" class="clan-line member-sub" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="MemberStatus" picking-mode="Ignore" class="clan-status-icon" />
+                </ui:VisualElement>
+                <ui:VisualElement class="member-info-row"><ui:Label text="Titre" class="member-key" /><ui:Label name="MemberTitle" text="" class="member-value" /></ui:VisualElement>
+                <ui:VisualElement class="member-info-row"><ui:Label text="Rang" class="member-key" /><ui:Label name="MemberRankLine" text="" class="member-value" /></ui:VisualElement>
+                <ui:VisualElement class="member-info-row"><ui:Label text="Unit&#233;" class="member-key" /><ui:Label name="MemberUnit" text="" class="member-value" /></ui:VisualElement>
+                <ui:VisualElement name="SponsorInfoRow" class="member-info-row"><ui:Label name="MemberSponsorKey" text="Apprenti" class="member-key" /><ui:Label name="MemberSponsor" text="" class="member-value" /></ui:VisualElement>
+            </ui:VisualElement>
+            <ui:Label text="Gestion" class="rank-group" />
+            <ui:VisualElement name="TitleRow" class="member-edit-row">
+                <ui:Label text="Titre" class="member-key" />
+                <ui:Instance template="L2Input" name="TitleInput" class="member-field member-input" />
+                <ui:Button name="ApplyTitleBtn" text="Changer" class="clan-action-btn member-btn" />
+            </ui:VisualElement>
+            <ui:VisualElement name="RankRow" class="member-edit-row">
+                <ui:Label text="Rang" class="member-key" />
+                <ui:DropdownField name="MemberRank" class="l2-dropdown member-field" />
+                <ui:Button name="ApplyRankBtn" text="Changer" class="clan-action-btn member-btn" />
+            </ui:VisualElement>
+            <ui:VisualElement name="UnitRow" class="member-edit-row">
+                <ui:Label text="Unit&#233;" class="member-key" />
+                <ui:DropdownField name="MemberUnitSelect" class="l2-dropdown member-field" />
+                <ui:Button name="MoveUnitBtn" text="D&#233;placer" class="clan-action-btn member-btn" />
+            </ui:VisualElement>
+            <ui:VisualElement name="SponsorRow" class="member-edit-row">
+                <ui:Label name="SponsorKey" text="Apprenti" class="member-key" />
+                <ui:DropdownField name="SponsorSelect" class="l2-dropdown member-field" />
+                <ui:Button name="LinkSponsorBtn" text="Lier" class="clan-action-btn member-btn" />
+            </ui:VisualElement>
+            <ui:VisualElement name="UnlinkRow" class="member-edit-row">
+                <ui:Label text="" class="member-key" />
+                <ui:Label name="UnlinkLabel" text="" class="clan-line member-field" />
+                <ui:Button name="UnlinkSponsorBtn" text="D&#233;lier" class="clan-action-btn member-btn" />
+            </ui:VisualElement>
+            <ui:Label name="ManageHint" text="" class="clan-line member-hint" />
+            <ui:VisualElement class="member-spacer" />
+            <ui:VisualElement class="clan-actions member-actions">
+                <ui:Button name="DismissBtn" text="Exclure du clan" class="clan-action-btn" />
+                <ui:Button name="CloseBtn" text="Fermer" class="clan-action-btn" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:Instance>
+</ui:UXML>

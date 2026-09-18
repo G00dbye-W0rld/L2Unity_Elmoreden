@@ -52,8 +52,8 @@ public class CrestCache
 					if (!fileName.startsWith(type.getPrefix()))
 						continue;
 					
-					// The data size isn't the required one, delete the file.
-					if (data.length != type.getSize())
+					// Le fichier depasse la taille permise : on le supprime.
+					if (data.length > type.getSize())
 					{
 						if (Files.deleteIfExists(filePath))
 							LOGGER.warn("The data for crest {} is invalid. The crest has been deleted.", fileName);
@@ -95,7 +95,7 @@ public class CrestCache
 		byte[] data = _crests.get(id);
 		
 		// Crest data is not required type, return.
-		if (data == null || data.length != type.getSize())
+		if (data == null || data.length > type.getSize())
 			return null;
 		
 		return data;
@@ -110,7 +110,7 @@ public class CrestCache
 	{
 		// Get crest data.
 		final byte[] data = _crests.get(id);
-		if (data == null || data.length != type.getSize())
+		if (data == null || data.length > type.getSize())
 			return;
 		
 		// Remove from cache.
@@ -141,7 +141,7 @@ public class CrestCache
 		final Path filePath = Paths.get(CRESTS_DIR, type.getPrefix() + id + ".dds");
 		
 		// Verify the data size integrity.
-		if (data.length != type.getSize())
+		if (data.length > type.getSize())
 		{
 			LOGGER.warn("The data for crest {} is invalid. Saving process is aborted.", filePath.getFileName());
 			return false;
@@ -173,6 +173,23 @@ public class CrestCache
 			
 			return (fileName.startsWith("Crest_") || fileName.startsWith("LargeCrest_") || fileName.startsWith("AllyCrest_")) && fileName.endsWith(".dds");
 		}
+	}
+	
+	/**
+	 * Le serveur ne decode pas les blasons, il les rediffuse : il refuse ce qui
+	 * n'est ni un PNG de taille raisonnable ni un DDS d'origine. Un PNG de quelques
+	 * octets peut declarer des milliers de pixels et saturer chaque client.
+	 */
+	public static boolean isAcceptedImage(byte[] data, int maxSide)
+	{
+		if (data.length >= 24 && (data[0] & 0xFF) == 0x89 && data[1] == 'P' && data[2] == 'N' && data[3] == 'G')
+		{
+			final int width = ((data[16] & 0xFF) << 24) | ((data[17] & 0xFF) << 16) | ((data[18] & 0xFF) << 8) | (data[19] & 0xFF);
+			final int height = ((data[20] & 0xFF) << 24) | ((data[21] & 0xFF) << 16) | ((data[22] & 0xFF) << 8) | (data[23] & 0xFF);
+			return width >= 1 && width <= maxSide && height >= 1 && height <= maxSide;
+		}
+		
+		return data.length >= 4 && data[0] == 'D' && data[1] == 'D' && data[2] == 'S';
 	}
 	
 	public static CrestCache getInstance()

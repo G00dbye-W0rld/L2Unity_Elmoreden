@@ -752,6 +752,7 @@ public class VillageMaster extends Folk
 		
 		if (pledgeType != Clan.SUBUNIT_ACADEMY && (clan.getClanMember(leaderName) == null || clan.getClanMember(leaderName).getPledgeType() != 0))
 		{
+			player.sendMessage("Capitaine introuvable : il doit etre membre du clan principal.");
 			if (pledgeType >= Clan.SUBUNIT_KNIGHT1)
 				player.sendPacket(SystemMessageId.CAPTAIN_OF_ORDER_OF_KNIGHTS_CANNOT_BE_APPOINTED);
 			else if (pledgeType >= Clan.SUBUNIT_ROYAL1)

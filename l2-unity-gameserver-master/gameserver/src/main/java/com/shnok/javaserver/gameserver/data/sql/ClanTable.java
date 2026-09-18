@@ -343,6 +343,19 @@ public class ClanTable
 	}
 	
 	/**
+	 * Les symboles de guerre et l'attaque sans Ctrl dependent de la relation
+	 * envoyee pour chaque joueur visible : on la renvoie des deux cotes.
+	 */
+	private static void broadcastWarRelations(Clan clan1, Clan clan2)
+	{
+		for (Player member : clan1.getOnlineMembers())
+			member.broadcastRelationsChanges();
+		
+		for (Player member : clan2.getOnlineMembers())
+			member.broadcastRelationsChanges();
+	}
+	
+	/**
 	 * Start a {@link Clan} war. Broadcast messages towards both sides, edit database and containers.
 	 * @param clanId1 : The attacker Clan id.
 	 * @param clanId2 : The victim Clan id.
@@ -357,6 +370,8 @@ public class ClanTable
 		
 		clan2.setAttackerClan(clanId1);
 		clan2.broadcastToMembers(new PledgeShowInfoUpdate(clan2), SystemMessage.getSystemMessage(SystemMessageId.CLAN_S1_DECLARED_WAR).addString(clan1.getName()));
+		
+		broadcastWarRelations(clan1, clan2);
 		
 		try (Connection con = ConnectionPool.getConnection();
 			PreparedStatement ps = con.prepareStatement(INSERT_WAR))
@@ -386,6 +401,8 @@ public class ClanTable
 		
 		clan2.deleteAttackerClan(clanId1);
 		clan2.broadcastToMembers(new PledgeShowInfoUpdate(clan2), SystemMessage.getSystemMessage(SystemMessageId.CLAN_S1_HAS_DECIDED_TO_STOP).addString(clan1.getName()));
+		
+		broadcastWarRelations(clan1, clan2);
 		
 		try (Connection con = ConnectionPool.getConnection())
 		{

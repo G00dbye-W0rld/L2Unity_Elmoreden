@@ -207,3 +207,58 @@
     margin-bottom: 0;
     margin-left: 0;
 }
+/* Clan et alliance de la cible, sous son nom, comme sur le client d'origine. */
+.target-window-clan {
+    font-size: 10px;
+    height: 14px;
+    margin: 0;
+    margin-left: 4px;
+    padding: 0;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    -unity-text-align: middle-left;
+}
+
+/* La fenetre grandit seulement pour un joueur, qui a deux lignes de plus :
+   son clan et son alliance. Le fond, le cadre gauche et la poignee de droite
+   ont chacun une hauteur figee : il faut les agrandir tous les quatre. */
+.target-window.with-clan {
+    height: 80px;
+}
+
+.target-window.with-clan .target-window-drag {
+    height: 80px;
+}
+
+.target-window.with-clan .target-window-bg {
+    height: 77px;
+}
+
+.target-window.with-clan .target-window-size-control {
+    height: 77px;
+}
+
+/* Un peu d'air entre le nom et les lignes de clan. */
+.target-window.with-clan .target-window-name-row {
+    margin-bottom: 4px;
+}
+
+/* Blason du clan devant son nom, a la taille d'une ligne de texte. */
+.target-window-clan-row {
+    flex-direction: row;
+    align-items: center;
+    height: 14px;
+}
+
+.target-window-crest {
+    width: 14px;
+    height: 14px;
+    margin-left: 4px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* La ligne du clan ouvre la fiche du clan : elle s'eclaire au survol. */
+.target-window-clan-link:hover .target-window-clan {
+    color: rgb(236, 206, 138);
+}

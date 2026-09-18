@@ -1,0 +1,108 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Template name="WindowTemplate" src="project://database/Assets/Resources/Data/UI/_Elements/Components/WindowTemplate.uxml?fileID=9197481963319205126&amp;guid=5ca840f56ef6f1044b4dc077c7d3e6e6&amp;type=3#WindowTemplate" />
+    <ui:Template name="L2Input" src="project://database/Assets/Resources/Data/UI/_Elements/Components/L2Input/L2Input.uxml?fileID=9197481963319205126&amp;guid=dce83b8dcd7f5614280886eaaa82f0f7&amp;type=3#L2Input" />
+
+    <ui:Instance template="WindowTemplate" name="WindowTemplate" class="clan-window" style="width: 430px; height: 600px; position: absolute;">
+        <AttributeOverrides element-name="windows-name-label" text="Clan" />
+        <ui:VisualElement name="ClanContent" class="clan-content">
+            <ui:VisualElement name="Tabs" class="clan-tabs">
+                <ui:Button name="MembersTab" text="Informations" class="clan-tab clan-tab-wide active" />
+                <ui:Button name="WarsTab" text="Guerres" class="clan-tab" />
+                <ui:Button name="AllyTab" text="Alliance" class="clan-tab" />
+                <ui:Button name="SkillsTab" text="Comp&#233;tences" class="clan-tab clan-tab-wide" />
+            </ui:VisualElement>
+            <ui:VisualElement name="MembersPage" class="clan-page">
+                <ui:VisualElement name="Header" class="clan-banner">
+                    <ui:VisualElement name="Crest" picking-mode="Ignore" class="clan-crest" />
+                    <ui:VisualElement class="clan-banner-text">
+                        <ui:Label name="ClanName" text="" class="clan-name l2-color-4" />
+                        <ui:VisualElement class="clan-leader-row">
+                            <ui:VisualElement picking-mode="Ignore" class="clan-crown" />
+                            <ui:Label name="LeaderLine" text="" class="clan-line clan-leader" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="clan-banner-side">
+                        <ui:Label name="LevelLine" text="" class="clan-line clan-level" />
+                        <ui:Label name="ReputationLine" text="" class="clan-line clan-reputation" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="InfoIcons" class="clan-info-grid">
+                    <ui:VisualElement name="InfoClanHall" class="clan-info-cell"><ui:VisualElement class="clan-info-icon clan-info-hall" /><ui:Label name="InfoClanHallText" class="clan-line clan-info-text" /></ui:VisualElement>
+                    <ui:VisualElement name="InfoCastle" class="clan-info-cell"><ui:VisualElement class="clan-info-icon clan-info-castle" /><ui:Label name="InfoCastleText" class="clan-line clan-info-text" /></ui:VisualElement>
+                    <ui:VisualElement name="InfoAlliance" class="clan-info-cell"><ui:VisualElement class="clan-info-icon clan-info-ally" /><ui:Label name="InfoAllianceText" class="clan-line clan-info-text" /></ui:VisualElement>
+                    <ui:VisualElement name="InfoWar" class="clan-info-cell"><ui:VisualElement class="clan-info-icon clan-info-war" /><ui:Label name="InfoWarText" class="clan-line clan-info-text" /></ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="UnitRow" class="clan-unit-row">
+                    <ui:DropdownField name="UnitFilter" class="l2-dropdown clan-unit-filter" />
+                    <ui:Label name="UnitCount" text="" class="clan-line clan-unit-count" />
+                </ui:VisualElement>
+                <ui:VisualElement name="Columns" class="clan-columns">
+                    <ui:Label text="Nom" class="clan-col clan-col-name" />
+                    <ui:Label text="Niv." class="clan-col clan-col-level" />
+                    <ui:Label text="Classe" class="clan-col clan-col-class" />
+                    <ui:Label text="Statut" class="clan-col clan-col-status" />
+                </ui:VisualElement>
+                <ui:ScrollView name="MemberList" vertical-scroller-visibility="AlwaysVisible" horizontal-scroller-visibility="Hidden" mouse-wheel-scroll-size="4" touch-scroll-type="Clamped" class="l2-scroll-view clan-member-list" />
+                <ui:Label name="EmptyLabel" text="" class="clan-empty l2-color-3" />
+                <ui:VisualElement name="Actions" class="clan-actions">
+                    <ui:Button name="InviteBtn" text="Inviter la cible" class="clan-action-btn" />
+                    <ui:Button name="CrestBtn" text="Blason" class="clan-action-btn" />
+                    <ui:Button name="LargeCrestBtn" text="Grand blason" class="clan-action-btn" />
+                </ui:VisualElement>
+                <ui:VisualElement name="ActionsBottom" class="clan-actions">
+                    <ui:Button name="RanksBtn" text="Privil&#232;ges des rangs" class="clan-action-btn" />
+                    <ui:Button name="LeaveBtn" text="Quitter" class="clan-action-btn" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="WarsPage" class="clan-page hidden">
+                <ui:VisualElement class="rank-row">
+                    <ui:Instance template="L2Input" name="WarTarget" class="member-field member-input" />
+                    <ui:Button name="DeclareWarBtn" text="D&#233;clarer la guerre" class="clan-action-btn war-declare" />
+                </ui:VisualElement>
+                <ui:Label text="Guerres d&#233;clar&#233;es" class="rank-group" />
+                <ui:ScrollView name="DeclaredList" vertical-scroller-visibility="AlwaysVisible" horizontal-scroller-visibility="Hidden" mouse-wheel-scroll-size="4" touch-scroll-type="Clamped" class="l2-scroll-view clan-member-list" />
+                <ui:Label text="Clans en guerre contre nous" class="rank-group" />
+                <ui:ScrollView name="AttackerList" vertical-scroller-visibility="AlwaysVisible" horizontal-scroller-visibility="Hidden" mouse-wheel-scroll-size="4" touch-scroll-type="Clamped" class="l2-scroll-view clan-member-list" />
+                <ui:VisualElement class="clan-actions">
+                    <ui:Button name="StopWarBtn" text="Arr&#234;ter la guerre" class="clan-action-btn" />
+                    <ui:Button name="SurrenderBtn" text="Capituler" class="clan-action-btn" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="AllyPage" class="clan-page hidden">
+                <ui:VisualElement class="rank-card">
+                    <ui:Label name="AllyName" text="" class="rank-member-name" />
+                    <ui:Label name="AllyLeader" text="" class="clan-line" />
+                    <ui:Label name="AllyCount" text="" class="clan-line" />
+                </ui:VisualElement>
+                <ui:VisualElement class="clan-columns">
+                    <ui:Label text="Clan" class="clan-col clan-col-name" />
+                    <ui:Label text="Niv." class="clan-col clan-col-level" />
+                    <ui:Label text="Chef" class="clan-col clan-col-class" />
+                    <ui:Label text="En ligne" class="clan-col clan-col-status" />
+                </ui:VisualElement>
+                <ui:ScrollView name="AllyList" vertical-scroller-visibility="AlwaysVisible" horizontal-scroller-visibility="Hidden" mouse-wheel-scroll-size="4" touch-scroll-type="Clamped" class="l2-scroll-view clan-member-list" />
+                <ui:VisualElement class="clan-actions">
+                    <ui:Button name="AllyInviteBtn" text="Inviter" class="clan-action-btn" />
+                    <ui:Button name="AllyDismissBtn" text="Exclure" class="clan-action-btn" />
+                    <ui:Button name="AllyCrestBtn" text="Blason d'alliance" class="clan-action-btn" />
+                </ui:VisualElement>
+                <ui:VisualElement class="clan-actions">
+                    <ui:Button name="AllyLeaveBtn" text="Quitter" class="clan-action-btn" />
+                    <ui:Button name="AllyDissolveBtn" text="Dissoudre" class="clan-action-btn" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="SkillsPage" class="clan-page hidden">
+                <ui:VisualElement class="clan-columns">
+                    <ui:Label text="Comp&#233;tence" class="clan-col clan-col-name clan-col-skill" />
+                    <ui:Label text="Niv." class="clan-col clan-col-level" />
+                </ui:VisualElement>
+                <ui:ScrollView name="SkillList" vertical-scroller-visibility="AlwaysVisible" horizontal-scroller-visibility="Hidden" mouse-wheel-scroll-size="4" touch-scroll-type="Clamped" class="l2-scroll-view clan-member-list" />
+                <ui:Label name="SkillEmpty" text="" class="clan-empty l2-color-3" />
+                <ui:VisualElement class="rank-card clan-skill-detail">
+                    <ui:Label name="SkillDetailName" text="" class="rank-member-name" />
+                    <ui:Label name="SkillDetailDescription" text="" class="clan-line clan-skill-description" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:Instance>
+</ui:UXML>

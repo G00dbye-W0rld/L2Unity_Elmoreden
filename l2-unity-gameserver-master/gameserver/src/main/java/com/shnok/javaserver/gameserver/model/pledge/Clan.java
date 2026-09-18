@@ -1393,16 +1393,24 @@ public class Clan
 			return null;
 		}
 		
-		if (_leader.getObjectId() == leaderId)
+		// Le jeu d'origine interdit au chef de diriger une sous-unite ; reglable
+		// pour pouvoir creer une unite avec peu de joueurs.
+		if (_leader.getObjectId() == leaderId && !Config.SUBUNIT_LEADER_CAN_BE_CLAN_LEADER)
 		{
+			player.sendMessage("Le chef de clan ne peut pas diriger une sous-unite : choisissez un autre membre.");
 			player.sendPacket(SystemMessageId.YOU_DO_NOT_MEET_CRITERIA_IN_ORDER_TO_CREATE_A_MILITARY_UNIT);
 			return null;
 		}
 		
-		if (pledgeType != SUBUNIT_ACADEMY && ((_reputationScore < 5000 && pledgeType < SUBUNIT_KNIGHT1) || (_reputationScore < 10000 && pledgeType > SUBUNIT_ROYAL2)))
+		if (pledgeType != SUBUNIT_ACADEMY)
 		{
-			player.sendPacket(SystemMessageId.THE_CLAN_REPUTATION_SCORE_IS_TOO_LOW);
-			return null;
+			final int required = (pledgeType > SUBUNIT_ROYAL2) ? 10000 : 5000;
+			if (_reputationScore < required)
+			{
+				player.sendMessage("Reputation insuffisante : " + required + " points sont necessaires (vous en avez " + _reputationScore + ").");
+				player.sendPacket(SystemMessageId.THE_CLAN_REPUTATION_SCORE_IS_TOO_LOW);
+				return null;
+			}
 		}
 		
 		try (Connection con = ConnectionPool.getConnection();

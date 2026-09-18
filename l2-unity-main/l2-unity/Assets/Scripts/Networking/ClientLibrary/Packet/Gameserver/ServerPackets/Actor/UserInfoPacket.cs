@@ -91,10 +91,10 @@ public class UserInfoPacket : ServerPacket
 
             Identity.Title = ReadS();
 
-            ReadI(); //ClanId
-            ReadI(); //ClanCrest
-            ReadI(); //Ally
-            ReadI(); //AllyCrest
+            Identity.ClanId = ReadI();
+            Identity.ClanCrestId = ReadI();
+            Identity.AllyId = ReadI();
+            Identity.AllyCrestId = ReadI();
 
             ReadI();
 

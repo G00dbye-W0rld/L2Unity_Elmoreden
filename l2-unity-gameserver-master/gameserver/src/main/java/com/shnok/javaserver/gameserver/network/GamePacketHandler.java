@@ -225,9 +225,9 @@ public final class GamePacketHandler implements IPacketHandler<GameClient>, ICli
 					case 0x27:
 						msg = new RequestOustPledgeMember();
 						break;
-					// case 0x28:
-					// // RequestDismissPledge
-					// break;
+					case 0x28:
+						msg = new RequestDismissPledge();
+						break;
 					case 0x29:
 						msg = new RequestJoinParty();
 						break;
@@ -836,6 +836,10 @@ public final class GamePacketHandler implements IPacketHandler<GameClient>, ICli
 								break;
 							case 0x30:
 								msg = new RequestDuelSurrender();
+								break;
+							// Fiche publique d'un clan : ajout du projet.
+							case 0x3a:
+								msg = new RequestClanCard();
 								break;
 							// Marqueur de carte partage avec le groupe : ajout du projet,
 							// hors de la plage utilisee par Interlude.

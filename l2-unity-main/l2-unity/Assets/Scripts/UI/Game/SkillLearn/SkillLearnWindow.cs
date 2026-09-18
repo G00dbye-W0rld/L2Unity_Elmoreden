@@ -62,8 +62,10 @@ public class SkillLearnWindow : L2PopupWindow
         _skillRequirementAsset = LoadAsset("Data/UI/_Elements/Game/SkillLearnWindow/SkillLearnRequirement");
     }
 
-    public void InitSkillsList(SkillWindowInfo[] skills)
+    // Competences de clan : meme fenetre, mais le cout est en reputation du clan.
+    public void InitSkillsList(SkillWindowInfo[] skills, PacketSkillType type)
     {
+        SkillType = type;
         _skills = new SkillWindowInfo[skills.Length];
         for (int i = 0; i < skills.Length; i++)
         {
@@ -118,7 +120,8 @@ public class SkillLearnWindow : L2PopupWindow
         _skillList = new L2ScrollableList<SkillWindowInfo>();
         _skillList.Initialize(_windowEle.Q<VisualElement>("ListView"), _skills, BindSkill, alternatingRowColor: true);
         _skillList.RemoveItem = RemoveSkill;
-        playerSp = ((PlayerStats)PlayerEntity.Instance.Stats).Sp;
+        playerSp = SkillType == PacketSkillType.Clan ? ClanData.Reputation : ((PlayerStats)PlayerEntity.Instance.Stats).Sp;
+        ApplyCostLabels();
         _userSpValue.text = playerSp.ToString();
         _userSpDetailValue.text = playerSp.ToString();
 
@@ -168,6 +171,17 @@ public class SkillLearnWindow : L2PopupWindow
         skillLabel.text = _skills[index].Name;
         levelLabel.text = _skills[index].Level.ToString();
         spCostLabel.text = _skills[index].SpCost.ToString();
+        item.Q<Label>("SPCost").text = SkillType == PacketSkillType.Clan ? "R\u00e9putation : " : "SP Cost : ";
+    }
+
+    private void ApplyCostLabels()
+    {
+        bool clan = SkillType == PacketSkillType.Clan;
+        string points = clan ? "R\u00e9putation" : "SP";
+
+        _windowEle.Q<Label>("SP").text = points;
+        _skillDetail.Q<Label>("SP").text = points;
+        _skillDetail.Q<Label>("DetailSP").text = clan ? "R\u00e9putation requise : " : "Required SP : ";
     }
 
     private void RemoveSkill(VisualElement item, int index)
@@ -228,21 +242,39 @@ public class SkillLearnWindow : L2PopupWindow
         ToggleShowSkillDetail();
     }
 
+    // Objets exiges par le serveur (livre de sort, cristal de vie d'une
+    // competence de clan). La liste est videe : sinon elle s'empile.
     public void ShowSkillDetail(SkillRequirement[] requirements)
     {
+        if (_selectedSkill == null)
+        {
+            return;
+        }
+
         _selectedSkill.SkillRequirement = requirements;
         VisualElement conditions = _skillDetail.Q<VisualElement>("SkillLearnConditions");
-        for (var i = 0; i < _selectedSkill.SkillRequirement.Length; i++)
+        conditions.Clear();
+
+        if (requirements == null)
         {
-            SkillRequirement skillReq = _selectedSkill.SkillRequirement[i];
+            return;
+        }
+
+        foreach (SkillRequirement skillReq in requirements)
+        {
             VisualElement skillRequirementVisual = _skillRequirementAsset.Instantiate()[0];
 
             skillRequirementVisual.Q<Label>("SkillRequirementIcon").style.backgroundImage = new StyleBackground(
                 IconTable.Instance.GetIcon(skillReq.ItemId));
-            skillRequirementVisual.Q<Label>("SkillRequirementName").text =
-                $"{ItemTable.Instance.EtcItems[skillReq.ItemId]} x{skillReq.Count}";
+            skillRequirementVisual.Q<Label>("SkillRequirementName").text = $"{RequirementName(skillReq.ItemId)} x{skillReq.Count}";
             conditions.Add(skillRequirementVisual);
         }
+    }
+
+    private static string RequirementName(int itemId)
+    {
+        EtcItem item;
+        return ItemTable.Instance.EtcItems.TryGetValue(itemId, out item) && item != null && item.ItemName != null ? item.ItemName.Name : "Objet " + itemId;
     }
 
     private void ToggleShowSkillDetail()

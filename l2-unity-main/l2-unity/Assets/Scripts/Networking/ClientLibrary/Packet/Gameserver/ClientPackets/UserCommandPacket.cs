@@ -4,6 +4,10 @@
 public class UserCommandPacket : ClientPacket
 {
     public const int Loc = 0;
+    public const int ClanWarList = 88;
+    public const int AttackerList = 89;
+    public const int UnderAttackList = 90;
+    public const int ClanPenalty = 100;
 
     public UserCommandPacket(int commandId) : base((byte)GameClientPacketType.UserCommand)
     {

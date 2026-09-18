@@ -55,13 +55,13 @@ public final class RequestStartPledgeWar extends L2GameClientPacket
 			return;
 		}
 		
-		if (attackerClan.getLevel() < 3 || attackerClan.getMembersCount() < Config.CLAN_MEMBERS_FOR_WAR)
+		if (attackerClan.getLevel() < Config.CLAN_WAR_MIN_LEVEL || attackerClan.getMembersCount() < Config.CLAN_MEMBERS_FOR_WAR)
 		{
 			player.sendPacket(SystemMessageId.CLAN_WAR_DECLARED_IF_CLAN_LVL3_OR_15_MEMBER);
 			return;
 		}
 		
-		if (!attackerClan.getAttackerList().contains(attackedClan.getClanId()) && (attackedClan.getLevel() < 3 || attackedClan.getMembersCount() < Config.CLAN_MEMBERS_FOR_WAR))
+		if (!attackerClan.getAttackerList().contains(attackedClan.getClanId()) && (attackedClan.getLevel() < Config.CLAN_WAR_MIN_LEVEL || attackedClan.getMembersCount() < Config.CLAN_MEMBERS_FOR_WAR))
 		{
 			player.sendPacket(SystemMessage.getSystemMessage(SystemMessageId.S1_CLAN_CANNOT_DECLARE_WAR_TOO_LOW_LEVEL_OR_NOT_ENOUGH_MEMBERS).addString(attackedClan.getName()));
 			return;

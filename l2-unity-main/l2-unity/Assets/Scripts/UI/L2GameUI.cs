@@ -36,9 +36,29 @@ public class L2GameUI : L2UI
         {
             gameObject.AddComponent<PrivateStoreBuyWindow>();
         }
+        if (GetComponent<WarehouseWindow>() == null)
+        {
+            gameObject.AddComponent<WarehouseWindow>();
+        }
         if (GetComponent<WorldMapWindow>() == null)
         {
             gameObject.AddComponent<WorldMapWindow>();
+        }
+        if (GetComponent<ClanWindow>() == null)
+        {
+            gameObject.AddComponent<ClanWindow>();
+        }
+        if (GetComponent<ClanRankWindow>() == null)
+        {
+            gameObject.AddComponent<ClanRankWindow>();
+        }
+        if (GetComponent<ClanMemberWindow>() == null)
+        {
+            gameObject.AddComponent<ClanMemberWindow>();
+        }
+        if (GetComponent<ClanInfoWindow>() == null)
+        {
+            gameObject.AddComponent<ClanInfoWindow>();
         }
         if (GetComponent<MinimapWindow>() == null)
         {
@@ -147,10 +167,35 @@ public class L2GameUI : L2UI
             PrivateStoreBuyWindow.Instance.AddWindow(_rootVisualContainer);
             PrivateStoreBuyWindow.Instance.HideWindow(true);
         }
+        if (WarehouseWindow.Instance != null)
+        {
+            WarehouseWindow.Instance.AddWindow(_rootVisualContainer);
+            WarehouseWindow.Instance.HideWindow(true);
+        }
         if (WorldMapWindow.Instance != null)
         {
             WorldMapWindow.Instance.AddWindow(_rootVisualContainer);
             WorldMapWindow.Instance.HideWindow(true);
+        }
+        if (ClanWindow.Instance != null)
+        {
+            ClanWindow.Instance.AddWindow(_rootVisualContainer);
+            ClanWindow.Instance.HideWindow(true);
+        }
+        if (ClanRankWindow.Instance != null)
+        {
+            ClanRankWindow.Instance.AddWindow(_rootVisualContainer);
+            ClanRankWindow.Instance.HideWindow(true);
+        }
+        if (ClanMemberWindow.Instance != null)
+        {
+            ClanMemberWindow.Instance.AddWindow(_rootVisualContainer);
+            ClanMemberWindow.Instance.HideWindow(true);
+        }
+        if (ClanInfoWindow.Instance != null)
+        {
+            ClanInfoWindow.Instance.AddWindow(_rootVisualContainer);
+            ClanInfoWindow.Instance.HideWindow(true);
         }
         if (MinimapWindow.Instance != null)
         {

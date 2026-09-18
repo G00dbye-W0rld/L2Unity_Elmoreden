@@ -536,12 +536,14 @@ public class WorldCombat : MonoBehaviour
         ParticleManager.Instance.SpawnArrowProjectile(caster, target, hitTimeSec, hitSuccess);
     }
 
-    public Task RelationChanged(int owner, int karma, int pvpFlag)
+    public Task RelationChanged(int owner, int relation, bool autoAttackable, int karma, int pvpFlag)
     {
         return _worldSpawner.ExecuteWithEntityAsync(owner, e =>
         {
             e.Stats.Karma = karma;
             e.Identity.PvpFlag = pvpFlag;
+            e.Identity.Relation = relation;
+            e.Identity.AutoAttackable = autoAttackable;
         });
     }
 }

@@ -3,6 +3,7 @@ using UnityEngine;
 public class AcquireSkillLearnListPacket : ServerPacket
 {
     public SkillWindowInfo[] Skills { get; private set; }
+    public PacketSkillType Type { get; private set; }
     public AcquireSkillLearnListPacket(byte[] d) : base(d)
     {
         Parse();
@@ -10,7 +11,7 @@ public class AcquireSkillLearnListPacket : ServerPacket
 
     public override void Parse()
     {
-        PacketSkillType type = (PacketSkillType)ReadI();
+        Type = (PacketSkillType)ReadI();
         int skillsSize = ReadI();
         Skills = new SkillWindowInfo[skillsSize];
         for (int i = 0; i < skillsSize; i++)

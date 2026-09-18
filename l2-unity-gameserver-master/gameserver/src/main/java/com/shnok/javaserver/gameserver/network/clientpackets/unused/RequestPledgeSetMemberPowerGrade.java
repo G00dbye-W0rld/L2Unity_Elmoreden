@@ -1,5 +1,6 @@
 package com.shnok.javaserver.gameserver.network.clientpackets.unused;
 
+import com.shnok.javaserver.gameserver.enums.PrivilegeType;
 import com.shnok.javaserver.gameserver.model.actor.Player;
 import com.shnok.javaserver.gameserver.model.pledge.Clan;
 import com.shnok.javaserver.gameserver.model.pledge.ClanMember;
@@ -31,8 +32,20 @@ public final class RequestPledgeSetMemberPowerGrade extends L2GameClientPacket
 		if (clan == null)
 			return;
 		
+		// Sans ce controle, n'importe quel membre pouvait changer le rang de
+		// n'importe qui, le sien compris, et s'octroyer les privileges d'un rang.
+		if (!player.hasClanPrivileges(PrivilegeType.SP_MANAGE_RANKS))
+		{
+			player.sendPacket(SystemMessageId.YOU_ARE_NOT_AUTHORIZED_TO_DO_THAT);
+			return;
+		}
+		
+		// Hors des rangs 1 a 9, PledgePowerGradeList deborderait de son tableau.
+		if (_powerGrade < 1 || _powerGrade > 9)
+			return;
+		
 		final ClanMember member = clan.getClanMember(_memberName);
-		if (member == null)
+		if (member == null || member.getObjectId() == clan.getLeaderId())
 			return;
 		
 		if (member.getPledgeType() == Clan.SUBUNIT_ACADEMY)

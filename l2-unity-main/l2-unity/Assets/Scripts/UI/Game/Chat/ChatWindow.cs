@@ -168,6 +168,58 @@ public class ChatWindow : L2Window
         }
     }
 
+    // Commandes de clan : les listes et les penalites sont des commandes
+    // utilisateur du serveur, la declaration et l'arret de guerre ses paquets.
+    private static bool TryClanCommand(string text)
+    {
+        string lower = text.Trim().ToLowerInvariant();
+        GameClientPacketHandler client = GameClient.Instance.ClientPacketHandler;
+
+        switch (lower)
+        {
+            case "/clanpenalty":
+                client.SendUserCommand(UserCommandPacket.ClanPenalty);
+                return true;
+            case "/clanwarlist":
+                client.SendUserCommand(UserCommandPacket.ClanWarList);
+                return true;
+            case "/attackerlist":
+                client.SendUserCommand(UserCommandPacket.AttackerList);
+                return true;
+            case "/underattacklist":
+                client.SendUserCommand(UserCommandPacket.UnderAttackList);
+                return true;
+        }
+
+        string clanName = CommandArgument(text, "/clanwarstart");
+        if (clanName != null)
+        {
+            client.SendStartPledgeWar(clanName);
+            return true;
+        }
+
+        clanName = CommandArgument(text, "/clanwarstop");
+        if (clanName != null)
+        {
+            client.SendStopPledgeWar(clanName);
+            return true;
+        }
+
+        return false;
+    }
+
+    // "/commande nom" : renvoie le nom, ou null si ce n'est pas cette commande.
+    private static string CommandArgument(string text, string command)
+    {
+        if (!text.StartsWith(command + " ", System.StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        string argument = text.Substring(command.Length).Trim().Trim('"');
+        return argument.Length > 0 ? argument : null;
+    }
+
     IEnumerator OpenChat()
     {
         _chatOpened = true;
@@ -264,6 +316,10 @@ public class ChatWindow : L2Window
                 // Commande du client d'origine : le serveur repond par un
                 // message systeme avec les trois coordonnees.
                 GameClient.Instance.ClientPacketHandler.SendUserCommand(UserCommandPacket.Loc);
+            }
+            else if (TryClanCommand(text))
+            {
+                // Commandes de clan du client d'origine, traitees dans TryClanCommand.
             }
             else if (text.StartsWith("/invite ", System.StringComparison.OrdinalIgnoreCase))
             {

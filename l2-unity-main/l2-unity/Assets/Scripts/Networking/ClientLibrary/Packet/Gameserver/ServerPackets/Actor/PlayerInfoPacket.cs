@@ -140,10 +140,10 @@ public class PlayerInfoPacket : ServerPacket
 
             Identity.Title = ReadS();
 
-            ReadI(); //ClanId
-            ReadI(); //ClanCrest
-            ReadI(); //Ally
-            ReadI(); //AllyCrest
+            Identity.ClanId = ReadI();
+            Identity.ClanCrestId = ReadI();
+            Identity.AllyId = ReadI();
+            Identity.AllyCrestId = ReadI();
             ReadI(); //Relation
             ReadB(); //MountType
             EntityActionInfo.OperateType = (OperateType)ReadB();
@@ -160,7 +160,7 @@ public class PlayerInfoPacket : ServerPacket
             ReadB(); //IsInPartyMatchRoom
             ReadI(); //AbnormalEffect
             ReadB();
-            ReadI(); //ClanPrivileges
+            Identity.ClanPrivileges = ReadI();
             ReadH(); //Reco left
             ReadH(); //Reco have
             ReadI(); //MountId

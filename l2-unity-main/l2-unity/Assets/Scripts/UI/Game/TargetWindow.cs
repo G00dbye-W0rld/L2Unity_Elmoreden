@@ -6,6 +6,13 @@ using UnityEngine.UIElements;
 public class TargetWindow : L2PopupWindow
 {
     private Label _nameLabel;
+    private Label _clanLabel;
+    private VisualElement _crest;
+    private UnityEngine.Texture2D _shownCrest;
+    private UnityEngine.Texture2D _shownAllyCrest;
+    private VisualElement _allyCrest;
+    private int _clanIdShown;
+    private Label _allyLabel;
     private VisualElement _HPBarContainer;
     private VisualElement _HPBar;
     private VisualElement _HPBarBG;
@@ -63,6 +70,27 @@ public class TargetWindow : L2PopupWindow
         horizontalResizeHandle.AddManipulator(horizontalResize);
 
         _nameLabel = (Label)GetElementById("TargetName");
+        _clanLabel = GetLabelById("TargetClan");
+        _crest = GetElementById("TargetCrest");
+        _allyLabel = GetLabelById("TargetAlly");
+        _allyCrest = GetElementById("TargetAllyCrest");
+        if (_allyCrest != null)
+        {
+            _allyCrest.style.display = DisplayStyle.None;
+        }
+
+        // Un clic sur le clan de la cible ouvre sa fiche.
+        VisualElement clanRow = GetElementById("TargetClanRow");
+        if (clanRow != null)
+        {
+            clanRow.RegisterCallback<MouseUpEvent>(evt =>
+            {
+                if (_clanIdShown != 0 && ClanInfoWindow.Instance != null)
+                {
+                    ClanInfoWindow.Instance.Open(_clanIdShown);
+                }
+            });
+        }
         if (_nameLabel == null)
         {
             Debug.LogError("Target window target name label is null.");
@@ -122,6 +150,7 @@ public class TargetWindow : L2PopupWindow
 
             Entity targetData = TargetManager.Instance.Target;
             _nameLabel.text = targetData.Identity.Name;
+            UpdateClanLines(targetData);
 
             // "+" d'invitation : uniquement pour un AUTRE joueur, et pas s'il
             // est deja dans le groupe actuel (rien a inviter dans ce cas).
@@ -177,6 +206,95 @@ public class TargetWindow : L2PopupWindow
         {
             HideWindow(false);
         }
+    }
+
+    // Clan et alliance sous le nom, comme le client d'origine. Les paquets
+    // d'apparition ne donnent que des identifiants : le nom est demande au
+    // serveur la premiere fois, puis garde en cache.
+    private void UpdateClanLines(Entity target)
+    {
+        if (_clanLabel == null || _allyLabel == null)
+        {
+            return;
+        }
+
+        bool isPlayer = target.Identity.EntityType == EntityType.Player || target.Identity.EntityType == EntityType.User;
+        _clanLabel.style.display = isPlayer ? DisplayStyle.Flex : DisplayStyle.None;
+        _allyLabel.style.display = isPlayer ? DisplayStyle.Flex : DisplayStyle.None;
+        _windowEle.EnableInClassList("with-clan", isPlayer);
+
+        if (!isPlayer)
+        {
+            return;
+        }
+
+        UpdateCrest(target.Identity.ClanCrestId);
+        UpdateAllyCrest(target.Identity.AllyCrestId);
+        _clanIdShown = target.Identity.ClanId;
+
+        int clanId = target.Identity.ClanId;
+        if (clanId == 0)
+        {
+            _clanLabel.text = "Vagabond";
+            _allyLabel.text = "Sans alliance";
+            return;
+        }
+
+        ClanNames.Request(clanId);
+
+        if (ClanNames.TryGet(clanId, out ClanNames.Entry entry))
+        {
+            _clanLabel.text = "Clan " + entry.ClanName;
+            _allyLabel.text = string.IsNullOrEmpty(entry.AllyName) ? "Sans alliance" : "Alliance " + entry.AllyName;
+        }
+        else
+        {
+            _clanLabel.text = "Clan ...";
+            _allyLabel.text = string.Empty;
+        }
+    }
+
+    // Le blason s'affiche devant le nom du clan ; il est demande au serveur la
+    // premiere fois, puis garde en cache.
+    private void UpdateCrest(int crestId)
+    {
+        if (_crest == null)
+        {
+            return;
+        }
+
+        ClanCrests.Request(crestId);
+        UnityEngine.Texture2D crest = crestId != 0 ? ClanCrests.Get(crestId) : null;
+
+        // Appele a chaque image : on ne touche au style que s'il change.
+        if (crest == _shownCrest)
+        {
+            return;
+        }
+
+        _shownCrest = crest;
+        _crest.style.display = crest != null ? DisplayStyle.Flex : DisplayStyle.None;
+        _crest.style.backgroundImage = crest != null ? new StyleBackground(crest) : new StyleBackground();
+    }
+
+    private void UpdateAllyCrest(int crestId)
+    {
+        if (_allyCrest == null)
+        {
+            return;
+        }
+
+        ClanCrests.RequestAlly(crestId);
+        UnityEngine.Texture2D crest = crestId != 0 ? ClanCrests.GetAlly(crestId) : null;
+
+        if (crest == _shownAllyCrest)
+        {
+            return;
+        }
+
+        _shownAllyCrest = crest;
+        _allyCrest.style.display = crest != null ? DisplayStyle.Flex : DisplayStyle.None;
+        _allyCrest.style.backgroundImage = crest != null ? new StyleBackground(crest) : new StyleBackground();
     }
 
     public override void ShowWindow()

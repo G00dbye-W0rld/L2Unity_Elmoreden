@@ -55,6 +55,11 @@ public final class Config
 	public static int MAX_NUM_OF_CLANS_IN_ALLY;
 	public static int CLAN_MEMBERS_FOR_WAR;
 	public static int CLAN_WAR_PENALTY_WHEN_ENDED;
+	public static int CLAN_CREST_MIN_LEVEL;
+	public static int CLAN_WAR_MIN_LEVEL;
+	public static int CLAN_WAREHOUSE_MIN_LEVEL;
+	public static int CLAN_TITLE_MIN_LEVEL;
+	public static boolean SUBUNIT_LEADER_CAN_BE_CLAN_LEADER;
 	public static boolean MEMBERS_CAN_WITHDRAW_FROM_CLANWH;
 	
 	/** Manor */
@@ -559,6 +564,11 @@ public final class Config
 		MAX_NUM_OF_CLANS_IN_ALLY = clans.getProperty("MaxNumOfClansInAlly", 3);
 		CLAN_MEMBERS_FOR_WAR = clans.getProperty("ClanMembersForWar", 15);
 		CLAN_WAR_PENALTY_WHEN_ENDED = clans.getProperty("ClanWarPenaltyWhenEnded", 5);
+		CLAN_CREST_MIN_LEVEL = clans.getProperty("ClanCrestMinLevel", 3);
+		CLAN_WAR_MIN_LEVEL = clans.getProperty("ClanWarMinLevel", 3);
+		CLAN_WAREHOUSE_MIN_LEVEL = clans.getProperty("ClanWarehouseMinLevel", 1);
+		CLAN_TITLE_MIN_LEVEL = clans.getProperty("ClanTitleMinLevel", 3);
+		SUBUNIT_LEADER_CAN_BE_CLAN_LEADER = clans.getProperty("SubUnitLeaderCanBeClanLeader", false);
 		CLAN_DISSOLVE_DAYS = clans.getProperty("DaysToPassToDissolveAClan", 7);
 		ALLY_JOIN_DAYS_WHEN_LEAVED = clans.getProperty("DaysBeforeJoinAllyWhenLeaved", 1);
 		ALLY_JOIN_DAYS_WHEN_DISMISSED = clans.getProperty("DaysBeforeJoinAllyWhenDismissed", 1);

@@ -1,0 +1,36 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Template name="WindowTemplate" src="project://database/Assets/Resources/Data/UI/_Elements/Components/WindowTemplate.uxml?fileID=9197481963319205126&amp;guid=5ca840f56ef6f1044b4dc077c7d3e6e6&amp;type=3#WindowTemplate" />
+    <Style src="project://database/Assets/Resources/Data/UI/_Elements/L2StyleSheet.uss?fileID=7433441132597879392&amp;guid=72e99cc94b130bf4ba100dceaa830b13&amp;type=3#L2StyleSheet" />
+    <Style src="project://database/Assets/Resources/Data/UI/_Elements/Game/ClanWindow/ClanWindow.uss?fileID=7433441132597879392&amp;guid=b14b580038eb187f984058fbaa33cd92&amp;type=3#ClanWindow" />
+    <ui:Instance template="WindowTemplate" name="WindowTemplate" class="clan-info-window" style="width: 320px; height: 440px; position: absolute;">
+        <AttributeOverrides element-name="windows-name-label" text="Fiche du clan" />
+        <ui:VisualElement name="InfoContent" class="clan-rank-content">
+            <ui:VisualElement class="rank-card member-card">
+                <ui:VisualElement class="member-head">
+                    <ui:VisualElement name="InfoCrest" picking-mode="Ignore" class="clan-crest" />
+                    <ui:VisualElement class="member-head-text">
+                        <ui:Label name="InfoName" text="" class="rank-member-name" />
+                        <ui:Label name="InfoLevel" text="" class="clan-line member-sub" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="InfoLargeCrest" picking-mode="Ignore" class="clan-large-crest" />
+            </ui:VisualElement>
+            <ui:VisualElement class="member-info-row"><ui:Label text="Chef" class="member-key" /><ui:Label name="InfoLeader" text="" class="member-value" /></ui:VisualElement>
+            <ui:VisualElement class="member-info-row"><ui:Label text="Membres" class="member-key" /><ui:Label name="InfoMembers" text="" class="member-value" /></ui:VisualElement>
+            <ui:VisualElement class="member-info-row">
+                <ui:Label text="Alliance" class="member-key" />
+                <ui:VisualElement name="InfoAllyCrest" picking-mode="Ignore" class="target-window-crest clan-info-ally-crest" />
+                <ui:Label name="InfoAlly" text="" class="member-value" />
+            </ui:VisualElement>
+            <ui:VisualElement class="member-info-row"><ui:Label text="Base" class="member-key" /><ui:Label name="InfoBase" text="" class="member-value" /></ui:VisualElement>
+            <ui:VisualElement class="member-info-row"><ui:Label text="R&#233;putation" class="member-key" /><ui:Label name="InfoReputation" text="" class="member-value" /></ui:VisualElement>
+            <ui:Label text="Relation avec votre clan" class="rank-group" />
+            <ui:Label name="InfoWar" text="" class="clan-line member-hint" />
+            <ui:VisualElement class="member-spacer" />
+            <ui:VisualElement class="clan-actions member-actions">
+                <ui:Button name="WarBtn" text="D&#233;clarer la guerre" class="clan-action-btn" />
+                <ui:Button name="CloseBtn" text="Fermer" class="clan-action-btn" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:Instance>
+</ui:UXML>

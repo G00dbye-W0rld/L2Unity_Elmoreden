@@ -58,6 +58,7 @@ public class MenuWindow : L2Window
 
         var clanBtn = _windowEle.Q<Button>("ClanButton");
         clanBtn.AddManipulator(new ButtonClickSoundManipulator(clanBtn));
+        clanBtn.RegisterCallback<ClickEvent>((evt) => ClanWindow.Instance?.ToggleHideWindow());
 
         var mapBtn = _windowEle.Q<Button>("MapButton");
         mapBtn.AddManipulator(new ButtonClickSoundManipulator(mapBtn));

@@ -42,29 +42,39 @@ public final class RequestPledgeReorganizeMember extends L2GameClientPacket
 		}
 		
 		final ClanMember member1 = clan.getClanMember(_memberName);
-		
-		if (_isMemberSelected == 0)
-		{
-			if (member1 != null)
-				player.sendPacket(new PledgeReceiveMemberInfo(member1)); // client changes affiliation info even if it fails, so we have to fix it manually
-			return;
-		}
-		
-		final ClanMember member2 = clan.getClanMember(_selectedMemberName);
-		
-		if (member1 == null || member1.getObjectId() == clan.getLeaderId() || member2 == null || member2.getObjectId() == clan.getLeaderId())
+		if (member1 == null || member1.getObjectId() == clan.getLeaderId())
 			return;
 		
-		// Do not send sub pledge leaders to other pledges than main
-		if (clan.isSubPledgeLeader(member1.getObjectId()))
+		// Unite cible reelle uniquement ; l'academie a ses propres conditions d'entree.
+		final int oldPledgeType = member1.getPledgeType();
+		final boolean validTarget = _newPledgeType == 0 || clan.getSubPledge(_newPledgeType) != null;
+		if (!validTarget || _newPledgeType == Clan.SUBUNIT_ACADEMY || oldPledgeType == Clan.SUBUNIT_ACADEMY || oldPledgeType == _newPledgeType || clan.isSubPledgeLeader(member1.getObjectId()))
 		{
 			player.sendPacket(new PledgeReceiveMemberInfo(member1));
 			return;
 		}
 		
-		final int oldPledgeType = member1.getPledgeType();
-		if (oldPledgeType == _newPledgeType)
+		// Place libre : simple deplacement. Unite pleine : echange avec le membre choisi.
+		if (_isMemberSelected == 0)
+		{
+			if (clan.getSubPledgeMembersCount(_newPledgeType) >= clan.getMaxNrOfMembers(_newPledgeType))
+			{
+				player.sendPacket(SystemMessageId.SUBCLAN_IS_FULL);
+				player.sendPacket(new PledgeReceiveMemberInfo(member1));
+				return;
+			}
+			
+			member1.setPledgeType(_newPledgeType);
+			clan.broadcastClanStatus();
 			return;
+		}
+		
+		final ClanMember member2 = clan.getClanMember(_selectedMemberName);
+		if (member2 == null || member2.getObjectId() == clan.getLeaderId() || member2.getPledgeType() != _newPledgeType || clan.isSubPledgeLeader(member2.getObjectId()))
+		{
+			player.sendPacket(new PledgeReceiveMemberInfo(member1));
+			return;
+		}
 		
 		member1.setPledgeType(_newPledgeType);
 		member2.setPledgeType(oldPledgeType);

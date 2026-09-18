@@ -103,6 +103,11 @@ public class GameClientPacketHandler : ClientPacketHandler
         SendPacket(packet);
     }
 
+    public void SendDlgAnswer(int messageId, int answer, int requesterId)
+    {
+        SendPacket(new DlgAnswerPacket(messageId, answer, requesterId));
+    }
+
     public void SendRequestJoinParty(string targetName, int lootRuleId)
     {
         RequestJoinPartyPacket packet = new RequestJoinPartyPacket(targetName, lootRuleId);
@@ -131,6 +136,161 @@ public class GameClientPacketHandler : ClientPacketHandler
     {
         RequestEnchantItemPacket packet = new RequestEnchantItemPacket(objectId);
         SendPacket(packet);
+    }
+
+    public void SendRequestJoinPledge(int targetId, int pledgeType)
+    {
+        SendPacket(new RequestJoinPledgePacket(targetId, pledgeType));
+    }
+
+    public void SendAnswerJoinPledge(bool accept)
+    {
+        SendPacket(new RequestAnswerJoinPledgePacket(accept));
+    }
+
+    public void SendWithdrawPledge()
+    {
+        SendPacket(new RequestWithdrawPledgePacket());
+    }
+
+    public void SendDismissPledge()
+    {
+        SendPacket(new RequestDismissPledgePacket());
+    }
+
+    public void SendOustPledgeMember(string name)
+    {
+        SendPacket(new RequestOustPledgeMemberPacket(name));
+    }
+
+    public void SendGiveNickName(string name, string title)
+    {
+        SendPacket(new RequestGiveNickNamePacket(name, title));
+    }
+
+    public void SendJoinAlly(int targetId)
+    {
+        SendPacket(new AllyTargetPacket(GameClientPacketType.RequestJoinAlly, targetId));
+    }
+
+    public void SendAnswerJoinAlly(bool accept)
+    {
+        SendPacket(new AllyTargetPacket(GameClientPacketType.RequestAnswerJoinAlly, accept ? 1 : 0));
+    }
+
+    public void SendAllyLeave()
+    {
+        SendPacket(new AllyRequestPacket(GameClientPacketType.AllyLeave));
+    }
+
+    public void SendAllyDismiss(string clanName)
+    {
+        SendPacket(new AllyDismissPacket(clanName));
+    }
+
+    public void SendDismissAlly()
+    {
+        SendPacket(new AllyRequestPacket(GameClientPacketType.RequestDismissAlly));
+    }
+
+    public void SendRequestAllyInfo()
+    {
+        SendPacket(new AllyRequestPacket(GameClientPacketType.RequestAllyInfo));
+    }
+
+    public void SendStartPledgeWar(string clanName)
+    {
+        SendPacket(new RequestPledgeWarPacket(GameClientPacketType.RequestStartPledgeWar, clanName));
+    }
+
+    public void SendStopPledgeWar(string clanName)
+    {
+        SendPacket(new RequestPledgeWarPacket(GameClientPacketType.RequestStopPledgeWar, clanName));
+    }
+
+    public void SendSurrenderPledgeWar(string clanName)
+    {
+        SendPacket(new RequestPledgeWarPacket(GameClientPacketType.RequestSurrenderPledgeWar, clanName));
+    }
+
+    public void SendRequestPledgeWarList(int page, int tab)
+    {
+        SendPacket(new RequestPledgeWarListPacket(page, tab));
+    }
+
+    public void SendRequestPledgePower(int rank, int action, int privileges)
+    {
+        SendPacket(new RequestPledgePowerPacket(rank, action, privileges));
+    }
+
+    public void SendRequestPledgeMemberInfo(int pledgeType, string name)
+    {
+        SendPacket(new RequestPledgeMemberInfoPacket(pledgeType, name));
+    }
+
+    public void SendPledgeReorganizeMember(string member, int newPledgeType, string swapWith)
+    {
+        SendPacket(new RequestPledgeReorganizeMemberPacket(member, newPledgeType, swapWith));
+    }
+
+    public void SendPledgeSetAcademyMaster(bool set, string member, string other)
+    {
+        SendPacket(new RequestPledgeSetAcademyMasterPacket(set, member, other));
+    }
+
+    public void SendSetMemberPowerGrade(string name, int powerGrade)
+    {
+        SendPacket(new RequestPledgeSetMemberPowerGradePacket(name, powerGrade));
+    }
+
+    public void SendRequestPledgePowerGradeList()
+    {
+        SendPacket(new RequestPledgePowerGradeListPacket());
+    }
+
+    public void SendSetPledgeCrest(byte[] image)
+    {
+        SendPacket(new RequestSetPledgeCrestPacket(image));
+    }
+
+    public void SendRequestPledgeCrest(int crestId)
+    {
+        SendPacket(new RequestPledgeCrestPacket(crestId));
+    }
+
+    public void SendRequestAllyCrest(int crestId)
+    {
+        SendPacket(new RequestAllyCrestPacket(crestId));
+    }
+
+    public void SendSetAllyCrest(byte[] image)
+    {
+        SendPacket(new RequestSetAllyCrestPacket(image));
+    }
+
+    public void SendRequestPledgeCrestLarge(int crestId)
+    {
+        SendPacket(new RequestExPledgeCrestLargePacket(crestId));
+    }
+
+    public void SendSetPledgeCrestLarge(byte[] image)
+    {
+        SendPacket(new RequestExSetPledgeCrestLargePacket(image));
+    }
+
+    public void SendRequestClanCard(int clanId)
+    {
+        SendPacket(new RequestClanCardPacket(clanId));
+    }
+
+    public void SendRequestPledgeInfo(int clanId)
+    {
+        SendPacket(new RequestPledgeInfoPacket(clanId));
+    }
+
+    public void SendRequestPledgeMemberList()
+    {
+        SendPacket(new RequestPledgeMemberListPacket());
     }
 
     public void SendPartyMarker(int x, int y, int z)
@@ -332,6 +492,21 @@ public class GameClientPacketHandler : ClientPacketHandler
     public void SendRequestPrivateStoreBuy(int storeObjectId, List<Product> products)
     {
         SendPacket(new RequestPrivateStoreBuyPacket(storeObjectId, products));
+    }
+
+    public void SendWarehouseList(bool deposit, List<Product> products)
+    {
+        SendPacket(new SendWarehouseListPacket(deposit, products));
+    }
+
+    public void SendRequestPackageSendableItemList(int targetId)
+    {
+        SendPacket(new RequestPackageSendableItemListPacket(targetId));
+    }
+
+    public void SendRequestPackageSend(int targetId, List<Product> products)
+    {
+        SendPacket(new RequestPackageSendPacket(targetId, products));
     }
 
     public void SendSetPrivateStoreMsgBuy(string title)

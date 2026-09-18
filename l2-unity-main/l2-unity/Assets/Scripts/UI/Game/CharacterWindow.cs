@@ -9,6 +9,8 @@ public class CharacterInfoWindow : L2PopupWindow
     private Label _nameLabel;
     private Label _levelLabel;
     private Label _classLabel;
+    private Label _clanNameLabel;
+    private Label _clanStatusLabel;
 
     //bars
     private Label _hpLabel;
@@ -114,6 +116,8 @@ public class CharacterInfoWindow : L2PopupWindow
         _nameLabel = GetLabelById("CharacterNameLabel");
         _levelLabel = GetLabelById("LvlLabelName");
         _classLabel = GetLabelById("ClassLabelName");
+        _clanNameLabel = GetLabelById("ClanLabelName");
+        _clanStatusLabel = GetLabelById("StatusLabelName");
 
         //bars
         VisualElement HPBarContainer = GetElementById("HPBar");
@@ -204,7 +208,35 @@ public class CharacterInfoWindow : L2PopupWindow
         _nameLabel.text = identity.Name;
         _classLabel.text = ((CharacterClass)(identity.PlayerClass)).ToString();
         _levelLabel.text = stats.Level.ToString();
+        UpdateClan();
+    }
 
+    // Le clan du joueur vient de ClanData, alimente par les paquets du clan.
+    private void UpdateClan()
+    {
+        if (_clanNameLabel == null)
+        {
+            return;
+        }
+
+        _clanNameLabel.text = ClanData.HasClan ? ClanData.Name : "Sans clan";
+
+        if (_clanStatusLabel != null)
+        {
+            _clanStatusLabel.text = ClanData.HasClan ? RankName(ClanData.Rank) : "Vagabond";
+        }
+    }
+
+    /// Les rangs du serveur, du plus bas au plus haut.
+    private static string RankName(int rank)
+    {
+        switch (rank)
+        {
+            case 1: return "Chef de clan";
+            case 2: return "Officier";
+            case 3: return "Membre";
+            default: return "Membre";
+        }
     }
     private void UpdateStats(PlayerStats stats)
     {

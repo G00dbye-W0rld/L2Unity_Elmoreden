@@ -26,6 +26,66 @@ public class GameServerPacketHandler : ServerPacketHandler
             case GameServerPacketType.RadarControl:
                 OnRadarControl(data);
                 break;
+            case GameServerPacketType.PledgeShowMemberListAll:
+                OnPledgeShowMemberListAll(data);
+                break;
+            case GameServerPacketType.PledgeShowMemberListAdd:
+                OnPledgeShowMemberListAdd(data);
+                break;
+            case GameServerPacketType.PledgeShowMemberListUpdate:
+                OnPledgeShowMemberListUpdate(data);
+                break;
+            case GameServerPacketType.PledgeShowMemberListDelete:
+                OnPledgeShowMemberListDelete(data);
+                break;
+            case GameServerPacketType.PledgeShowInfoUpdate:
+                OnPledgeShowInfoUpdate(data);
+                break;
+            case GameServerPacketType.AllianceInfo:
+                AllianceInfoPacket alliance = new AllianceInfoPacket(data);
+                _eventProcessor.QueueEvent(() => ClanAlliance.Set(alliance));
+                break;
+            case GameServerPacketType.AskJoinAlly:
+                OnAskJoinAlly(data);
+                break;
+            case GameServerPacketType.StartPledgeWar:
+            case GameServerPacketType.StopPledgeWar:
+            case GameServerPacketType.SurrenderPledgeWar:
+                _eventProcessor.QueueEvent(() => ClanWars.Request());
+                break;
+            case GameServerPacketType.ManagePledgePower:
+                OnManagePledgePower(data);
+                break;
+            case GameServerPacketType.PledgeCrest:
+                OnPledgeCrest(data);
+                break;
+            case GameServerPacketType.AllyCrest:
+                ClanPacketHandler.OnAllyCrest(data, _eventProcessor);
+                break;
+            case GameServerPacketType.PledgeStatusChanged:
+                // Doublon de PledgeInfo envoye par le serveur : rien de plus a en tirer.
+                break;
+            case GameServerPacketType.PledgeInfo:
+                OnPledgeInfo(data);
+                break;
+            case GameServerPacketType.PledgeShowMemberListDeleteAll:
+                _eventProcessor.QueueEvent(() => ClanData.OnListCleared());
+                break;
+            case GameServerPacketType.AskJoinPledge:
+                OnAskJoinPledge(data);
+                break;
+            case GameServerPacketType.JoinPledge:
+                OnJoinPledge(data);
+                break;
+            case GameServerPacketType.ConfirmDlg:
+                OnConfirmDlg(data);
+                break;
+            case GameServerPacketType.DoorInfo:
+                DoorPacketHandler.OnDoorInfo(data, _eventProcessor);
+                break;
+            case GameServerPacketType.DoorStatusUpdate:
+                DoorPacketHandler.OnDoorStatusUpdate(data, _eventProcessor);
+                break;
             case GameServerPacketType.CreatureSay:
                 OnMessageReceive(data);
                 break;
@@ -161,6 +221,9 @@ public class GameServerPacketHandler : ServerPacketHandler
             case GameServerPacketType.RelationChanged:
                 OnRelationChanged(data);
                 break;
+            case GameServerPacketType.TitleUpdate:
+                ClanPacketHandler.OnTitleUpdate(data);
+                break;
             case GameServerPacketType.CharDeleteOk:
                 OnCharDeleteOk(data);
                 break;
@@ -205,6 +268,16 @@ public class GameServerPacketHandler : ServerPacketHandler
                 break;
             case GameServerPacketType.PrivateStoreMsgBuy:
                 OnPrivateStoreMsg(data);
+                break;
+            case GameServerPacketType.WarehouseDepositList:
+            case GameServerPacketType.WarehouseWithdrawList:
+                WarehousePacketHandler.OnList(data, packetType == GameServerPacketType.WarehouseDepositList, _eventProcessor);
+                break;
+            case GameServerPacketType.PackageToList:
+                WarehousePacketHandler.OnPackageTargets(data, _eventProcessor);
+                break;
+            case GameServerPacketType.PackageSendableList:
+                WarehousePacketHandler.OnPackageSendable(data, _eventProcessor);
                 break;
             case GameServerPacketType.SendTradeRequest:
             case GameServerPacketType.TradeStart:
@@ -611,6 +684,26 @@ public class GameServerPacketHandler : ServerPacketHandler
         WorldCombat.Instance.UnsetEntityTarget(packet.EntityId);
     }
 
+    private void OnConfirmDlg(byte[] data)
+    {
+        ConfirmDlgPacket packet = new ConfirmDlgPacket(data);
+        SystemMessageDat messageData = SystemMessageTable.Instance.GetSystemMessage(packet.Id);
+
+        _eventProcessor.QueueEvent(() =>
+        {
+            string text = messageData != null
+                ? new SystemMessage(packet.Params, messageData).PrintMessage(false)
+                : "Message " + packet.Id;
+            System.Action yes = () => GameClient.Instance.ClientPacketHandler.SendDlgAnswer(packet.Id, 1, packet.RequesterId);
+            System.Action no = () => GameClient.Instance.ClientPacketHandler.SendDlgAnswer(packet.Id, 0, packet.RequesterId);
+
+            if (packet.Time > 0)
+                L2ConfirmWindow.Instance.ShowWindow(text, yes, no, packet.Time / 1000f);
+            else
+                L2ConfirmWindow.Instance.ShowWindow(text, yes, no);
+        });
+    }
+
     private void OnMyTargetSet(byte[] data)
     {
         MyTargetSetPacket packet = new MyTargetSetPacket(data);
@@ -752,11 +845,50 @@ public class GameServerPacketHandler : ServerPacketHandler
         World.Instance.NpcHtmlReceived(packet.ObjectId, packet.Html, packet.ItemId);
     }
 
+    // Tous les paquets etendus arrivent sous 0xFE, suivis d'un sous-code sur deux
+    // octets. Les lire tous comme un soulshot faisait planter l'analyse des qu'un
+    // autre arrivait, par exemple la liste des competences de clan a la connexion.
     private void OnExAutoSoulshot(byte[] data)
     {
-        // TODO: manage different 0xfe packets if we use them
-        ExAutoSoulshotPacket packet = new ExAutoSoulshotPacket(data);
-        WorldCombat.Instance.ExAutoSoulshotReceived(packet.ItemId, packet.Enable);
+        if (data.Length < 3)
+        {
+            return;
+        }
+
+        int subOpcode = data[1] | (data[2] << 8);
+        switch (subOpcode)
+        {
+            case 0x12:
+                ExAutoSoulshotPacket soulshot = new ExAutoSoulshotPacket(data);
+                WorldCombat.Instance.ExAutoSoulshotReceived(soulshot.ItemId, soulshot.Enable);
+                break;
+            case 0x39:
+            case 0x3a:
+                ClanPacketHandler.OnSkillList(data, _eventProcessor);
+                break;
+            case 0x3b:
+                OnPledgePowerGradeList(data);
+                break;
+            case 0x3c:
+                OnPledgeReceivePowerInfo(data);
+                break;
+            case 0x3d:
+                OnPledgeReceiveMemberInfo(data);
+                break;
+            case 0x3e:
+                PledgeReceiveWarListPacket wars = new PledgeReceiveWarListPacket(data);
+                _eventProcessor.QueueEvent(() => ClanWars.Set(wars.Tab, wars.Clans));
+                break;
+            case 0x3f:
+                ClanPacketHandler.OnSubPledgeCreated(data, _eventProcessor);
+                break;
+            case 0x28:
+                ClanPacketHandler.OnCrestLarge(data, _eventProcessor);
+                break;
+            case 0x5c:
+                ClanPacketHandler.OnClanCard(data, _eventProcessor);
+                break;
+        }
     }
 
     private void OnSocialActionReceived(byte[] data)
@@ -774,7 +906,7 @@ public class GameServerPacketHandler : ServerPacketHandler
     private void OnRelationChanged(byte[] data)
     {
         RelationChangedPacket packet = new RelationChangedPacket(data);
-        WorldCombat.Instance.RelationChanged(packet.Owner, packet.Karma, packet.PvpFlag);
+        WorldCombat.Instance.RelationChanged(packet.Owner, packet.Relation, packet.AutoAttackable, packet.Karma, packet.PvpFlag);
     }
 
     private void OnCharDeleteOk(byte[] data)
@@ -821,7 +953,7 @@ public class GameServerPacketHandler : ServerPacketHandler
     private void OnAcquireSkillLearnList(byte[] data)
     {
         AcquireSkillLearnListPacket packet = new AcquireSkillLearnListPacket(data);
-        _eventProcessor.QueueEvent(() => SkillLearnWindow.Instance.InitSkillsList(packet.Skills));
+        _eventProcessor.QueueEvent(() => SkillLearnWindow.Instance.InitSkillsList(packet.Skills, packet.Type));
     }
 
     private void OnAcquireSkillLearnInfo(byte[] data)
@@ -993,6 +1125,120 @@ public class GameServerPacketHandler : ServerPacketHandler
     }
 
     // Marqueurs de quete : le serveur pose, retire, ou efface tout.
+    // Clan : le serveur envoie une liste par unite (clan puis sous-unites),
+    // puis des mises a jour a l'unite.
+    private void OnPledgeShowMemberListAll(byte[] data)
+    {
+        PledgeShowMemberListAllPacket packet = new PledgeShowMemberListAllPacket(data);
+        _eventProcessor.QueueEvent(() => ClanData.SetFromList(packet));
+    }
+
+    private void OnPledgeShowMemberListAdd(byte[] data)
+    {
+        PledgeShowMemberListAddPacket packet = new PledgeShowMemberListAddPacket(data);
+        _eventProcessor.QueueEvent(() => ClanData.AddMember(packet.Member));
+    }
+
+    private void OnPledgeShowMemberListUpdate(byte[] data)
+    {
+        PledgeShowMemberListUpdatePacket packet = new PledgeShowMemberListUpdatePacket(data);
+        _eventProcessor.QueueEvent(() => ClanData.UpdateMember(packet.Member));
+    }
+
+    private void OnPledgeShowMemberListDelete(byte[] data)
+    {
+        PledgeShowMemberListDeletePacket packet = new PledgeShowMemberListDeletePacket(data);
+        _eventProcessor.QueueEvent(() => ClanData.RemoveMember(packet.Name));
+    }
+
+    private void OnManagePledgePower(byte[] data)
+    {
+        ManagePledgePowerPacket packet = new ManagePledgePowerPacket(data);
+        _eventProcessor.QueueEvent(() => ClanRanks.SetPrivileges(packet.Rank, packet.Privileges));
+    }
+
+    private void OnPledgePowerGradeList(byte[] data)
+    {
+        PledgePowerGradeListPacket packet = new PledgePowerGradeListPacket(data);
+        _eventProcessor.QueueEvent(() => ClanRanks.SetMembersPerRank(packet.MembersPerRank));
+    }
+
+    private void OnPledgeReceivePowerInfo(byte[] data)
+    {
+        PledgeReceivePowerInfoPacket packet = new PledgeReceivePowerInfoPacket(data);
+        _eventProcessor.QueueEvent(() => ClanRanks.SetPrivileges(packet.PowerGrade, packet.Privileges));
+    }
+
+    private void OnPledgeReceiveMemberInfo(byte[] data)
+    {
+        PledgeReceiveMemberInfoPacket packet = new PledgeReceiveMemberInfoPacket(data);
+        _eventProcessor.QueueEvent(() => ClanRanks.SetMember(new ClanRanks.Member
+        {
+            Name = packet.Name,
+            Title = packet.Title,
+            PowerGrade = packet.PowerGrade,
+            PledgeType = packet.PledgeType,
+            UnitName = packet.UnitName,
+            SponsorName = packet.SponsorName
+        }));
+    }
+
+    private void OnPledgeCrest(byte[] data)
+    {
+        PledgeCrestPacket packet = new PledgeCrestPacket(data);
+        if (packet.Data == null)
+        {
+            return;
+        }
+
+        _eventProcessor.QueueEvent(() => ClanCrests.Set(packet.CrestId, packet.Data));
+    }
+
+    private void OnAskJoinAlly(byte[] data)
+    {
+        AskJoinAllyPacket packet = new AskJoinAllyPacket(data);
+        _eventProcessor.QueueEvent(() =>
+        {
+            L2ConfirmWindow.Instance.ShowWindow(
+                packet.RequestorName + " invite votre clan dans son alliance.",
+                () => GameClient.Instance.ClientPacketHandler.SendAnswerJoinAlly(true),
+                () => GameClient.Instance.ClientPacketHandler.SendAnswerJoinAlly(false),
+                30f);
+        });
+    }
+
+    private void OnAskJoinPledge(byte[] data)
+    {
+        AskJoinPledgePacket packet = new AskJoinPledgePacket(data);
+        _eventProcessor.QueueEvent(() =>
+        {
+            L2ConfirmWindow.Instance.ShowWindow(
+                "Rejoindre le clan " + packet.PledgeName + " ?",
+                () => GameClient.Instance.ClientPacketHandler.SendAnswerJoinPledge(true),
+                () => GameClient.Instance.ClientPacketHandler.SendAnswerJoinPledge(false),
+                30f);
+        });
+    }
+
+    // Le clan est rejoint : la liste des membres suit dans la foulee.
+    private void OnJoinPledge(byte[] data)
+    {
+        JoinPledgePacket packet = new JoinPledgePacket(data);
+        _eventProcessor.QueueEvent(() => ClanData.SetJoined(packet.PledgeId));
+    }
+
+    private void OnPledgeInfo(byte[] data)
+    {
+        PledgeInfoPacket packet = new PledgeInfoPacket(data);
+        _eventProcessor.QueueEvent(() => ClanNames.Set(packet.ClanId, packet.ClanName, packet.AllyName));
+    }
+
+    private void OnPledgeShowInfoUpdate(byte[] data)
+    {
+        PledgeShowInfoUpdatePacket packet = new PledgeShowInfoUpdatePacket(data);
+        _eventProcessor.QueueEvent(() => ClanData.SetInfo(packet));
+    }
+
     private void OnRadarControl(byte[] data)
     {
         RadarControlPacket packet = new RadarControlPacket(data);

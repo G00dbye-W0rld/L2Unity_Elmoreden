@@ -11,6 +11,14 @@
                     <ui:Label text="Label" name="TargetName" class="target-window-target-name l2-color-4" />
                     <ui:Button text="" name="PartyInviteButton" class="target-window-party-invite-btn hidden" />
                 </ui:VisualElement>
+                <ui:VisualElement name="TargetClanRow" class="target-window-clan-row target-window-clan-link">
+                    <ui:VisualElement name="TargetCrest" picking-mode="Ignore" class="target-window-crest" />
+                    <ui:Label text="" name="TargetClan" picking-mode="Ignore" class="target-window-clan l2-color-3" />
+                </ui:VisualElement>
+                <ui:VisualElement name="TargetAllyRow" picking-mode="Ignore" class="target-window-clan-row">
+                    <ui:VisualElement name="TargetAllyCrest" picking-mode="Ignore" class="target-window-crest" />
+                    <ui:Label text="" name="TargetAlly" picking-mode="Ignore" class="target-window-clan l2-color-3" />
+                </ui:VisualElement>
                 <ui:VisualElement class="target-window-bar-container">
                     <ui:Instance template="L2Bar" name="HPBar" class="target-bar-container" />
                 </ui:VisualElement>

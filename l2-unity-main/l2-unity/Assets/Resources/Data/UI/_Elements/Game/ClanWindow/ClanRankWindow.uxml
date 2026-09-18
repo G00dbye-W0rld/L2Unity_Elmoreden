@@ -1,0 +1,19 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Template name="WindowTemplate" src="project://database/Assets/Resources/Data/UI/_Elements/Components/WindowTemplate.uxml?fileID=9197481963319205126&amp;guid=5ca840f56ef6f1044b4dc077c7d3e6e6&amp;type=3#WindowTemplate" />
+    <Style src="project://database/Assets/Resources/Data/UI/_Elements/L2StyleSheet.uss?fileID=7433441132597879392&amp;guid=72e99cc94b130bf4ba100dceaa830b13&amp;type=3#L2StyleSheet" />
+    <Style src="project://database/Assets/Resources/Data/UI/_Elements/Game/ClanWindow/ClanWindow.uss?fileID=7433441132597879392&amp;guid=b14b580038eb187f984058fbaa33cd92&amp;type=3#ClanWindow" />
+    <ui:Instance template="WindowTemplate" name="WindowTemplate" class="clan-rank-window" style="width: 320px; height: 390px; position: absolute;">
+        <AttributeOverrides element-name="windows-name-label" text="Privil&#232;ges des rangs" />
+        <ui:VisualElement name="RankContent" class="clan-rank-content">
+            <ui:VisualElement class="rank-row">
+                <ui:Label text="Privil&#232;ges" class="clan-line rank-row-label rank-row-label-wide" />
+                <ui:DropdownField name="PrivilegeRank" class="l2-dropdown rank-dropdown" />
+                <ui:Label name="RankCount" text="" class="clan-line rank-count" />
+            </ui:VisualElement>
+            <ui:ScrollView name="PrivilegeList" vertical-scroller-visibility="AlwaysVisible" horizontal-scroller-visibility="Hidden" mouse-wheel-scroll-size="4" touch-scroll-type="Clamped" class="l2-scroll-view rank-privilege-list" />
+            <ui:VisualElement class="clan-actions">
+                <ui:Button name="SavePrivilegesBtn" text="Enregistrer les privil&#232;ges" class="clan-action-btn" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:Instance>
+</ui:UXML>

@@ -16,9 +16,12 @@ public class AttackAction : L2Action
             Entity targetEntity = TargetManager.Instance.Target;
             EntityType targetType = targetEntity.Identity.EntityType;
 
-            if ((targetType == EntityType.User || targetType == EntityType.NPC) && InputManager.Instance.Ctrl || targetType == EntityType.Monster)
+            // Le serveur dit pour chaque joueur s'il est attaquable sans Ctrl :
+            // ennemi de guerre, joueur a karma ou en PvP.
+            bool autoAttackable = targetType == EntityType.User && targetEntity.Identity.AutoAttackable;
+
+            if ((targetType == EntityType.User || targetType == EntityType.NPC) && InputManager.Instance.Ctrl || targetType == EntityType.Monster || autoAttackable)
             {
-                //Todo: Check if the target is flagged or has karma too
                 // TargetManager.Instance.SetAttackTarget();
                 PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_ATTACK);
             }
