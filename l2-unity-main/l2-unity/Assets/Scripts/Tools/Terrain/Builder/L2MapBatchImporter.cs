@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 #if (UNITY_EDITOR)
 using System;
 using System.Collections.Generic;
@@ -1510,4 +1511,5 @@ public static class L2MapBatchImporter
         return null;
     }
 }
+#endif
 #endif

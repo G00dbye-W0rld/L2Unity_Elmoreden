@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 #if (UNITY_EDITOR) 
 using System.Collections.Generic;
 using UnityEngine;
@@ -136,4 +137,5 @@ public class DecoToMesh {
         return -1;
     }
 }
+#endif
 #endif

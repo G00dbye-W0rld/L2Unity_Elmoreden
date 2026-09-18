@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 #if (UNITY_EDITOR) 
 using System.Collections.Generic;
 using System.IO;
@@ -337,4 +338,5 @@ public class L2T3DStaticMeshImporter : AssetImporter
         return pathToTest;
     }
 }
+#endif
 #endif

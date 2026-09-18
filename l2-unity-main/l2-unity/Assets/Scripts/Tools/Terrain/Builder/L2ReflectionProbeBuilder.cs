@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 #if (UNITY_EDITOR)
 using UnityEditor;
 using UnityEngine;
@@ -92,4 +93,5 @@ public class L2ReflectionProbeBuilder
                   + "'Generate Lighting' pour les calculer, ce n'est pas fait automatiquement.");
     }
 }
+#endif
 #endif

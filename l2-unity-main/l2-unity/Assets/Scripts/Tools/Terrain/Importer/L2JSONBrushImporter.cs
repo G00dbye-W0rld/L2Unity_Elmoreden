@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 #if (UNITY_EDITOR) 
 using System.Collections.Generic;
 using System.IO;
@@ -76,4 +77,5 @@ public class L2JSONBrushImporter : AssetImporter {
         return null;
     }
 }
+#endif
 #endif

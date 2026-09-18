@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 #if (UNITY_EDITOR)
 using System.Collections.Generic;
 using System.IO;
@@ -71,4 +72,5 @@ public class L2LightBuilder
         Debug.Log($"[Light] {lights.Count} lumiere(s) construite(s).");
     }
 }
+#endif
 #endif

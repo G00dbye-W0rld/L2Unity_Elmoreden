@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 #if (UNITY_EDITOR) 
 using System.Collections.Generic;
 using System.IO;
@@ -246,4 +247,5 @@ public class TerrainConverter : MonoBehaviour
         PrefabUtility.SaveAsPrefabAsset(destObject, prefabPath);
     }
 }
+#endif
 #endif

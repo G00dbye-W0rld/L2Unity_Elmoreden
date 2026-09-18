@@ -117,7 +117,12 @@ public class AmbientSoundEmitter : EventHandler {
         catch(EventNotFoundException) {
             _missing = true;
 
+#if UNITY_EDITOR
             string path = _eventReference.IsNull ? "(vide)" : _eventReference.Path;
+#else
+            // EventReference.Path n'existe que dans l'editeur.
+            string path = _eventReference.IsNull ? "(vide)" : _eventReference.Guid.ToString();
+#endif
             if(_reported.Add(path)) {
                 Debug.LogWarning($"[AmbientSound] Evenement absent des banques : {path}. "
                                  + "Emetteur desactive. Signale une seule fois.");

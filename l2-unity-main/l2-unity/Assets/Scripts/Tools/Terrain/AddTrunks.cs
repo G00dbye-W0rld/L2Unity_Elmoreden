@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 #if (UNITY_EDITOR)
 using UnityEditor;
 using UnityEngine;
@@ -109,4 +110,5 @@ public class AddTrunks
         return false;
     }
 }
+#endif
 #endif

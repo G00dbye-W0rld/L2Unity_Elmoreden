@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 #if (UNITY_EDITOR) 
 using System.IO;
 using UnityEditor;
@@ -492,4 +493,5 @@ public class L2MaterialBuilder
         }
     }
 }
+#endif
 #endif

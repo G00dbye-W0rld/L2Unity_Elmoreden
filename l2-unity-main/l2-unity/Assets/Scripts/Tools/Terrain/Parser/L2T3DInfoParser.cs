@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 #if (UNITY_EDITOR) 
 using System.Collections.Generic;
 using System.Globalization;
@@ -522,4 +523,5 @@ public class L2T3DInfoParser
 
 }
 
+#endif
 #endif

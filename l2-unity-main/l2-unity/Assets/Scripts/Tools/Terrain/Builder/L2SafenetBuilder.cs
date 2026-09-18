@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 #if (UNITY_EDITOR)
 using UnityEditor;
 using UnityEngine;
@@ -52,4 +53,5 @@ public class L2SafenetBuilder
                   + $"(position locale {safenet.transform.localPosition}, echelle {safenet.transform.localScale}).");
     }
 }
+#endif
 #endif

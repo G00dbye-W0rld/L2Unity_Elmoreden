@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 #if (UNITY_EDITOR) 
 using Newtonsoft.Json;
 using System.IO;
@@ -28,4 +29,5 @@ public class L2JSONStaticMeshActorImporter {
         return data;
     }
 }
+#endif
 #endif

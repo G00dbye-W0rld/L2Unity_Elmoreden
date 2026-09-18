@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System.Collections.Generic;
 using UnityEngine;
 using static JBooth.MicroSplat.MicroSplatPropData;
@@ -723,3 +724,4 @@ public class L2TerrainGeneratorTextureMatcher
         return missing;
     }
 }
+#endif

@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 #if (UNITY_EDITOR) 
 using System.IO;
 using UnityEditor;
@@ -65,4 +66,5 @@ public class Texture2DArrayGenerator : MonoBehaviour {
         return result;
     }
 }
+#endif
 #endif

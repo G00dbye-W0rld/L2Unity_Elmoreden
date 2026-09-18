@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 #if (UNITY_EDITOR)
 using System;
 using System.Collections.Generic;
@@ -144,4 +145,5 @@ public abstract class AssetImporter {
         return folderName;
     }
 }
+#endif
 #endif

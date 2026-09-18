@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 #if (UNITY_EDITOR)
 using UnityEditor;
 using UnityEngine;
@@ -100,4 +101,5 @@ public class L2WaterBuilder
         return clone;
     }
 }
+#endif
 #endif

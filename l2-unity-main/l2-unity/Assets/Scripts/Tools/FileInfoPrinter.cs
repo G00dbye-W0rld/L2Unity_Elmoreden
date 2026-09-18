@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 #if (UNITY_EDITOR) 
 using UnityEngine;
 using UnityEditor;
@@ -23,4 +24,5 @@ public class FileInfoPrinter {
         Debug.Log(stringBuilder.ToString());
     }
 }
+#endif
 #endif
