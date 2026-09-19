@@ -77,6 +77,10 @@ public class GameServerPacketHandler : ServerPacketHandler
             case GameServerPacketType.JoinPledge:
                 OnJoinPledge(data);
                 break;
+            case GameServerPacketType.ClanHallDecoration:
+                ClanHallDecorationPacket decoration = new ClanHallDecorationPacket(data);
+                _eventProcessor.QueueEvent(() => ClanHallDecor.Apply(decoration.HallId, decoration.Depths));
+                break;
             case GameServerPacketType.ConfirmDlg:
                 OnConfirmDlg(data);
                 break;
@@ -887,6 +891,18 @@ public class GameServerPacketHandler : ServerPacketHandler
                 break;
             case 0x5c:
                 ClanPacketHandler.OnClanCard(data, _eventProcessor);
+                break;
+            case 0x5e:
+                ExLockpickPacket lockpick = new ExLockpickPacket(data);
+                _eventProcessor.QueueEvent(() => LockpickWindow.Instance?.OnState(lockpick));
+                break;
+            case 0x5d:
+                ExClanHallFurniturePacket furniture = new ExClanHallFurniturePacket(data);
+                _eventProcessor.QueueEvent(() =>
+                {
+                    ClanHallFurniture.Apply(furniture.HallId, furniture.Placed);
+                    ClanHallDecor.SetWorkbench(furniture.HallId, furniture.WorkbenchObjectId);
+                });
                 break;
         }
     }

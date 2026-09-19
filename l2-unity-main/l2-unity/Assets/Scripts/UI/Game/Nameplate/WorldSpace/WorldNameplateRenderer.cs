@@ -56,8 +56,19 @@ public class WorldNameplateRenderer : MonoBehaviour
     private Transform _playerTransform;
     private float _viewDistance;
 
+    // Pour les etiquettes du monde qui reprennent l'habillage des nameplates
+    // (emplacements de mobilier des salles de clan).
+    public static WorldNameplateRenderer Instance { get; private set; }
+    public GameObject NameplatePrefab => nameplatePrefab;
+
+    public float ScaleAt(float distance)
+    {
+        return Mathf.Clamp(distance * distanceScaleFactor * (1f + distance * farBoostPerMeter), minScale, maxScale);
+    }
+
     public void Initialize(Camera mainCamera, Transform playerTransform, float viewDistance)
     {
+        Instance = this;
         _mainCameraTransform = mainCamera != null ? mainCamera.transform : null;
         _playerTransform = playerTransform;
         _viewDistance = viewDistance;

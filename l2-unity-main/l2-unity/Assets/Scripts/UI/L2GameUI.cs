@@ -60,6 +60,10 @@ public class L2GameUI : L2UI
         {
             gameObject.AddComponent<ClanInfoWindow>();
         }
+        if (GetComponent<LockpickWindow>() == null)
+        {
+            gameObject.AddComponent<LockpickWindow>();
+        }
         if (GetComponent<MinimapWindow>() == null)
         {
             gameObject.AddComponent<MinimapWindow>();
@@ -196,6 +200,11 @@ public class L2GameUI : L2UI
         {
             ClanInfoWindow.Instance.AddWindow(_rootVisualContainer);
             ClanInfoWindow.Instance.HideWindow(true);
+        }
+        if (LockpickWindow.Instance != null)
+        {
+            LockpickWindow.Instance.AddWindow(_rootVisualContainer);
+            LockpickWindow.Instance.HideWindow(true);
         }
         if (MinimapWindow.Instance != null)
         {

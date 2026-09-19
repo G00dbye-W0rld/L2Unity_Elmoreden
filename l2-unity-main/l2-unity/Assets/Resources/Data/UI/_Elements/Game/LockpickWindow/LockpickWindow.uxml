@@ -1,0 +1,28 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Template name="WindowTemplate" src="project://database/Assets/Resources/Data/UI/_Elements/Components/WindowTemplate.uxml?fileID=9197481963319205126&amp;guid=5ca840f56ef6f1044b4dc077c7d3e6e6&amp;type=3#WindowTemplate" />
+    <Style src="project://database/Assets/Resources/Data/UI/_Elements/L2StyleSheet.uss?fileID=7433441132597879392&amp;guid=72e99cc94b130bf4ba100dceaa830b13&amp;type=3#L2StyleSheet" />
+    <Style src="project://database/Assets/Resources/Data/UI/_Elements/Game/ClanWindow/ClanWindow.uss?fileID=7433441132597879392&amp;guid=b14b580038eb187f984058fbaa33cd92&amp;type=3#ClanWindow" />
+    <ui:Instance template="WindowTemplate" name="WindowTemplate" class="lockpick-window" style="width: 300px; height: 380px; position: absolute;">
+        <AttributeOverrides element-name="windows-name-label" text="Crocheter la serrure" />
+        <ui:VisualElement name="LockpickContent" class="clan-rank-content">
+            <ui:Label name="HallName" text="" class="rank-member-name" style="-unity-text-align: middle-center;" />
+            <ui:Label text="Faites c&#233;der les goupilles une &#224; une. Chaque &#233;chec brise un crochet ; un 1 donne l'alarme au clan." class="clan-line member-hint" style="white-space: normal; -unity-text-align: middle-center;" />
+            <ui:VisualElement name="Pins" style="flex-direction: row; justify-content: center; margin-top: 10px; margin-bottom: 6px;" />
+            <ui:VisualElement style="align-items: center; margin-top: 4px;">
+                <ui:VisualElement style="width: 72px; height: 72px; justify-content: center; align-items: center; background-color: rgba(0, 0, 0, 0.55); border-left-width: 2px; border-right-width: 2px; border-top-width: 2px; border-bottom-width: 2px; border-left-color: rgb(150, 125, 70); border-right-color: rgb(150, 125, 70); border-top-color: rgb(150, 125, 70); border-bottom-color: rgb(150, 125, 70); border-top-left-radius: 10px; border-top-right-radius: 10px; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
+                    <ui:Label name="Die" text="d20" style="font-size: 30px; color: rgb(255, 214, 127); -unity-font-style: bold; -unity-text-align: middle-center;" />
+                </ui:VisualElement>
+                <ui:Label name="RollDetail" text="" class="clan-line" style="margin-top: 6px; -unity-text-align: middle-center;" />
+                <ui:Label name="Result" text="" class="clan-line" style="-unity-font-style: bold; -unity-text-align: middle-center; white-space: normal;" />
+            </ui:VisualElement>
+            <ui:VisualElement class="member-info-row"><ui:Label text="Difficult&#233;" class="member-key" style="width: 80px;" /><ui:Label name="Difficulty" text="" class="member-value" /></ui:VisualElement>
+            <ui:VisualElement class="member-info-row"><ui:Label text="Bonus" class="member-key" style="width: 80px;" /><ui:Label name="Bonus" text="" class="member-value" /></ui:VisualElement>
+            <ui:VisualElement class="member-info-row"><ui:Label text="Crochets" class="member-key" style="width: 80px;" /><ui:Label name="Lockpicks" text="" class="member-value" /></ui:VisualElement>
+            <ui:VisualElement class="member-spacer" />
+            <ui:VisualElement class="clan-actions member-actions">
+                <ui:Button name="RollBtn" text="Tenter" class="clan-action-btn" />
+                <ui:Button name="CloseBtn" text="Abandonner" class="clan-action-btn" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:Instance>
+</ui:UXML>

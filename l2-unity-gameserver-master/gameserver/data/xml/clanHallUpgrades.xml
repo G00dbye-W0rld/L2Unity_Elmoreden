@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Installations des salles de clan (ajout du projet) : trois niveaux par installation,
+     paye chaque semaine sur l'entrepot du clan. lvl = valeur interne du serveur
+     (pourcentage pour PV, PM et experience, niveau pour les autres). Prix par semaine. -->
+<list>
+	<upgrade type="1" name="Cheminée" effect="Régénération des PV dans la salle">
+		<tier grade="1" tier="1" name="Simple" lvl="40" price="10000" effect="+40 % de régénération des PV" />
+		<tier grade="1" tier="2" name="Soigné" lvl="100" price="25000" effect="+100 % de régénération des PV" />
+		<tier grade="1" tier="3" name="Somptueux" lvl="160" price="50000" effect="+160 % de régénération des PV" />
+		<tier grade="2" tier="1" name="Simple" lvl="80" price="15000" effect="+80 % de régénération des PV" />
+		<tier grade="2" tier="2" name="Soigné" lvl="140" price="37500" effect="+140 % de régénération des PV" />
+		<tier grade="2" tier="3" name="Somptueux" lvl="200" price="75000" effect="+200 % de régénération des PV" />
+		<tier grade="3" tier="1" name="Simple" lvl="120" price="20000" effect="+120 % de régénération des PV" />
+		<tier grade="3" tier="2" name="Soigné" lvl="180" price="50000" effect="+180 % de régénération des PV" />
+		<tier grade="3" tier="3" name="Somptueux" lvl="300" price="100000" effect="+300 % de régénération des PV" />
+	</upgrade>
+	<upgrade type="2" name="Cristal de mana" effect="Régénération des PM dans la salle">
+		<tier grade="1" tier="1" name="Simple" lvl="5" price="20000" effect="+5 % de régénération des PM" />
+		<tier grade="1" tier="2" name="Soigné" lvl="15" price="50000" effect="+15 % de régénération des PM" />
+		<tier grade="1" tier="3" name="Somptueux" lvl="25" price="90000" effect="+25 % de régénération des PM" />
+		<tier grade="2" tier="1" name="Simple" lvl="5" price="30000" effect="+5 % de régénération des PM" />
+		<tier grade="2" tier="2" name="Soigné" lvl="15" price="75000" effect="+15 % de régénération des PM" />
+		<tier grade="2" tier="3" name="Somptueux" lvl="30" price="135000" effect="+30 % de régénération des PM" />
+		<tier grade="3" tier="1" name="Simple" lvl="15" price="40000" effect="+15 % de régénération des PM" />
+		<tier grade="3" tier="2" name="Soigné" lvl="30" price="100000" effect="+30 % de régénération des PM" />
+		<tier grade="3" tier="3" name="Somptueux" lvl="40" price="180000" effect="+40 % de régénération des PM" />
+	</upgrade>
+	<upgrade type="4" name="Lustre" effect="Expérience rendue à la résurrection dans la salle">
+		<tier grade="1" tier="1" name="Simple" lvl="5" price="25000" effect="5 % de l'expérience perdue rendue" />
+		<tier grade="1" tier="2" name="Soigné" lvl="15" price="60000" effect="15 % de l'expérience perdue rendue" />
+		<tier grade="1" tier="3" name="Somptueux" lvl="30" price="120000" effect="30 % de l'expérience perdue rendue" />
+		<tier grade="2" tier="1" name="Simple" lvl="15" price="37500" effect="15 % de l'expérience perdue rendue" />
+		<tier grade="2" tier="2" name="Soigné" lvl="25" price="90000" effect="25 % de l'expérience perdue rendue" />
+		<tier grade="2" tier="3" name="Somptueux" lvl="40" price="180000" effect="40 % de l'expérience perdue rendue" />
+		<tier grade="3" tier="1" name="Simple" lvl="25" price="50000" effect="25 % de l'expérience perdue rendue" />
+		<tier grade="3" tier="2" name="Soigné" lvl="35" price="120000" effect="35 % de l'expérience perdue rendue" />
+		<tier grade="3" tier="3" name="Somptueux" lvl="50" price="240000" effect="50 % de l'expérience perdue rendue" />
+	</upgrade>
+	<upgrade type="5" name="Miroir" effect="Téléportation des membres depuis la salle">
+		<tier grade="1" tier="1" name="Simple" lvl="1" price="10000" effect="Destinations proches" />
+		<tier grade="1" tier="2" name="Soigné" lvl="2" price="25000" effect="Destinations lointaines" />
+		<tier grade="2" tier="1" name="Simple" lvl="1" price="15000" effect="Destinations proches" />
+		<tier grade="2" tier="2" name="Soigné" lvl="2" price="37500" effect="Destinations lointaines" />
+		<tier grade="3" tier="1" name="Simple" lvl="1" price="20000" effect="Destinations proches" />
+		<tier grade="3" tier="2" name="Soigné" lvl="2" price="50000" effect="Destinations lointaines" />
+	</upgrade>
+	<upgrade type="9" name="Insigne" effect="Magie de soutien lancée par la gérance">
+		<tier grade="1" tier="1" name="Simple" lvl="1" price="20000" effect="Sorts de soutien de niveau 1" />
+		<tier grade="1" tier="2" name="Soigné" lvl="2" price="40000" effect="Sorts de soutien de niveau 2" />
+		<tier grade="1" tier="3" name="Somptueux" lvl="4" price="80000" effect="Sorts de soutien de niveau 4" />
+		<tier grade="2" tier="1" name="Simple" lvl="3" price="30000" effect="Sorts de soutien de niveau 3" />
+		<tier grade="2" tier="2" name="Soigné" lvl="4" price="60000" effect="Sorts de soutien de niveau 4" />
+		<tier grade="2" tier="3" name="Somptueux" lvl="5" price="120000" effect="Sorts de soutien de niveau 5" />
+		<tier grade="3" tier="1" name="Simple" lvl="5" price="40000" effect="Sorts de soutien de niveau 5" />
+		<tier grade="3" tier="2" name="Soigné" lvl="7" price="80000" effect="Sorts de soutien de niveau 7" />
+		<tier grade="3" tier="3" name="Somptueux" lvl="8" price="160000" effect="Sorts de soutien de niveau 8" />
+	</upgrade>
+	<upgrade type="12" name="Établi" effect="Fabrication d'objets spéciaux">
+		<tier grade="1" tier="1" name="Simple" lvl="1" price="100000" effect="Fabrication de niveau 1" />
+		<tier grade="1" tier="2" name="Soigné" lvl="2" price="250000" effect="Fabrication de niveau 2" />
+		<tier grade="1" tier="3" name="Somptueux" lvl="3" price="500000" effect="Fabrication de niveau 3" />
+		<tier grade="2" tier="1" name="Simple" lvl="1" price="150000" effect="Fabrication de niveau 1" />
+		<tier grade="2" tier="2" name="Soigné" lvl="2" price="375000" effect="Fabrication de niveau 2" />
+		<tier grade="2" tier="3" name="Somptueux" lvl="3" price="750000" effect="Fabrication de niveau 3" />
+		<tier grade="3" tier="1" name="Simple" lvl="1" price="200000" effect="Fabrication de niveau 1" />
+		<tier grade="3" tier="2" name="Soigné" lvl="2" price="500000" effect="Fabrication de niveau 2" />
+		<tier grade="3" tier="3" name="Somptueux" lvl="3" price="1000000" effect="Fabrication de niveau 3" />
+	</upgrade>
+</list>

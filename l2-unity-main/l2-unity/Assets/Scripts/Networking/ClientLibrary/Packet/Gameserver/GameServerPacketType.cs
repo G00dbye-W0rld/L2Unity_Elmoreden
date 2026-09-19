@@ -85,6 +85,7 @@ public enum GameServerPacketType : int
     JoinParty = 0x3a,
     DoorInfo = 0x4c,
     ConfirmDlg = 0xed,
+    ClanHallDecoration = 0xf7,
     DoorStatusUpdate = 0x4d,
     PartySmallWindowAll = 0x4e,
     PartySmallWindowAdd = 0x4f,

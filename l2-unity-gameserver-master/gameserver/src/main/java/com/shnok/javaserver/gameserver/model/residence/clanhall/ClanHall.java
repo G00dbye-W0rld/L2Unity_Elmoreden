@@ -12,8 +12,11 @@ import com.shnok.javaserver.commons.logging.CLogger;
 import com.shnok.javaserver.commons.pool.ConnectionPool;
 import com.shnok.javaserver.commons.pool.ThreadPool;
 
+import com.shnok.javaserver.gameserver.data.manager.ClanHallFurnitureManager;
 import com.shnok.javaserver.gameserver.data.sql.ClanTable;
 import com.shnok.javaserver.gameserver.data.xml.ClanHallDecoData;
+import com.shnok.javaserver.gameserver.data.xml.ClanHallUpgradeData;
+import com.shnok.javaserver.gameserver.network.serverpackets.unused.ClanHallDecoration;
 import com.shnok.javaserver.gameserver.model.actor.Player;
 import com.shnok.javaserver.gameserver.model.pledge.Clan;
 import com.shnok.javaserver.gameserver.model.residence.Residence;
@@ -161,9 +164,69 @@ public class ClanHall extends Residence
 	 * @param type : The type of {@link ClanHallFunction} we search.
 	 * @return the {@link ClanHallFunction} associated to the type.
 	 */
+	/**
+	 *  l'installation active, ou null si elle est absente ou suspendue faute de paiement.
+	 */
 	public ClanHallFunction getFunction(int type)
 	{
+		final ClanHallFunction chf = _functions.get(type);
+		return (chf == null || chf.isSuspended()) ? null : chf;
+	}
+	
+	/**
+	 *  l'installation achetee, meme suspendue (menus de gestion).
+	 */
+	public ClanHallFunction getInstalledFunction(int type)
+	{
 		return _functions.get(type);
+	}
+	
+	/**
+	 * Installe ou change le niveau d'une installation ; la premiere semaine est prelevee
+	 * sur l'entrepot du clan (ajout du projet : plus rien ne sort de l'inventaire du chef).
+	 */
+	public boolean installUpgrade(Clan clan, int type, int lvl, int weeklyPrice)
+	{
+		if (clan == null || clan.getWarehouse().getAdena() < weeklyPrice)
+			return false;
+		
+		clan.getWarehouse().destroyItemByItemId(57, weeklyPrice);
+		
+		ClanHallFunction chf = _functions.get(type);
+		if (chf != null && chf.getRate() != ONE_WEEK)
+		{
+			chf.removeFunction();
+			chf = null;
+		}
+		
+		if (chf == null)
+		{
+			chf = new ClanHallFunction(this, type, lvl, weeklyPrice, ONE_WEEK, System.currentTimeMillis() + ONE_WEEK);
+			chf.dbSave();
+			_functions.put(type, chf);
+		}
+		else
+			chf.refreshFunction(weeklyPrice, lvl);
+		
+		refreshDecoration();
+		return true;
+	}
+	
+	/**
+	 *  ce que la salle coute par semaine : loyer et installations.
+	 */
+	public long getWeeklyCharges()
+	{
+		long total = getLease();
+		for (ClanHallFunction chf : _functions.values())
+			total += (long) chf.getLease() * ONE_WEEK / Math.max(1, chf.getRate());
+		return total;
+	}
+	
+	public void refreshDecoration()
+	{
+		if (getZone() != null)
+			getZone().broadcastPacket(new ClanHallDecoration(this));
 	}
 	
 	/**
@@ -203,6 +266,9 @@ public class ClanHall extends Residence
 			// Refresh Clan Action panel.
 			clan.broadcastToMembers(new PledgeShowInfoUpdate(clan));
 		}
+		
+		// Le mobilier retourne a l'entrepot du clan qui perd la salle.
+		ClanHallFurnitureManager.getInstance().releaseAll(this, clan);
 		
 		_ownerId = 0;
 		_paidUntil = 0;
@@ -264,6 +330,9 @@ public class ClanHall extends Residence
 			// Refresh Clan Action panel.
 			owner.broadcastToMembers(new PledgeShowInfoUpdate(owner));
 		}
+		
+		if (owner != null && owner != clan)
+			ClanHallFurnitureManager.getInstance().releaseAll(this, owner);
 		
 		// Remove all related functions.
 		removeAllFunctions();
@@ -487,6 +556,12 @@ public class ClanHall extends Residence
 		final ClanHallFunction chf = getFunction(funcType);
 		if (chf == null)
 			return 0;
+		
+		// Installations du projet : le modele suit le niveau (simple, soigne, somptueux).
+		final ClanHallUpgradeData.Upgrade upgrade = ClanHallUpgradeData.getInstance().get(funcType);
+		final ClanHallUpgradeData.Tier tier = (upgrade != null) ? upgrade.findByLvl(getGrade(), chf.getLvl()) : null;
+		if (tier != null)
+			return tier.tier();
 		
 		return ClanHallDecoData.getInstance().getDecoDepth(funcType, chf.getFuncLvl());
 	}

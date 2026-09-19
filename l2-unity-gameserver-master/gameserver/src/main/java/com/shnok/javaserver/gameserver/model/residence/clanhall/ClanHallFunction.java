@@ -9,7 +9,9 @@ import com.shnok.javaserver.commons.pool.ConnectionPool;
 import com.shnok.javaserver.commons.pool.ThreadPool;
 
 import com.shnok.javaserver.gameserver.data.sql.ClanTable;
+import com.shnok.javaserver.gameserver.enums.SayType;
 import com.shnok.javaserver.gameserver.model.pledge.Clan;
+import com.shnok.javaserver.gameserver.network.serverpackets.CreatureSay;
 
 /**
  * Players can add a variety of decorations and functions to their {@link ClanHall}.
@@ -50,6 +52,7 @@ public class ClanHallFunction
 	private int _lvl;
 	private int _fee;
 	private long _endDate;
+	private boolean _suspended;
 	
 	public ClanHallFunction(ClanHall ch, int type, int lvl, int fee, long rate, long endDate)
 	{
@@ -68,6 +71,15 @@ public class ClanHallFunction
 			_feeTask = ThreadPool.schedule(this::payFunctionFee, _endDate - currentTime);
 		else
 			ThreadPool.execute(this::payFunctionFee);
+	}
+	
+	/**
+	 * Installation impayee : elle reste achetee mais ne fait plus effet tant que
+	 * l'entrepot du clan ne peut pas la payer (ajout du projet).
+	 */
+	public boolean isSuspended()
+	{
+		return _suspended;
 	}
 	
 	public int getType()
@@ -200,6 +212,7 @@ public class ClanHallFunction
 		// Refresh variables.
 		_fee = fee;
 		_lvl = lvl;
+		_suspended = false;
 		refreshEndTime();
 		
 		// Store into database.
@@ -232,8 +245,24 @@ public class ClanHallFunction
 			
 			// Renew the task.
 			_feeTask = ThreadPool.schedule(this::payFunctionFee, getRate());
+			
+			if (_suspended)
+			{
+				_suspended = false;
+				_ch.refreshDecoration();
+			}
 		}
 		else
-			removeFunction();
+		{
+			// Suspendue plutot que supprimee : on reessaie toutes les heures.
+			if (!_suspended)
+			{
+				_suspended = true;
+				_ch.refreshDecoration();
+				if (clan != null)
+					clan.broadcastToMembers(new CreatureSay(SayType.ANNOUNCEMENT, "Salle de clan", "Une installation est suspendue : l'entrepôt du clan ne peut plus la payer."));
+			}
+			_feeTask = ThreadPool.schedule(this::payFunctionFee, 3600000L);
+		}
 	}
 }

@@ -12,4 +12,5 @@ public enum GameClientPacketDoubleType : byte
     RequestPledgeReorganizeMember = 0x24,
     RequestClanCard = 0x3a,
     RequestPartyMarker = 0x40,
+    RequestLockpick = 0x41,
 }

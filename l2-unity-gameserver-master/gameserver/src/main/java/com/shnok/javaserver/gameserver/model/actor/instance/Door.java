@@ -27,6 +27,7 @@ import com.shnok.javaserver.gameserver.model.item.kind.Weapon;
 import com.shnok.javaserver.gameserver.model.residence.Residence;
 import com.shnok.javaserver.gameserver.model.residence.castle.Castle;
 import com.shnok.javaserver.gameserver.model.residence.clanhall.ClanHall;
+import com.shnok.javaserver.gameserver.model.residence.clanhall.LockpickManager;
 import com.shnok.javaserver.gameserver.model.residence.clanhall.SiegableHall;
 import com.shnok.javaserver.gameserver.model.spawn.NpcMaker;
 import com.shnok.javaserver.gameserver.network.SystemMessageId;
@@ -168,9 +169,13 @@ public class Door extends Creature implements IGeoObject
 			player.setRequestedGate(this);
 			player.sendPacket(new ConfirmDlg((!isOpened()) ? 1140 : 1141));
 		}
-		// Sans reponse, le joueur croit que le clic n'a pas ete pris en compte.
+		// Hors du clan : proposer de crocheter la serrure, ou dire pourquoi c'est impossible.
 		else if (_residence instanceof ClanHall)
-			player.sendPacket(SystemMessageId.YOU_ARE_NOT_AUTHORIZED_TO_DO_THAT);
+		{
+			final String refusal = LockpickManager.getInstance().start(player, this);
+			if (refusal != null)
+				player.sendMessage(refusal);
+		}
 	}
 	
 	@Override

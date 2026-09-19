@@ -31,8 +31,11 @@ public enum PrivilegeType
 	CP_MANAGE_TAXES(1048576),
 	CP_MERCENARIES(2097152),
 	CP_SET_FUNCTIONS(4194304),
+
+	// Ajout du projet : amenager le mobilier de la salle de clan.
+	CHP_FURNISH(8388608),
 	
-	ALL(8388606);
+	ALL(16777214);
 	
 	private int _mask;
 	

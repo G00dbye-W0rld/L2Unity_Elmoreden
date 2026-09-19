@@ -139,9 +139,9 @@ public class ClickManager : MonoBehaviour
                 // sinon un objet au sol dont le collider tombe sur un layer
                 // inclus dans _entityMask est route vers OnClickOnEntity()
                 // (-> tentative d'attaque cote serveur) au lieu du ramassage.
-                if (DoorManager.TryFindDoor(hit.collider.transform, out int doorObjectId, out Vector3 doorPosition))
+                if (TryFindUsable(hit.collider.transform, out int usableObjectId, out Vector3 usablePosition))
                 {
-                    OnClickOnDoor(doorObjectId, doorPosition);
+                    OnClickOnDoor(usableObjectId, usablePosition);
                 }
                 else if (_targetObjectData.ObjectTag == "Pickup")
                 {
@@ -157,7 +157,7 @@ public class ClickManager : MonoBehaviour
                 }
             }
 
-            if (DoorManager.TryFindDoor(hit.collider.transform, out _, out _))
+            if (TryFindUsable(hit.collider.transform, out _, out _))
             {
                 UpdateItemHighlight(null);
                 CursorManager.Instance.ChangeCursor(CursorManager.CursorType.Use);
@@ -257,6 +257,14 @@ public class ClickManager : MonoBehaviour
     private const float DoorReach = 1.6f;
     private int _doorTargetId;
     private Coroutine _doorApproach;
+
+    // Objets du decor lies a un objet serveur : portes, coffre de salle de clan.
+    private static bool TryFindUsable(Transform hit, out int objectId, out Vector3 position)
+    {
+        return DoorManager.TryFindDoor(hit, out objectId, out position)
+            || ClanHallFurniture.TryFindChest(hit, out objectId, out position)
+            || ClanHallDecor.TryFindWorkbench(hit, out objectId, out position);
+    }
 
     private void OnClickOnDoor(int objectId, Vector3 doorPosition)
     {

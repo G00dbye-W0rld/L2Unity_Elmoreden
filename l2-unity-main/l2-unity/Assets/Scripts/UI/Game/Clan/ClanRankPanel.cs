@@ -28,6 +28,7 @@ public class ClanRankPanel
         new Privilege { Group = "Salle de clan", Label = "Ench\u00e8res", Mask = 4096 },
         new Privilege { Group = "Salle de clan", Label = "Expulser", Mask = 8192 },
         new Privilege { Group = "Salle de clan", Label = "R\u00e9gler les fonctions", Mask = 16384 },
+        new Privilege { Group = "Salle de clan", Label = "Am\u00e9nager (mobilier)", Mask = 8388608 },
         new Privilege { Group = "Ch\u00e2teau", Label = "Entrer et sortir", Mask = 32768 },
         new Privilege { Group = "Ch\u00e2teau", Label = "Administrer le manoir", Mask = 65536 },
         new Privilege { Group = "Ch\u00e2teau", Label = "G\u00e9rer les si\u00e8ges", Mask = 131072 },

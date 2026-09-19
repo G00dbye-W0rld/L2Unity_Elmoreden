@@ -141,6 +141,10 @@ public class EnterWorld extends L2GameClientPacket
 			final ClanHall ch = ClanHallManager.getInstance().getClanHallByOwner(clan);
 			if (ch != null && !ch.getPaid())
 				player.sendPacket(SystemMessageId.PAYMENT_FOR_YOUR_CLAN_HALL_HAS_NOT_BEEN_MADE_PLEASE_MAKE_PAYMENT_TO_YOUR_CLAN_WAREHOUSE_BY_S1_TOMORROW);
+
+			// Le chef est prevenu avant que le loyer ou les installations ne soient impayes.
+			if (ch != null && player.isClanLeader() && clan.getWarehouse().getAdena() < 2 * ch.getWeeklyCharges())
+				player.sendMessage("Salle de clan : l'entrepôt ne couvre plus deux semaines de charges (" + ch.getWeeklyCharges() + " adena par semaine).");
 			
 			for (Castle castle : CastleManager.getInstance().getCastles())
 			{

@@ -8,6 +8,7 @@ import com.shnok.javaserver.gameserver.model.actor.Player;
 import com.shnok.javaserver.gameserver.model.residence.clanhall.ClanHall;
 import com.shnok.javaserver.gameserver.model.zone.type.subtype.ResidenceZoneType;
 import com.shnok.javaserver.gameserver.network.serverpackets.unused.ClanHallDecoration;
+import com.shnok.javaserver.gameserver.network.serverpackets.ExClanHallFurniture;
 
 /**
  * A zone extending {@link ResidenceZoneType} used by {@link ClanHall}s.
@@ -53,6 +54,7 @@ public class ClanHallZone extends ResidenceZoneType
 			
 			// Send decoration packet
 			player.sendPacket(new ClanHallDecoration(ch));
+			player.sendPacket(new ExClanHallFurniture(ch.getId()));
 		}
 	}
 	

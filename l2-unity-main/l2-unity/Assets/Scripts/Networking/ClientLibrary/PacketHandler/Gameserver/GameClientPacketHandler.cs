@@ -103,6 +103,11 @@ public class GameClientPacketHandler : ClientPacketHandler
         SendPacket(packet);
     }
 
+    public void SendRequestLockpick(int doorObjectId, int action)
+    {
+        SendPacket(new RequestLockpickPacket(doorObjectId, action));
+    }
+
     public void SendDlgAnswer(int messageId, int answer, int requesterId)
     {
         SendPacket(new DlgAnswerPacket(messageId, answer, requesterId));

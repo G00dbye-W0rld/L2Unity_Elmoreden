@@ -1,11 +1,16 @@
 package com.shnok.javaserver.gameserver.model.actor.instance;
 
 import java.text.SimpleDateFormat;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.TimeUnit;
 
 import com.shnok.javaserver.Config;
+import com.shnok.javaserver.gameserver.data.manager.ClanHallFurnitureManager;
 import com.shnok.javaserver.gameserver.data.xml.ClanHallDecoData;
+import com.shnok.javaserver.gameserver.data.xml.ClanHallUpgradeData;
+import com.shnok.javaserver.gameserver.data.xml.ItemData;
+import com.shnok.javaserver.gameserver.model.item.instance.ItemInstance;
 import com.shnok.javaserver.gameserver.enums.PrivilegeType;
 import com.shnok.javaserver.gameserver.enums.TeleportType;
 import com.shnok.javaserver.gameserver.enums.actors.NpcTalkCond;
@@ -103,6 +108,18 @@ public class ClanHallManagerNpc extends Merchant
 		final String actualCommand = st.nextToken();
 		
 		String val = (st.hasMoreTokens()) ? st.nextToken() : "";
+		
+		if (actualCommand.equalsIgnoreCase("services") || actualCommand.equalsIgnoreCase("charges") || actualCommand.equalsIgnoreCase("security") || actualCommand.startsWith("upgrade"))
+		{
+			handleHallMenu(player, actualCommand, val, st);
+			return;
+		}
+		
+		if (actualCommand.startsWith("furnish") || actualCommand.equalsIgnoreCase("furniture_shop"))
+		{
+			handleFurnish(player, actualCommand, val, st);
+			return;
+		}
 		
 		if (actualCommand.equalsIgnoreCase("banish_foreigner"))
 		{
@@ -270,7 +287,7 @@ public class ClanHallManagerNpc extends Merchant
 							level -= 10;
 						final int percent = level * 20;
 						
-						html.replace("%cost%", cost + "</font> Adena / " + days + " jour(s)</font>)");
+						html.replace("%cost%", cost + "</font> Adena / " + days + " jour(s)</font>");
 						html.replace("%use%", "Récupération de PV supplémentaire pour les membres du clan dans la salle : <font color=\"00FFFF\">" + percent + "%</font>");
 						html.replace("%apply%", "recovery hp " + funcLvl);
 						html.replace("%objectId%", getObjectId());
@@ -290,7 +307,7 @@ public class ClanHallManagerNpc extends Merchant
 							level -= 10;
 						final int percent = level * 5;
 						
-						html.replace("%cost%", cost + "</font> Adena / " + days + " jour(s)</font>)");
+						html.replace("%cost%", cost + "</font> Adena / " + days + " jour(s)</font>");
 						html.replace("%use%", "Récupération de PM supplémentaire pour les membres du clan dans la salle : <font color=\"00FFFF\">" + percent + "%</font>");
 						html.replace("%apply%", "recovery mp " + funcLvl);
 						html.replace("%objectId%", getObjectId());
@@ -310,7 +327,7 @@ public class ClanHallManagerNpc extends Merchant
 							level -= 10;
 						final int percent = level * 5;
 						
-						html.replace("%cost%", cost + "</font> Adena / " + days + " jour(s)</font>)");
+						html.replace("%cost%", cost + "</font> Adena / " + days + " jour(s)</font>");
 						html.replace("%use%", "Rend l'expérience perdue aux membres du clan ressuscités dans la salle : <font color=\"00FFFF\">" + percent + "%</font>");
 						html.replace("%apply%", "recovery exp " + funcLvl);
 						html.replace("%objectId%", getObjectId());
@@ -620,7 +637,7 @@ public class ClanHallManagerNpc extends Merchant
 						if (level > 10)
 							level -= 10;
 						
-						html.replace("%cost%", cost + "</font> Adena / " + days + " jour(s)</font>)");
+						html.replace("%cost%", cost + "</font> Adena / " + days + " jour(s)</font>");
 						html.replace("%use%", "Permet d'acheter des objets spéciaux à intervalles réguliers.");
 						html.replace("%apply%", "other item " + funcLvl);
 						html.replace("%objectId%", getObjectId());
@@ -639,7 +656,7 @@ public class ClanHallManagerNpc extends Merchant
 						if (level > 10)
 							level -= 10;
 						
-						html.replace("%cost%", cost + "</font> Adena / " + days + " jour(s)</font>)");
+						html.replace("%cost%", cost + "</font> Adena / " + days + " jour(s)</font>");
 						html.replace("%use%", "Permet de recevoir la magie de soutien de la gérance.");
 						html.replace("%apply%", "other support " + funcLvl);
 						html.replace("%objectId%", getObjectId());
@@ -658,7 +675,7 @@ public class ClanHallManagerNpc extends Merchant
 						if (level > 10)
 							level -= 10;
 						
-						html.replace("%cost%", cost + "</font> Adena / " + days + " jour(s)</font>)");
+						html.replace("%cost%", cost + "</font> Adena / " + days + " jour(s)</font>");
 						html.replace("%use%", "Téléporte les membres du clan vers les destinations de <font color=\"00FFFF\">niveau " + level + "</font>");
 						html.replace("%apply%", "other tele " + funcLvl);
 						html.replace("%objectId%", getObjectId());
@@ -905,7 +922,7 @@ public class ClanHallManagerNpc extends Merchant
 						if (level > 10)
 							level -= 10;
 						
-						html.replace("%cost%", cost + "</font> Adena / " + days + " jour(s)</font>)");
+						html.replace("%cost%", cost + "</font> Adena / " + days + " jour(s)</font>");
 						html.replace("%use%", "Des tentures pour décorer la salle de clan.");
 						html.replace("%apply%", "deco curtains " + funcLvl);
 						html.replace("%objectId%", getObjectId());
@@ -924,7 +941,7 @@ public class ClanHallManagerNpc extends Merchant
 						if (level > 10)
 							level -= 10;
 						
-						html.replace("%cost%", cost + "</font> Adena / " + days + " jour(s)</font>)");
+						html.replace("%cost%", cost + "</font> Adena / " + days + " jour(s)</font>");
 						html.replace("%use%", "Sert à décorer la salle de clan.");
 						html.replace("%apply%", "deco fixtures " + funcLvl);
 						html.replace("%objectId%", getObjectId());
@@ -1169,6 +1186,269 @@ public class ClanHallManagerNpc extends Merchant
 		return NpcTalkCond.NONE;
 	}
 	
+	
+	private static final Map<String, String> FURNITURE_CATEGORIES = Map.of("SEAT", "Siège", "TABLE", "Table", "LIGHT", "Luminaire", "DECOR", "Décoration", "BANNER", "Étendard", "CARPET", "Tapis", "CURTAIN", "Tentures", "PLATFORM", "Estrade", "CHEST", "Coffre");
+	
+	// Menus de la salle (ajout du projet) : services, ameliorations, charges, securite.
+	private static final String BUTTON = "<button value=\"%s\" action=\"bypass -h npc_%d_%s\" width=%d height=21 back=\"L2UI_ch3.Btn1_normalOn\" fore=\"L2UI_ch3.Btn1_normal\">";
+
+	private static String adena(long value)
+	{
+		return String.format("%,d", value).replace(',', ' ').replace(' ', ' ').replace(' ', ' ');
+	}
+
+	private String button(String label, String command, int width)
+	{
+		return String.format(BUTTON, label, getObjectId(), command, width);
+	}
+
+	private void sendHallPage(Player player, String title, String content)
+	{
+		final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
+		html.setFile("data/html/clanHallManager/hall-page.htm");
+		html.replace("%title%", title);
+		html.replace("%content%", content);
+		html.replace("%objectId%", getObjectId());
+		player.sendPacket(html);
+	}
+
+	private static String state(ClanHall ch, ClanHallUpgradeData.Upgrade upgrade)
+	{
+		final ClanHallFunction chf = ch.getInstalledFunction(upgrade.type());
+		if (chf == null)
+			return "<font color=\"808080\">Non installé</font>";
+
+		if (chf.isSuspended())
+			return "<font color=\"FF6060\">Suspendu (entrepôt insuffisant)</font>";
+
+		final ClanHallUpgradeData.Tier tier = upgrade.findByLvl(ch.getGrade(), chf.getLvl());
+		return "<font color=\"A0E0A0\">" + ((tier != null) ? tier.name() + " : " + tier.effect() : "Niveau " + chf.getLvl()) + "</font>";
+	}
+
+	private void handleHallMenu(Player player, String command, String val, StringTokenizer st)
+	{
+		final ClanHall ch = getClanHall();
+		final ClanHallUpgradeData data = ClanHallUpgradeData.getInstance();
+
+		if (command.equalsIgnoreCase("services"))
+		{
+			final StringBuilder sb = new StringBuilder("Ce que la salle offre à ses membres. Les installations se commandent dans les Améliorations.<br><br>");
+			for (ClanHallUpgradeData.Upgrade upgrade : data.getAll())
+			{
+				sb.append("<table width=270><tr><td width=36><img src=\"icon.clanhall_upgrade_").append(upgrade.type()).append("\" width=32 height=32></td><td width=234>");
+				sb.append("<font color=\"LEVEL\">").append(upgrade.name()).append("</font><br1>").append(state(ch, upgrade)).append("</td></tr></table>");
+
+				final String use = switch (upgrade.type())
+				{
+					case ClanHall.FUNC_TELEPORT -> "functions tele";
+					case ClanHall.FUNC_SUPPORT_MAGIC -> "functions support";
+					case ClanHall.FUNC_CREATE_ITEM -> "functions item_creation " + getNpcId();
+					default -> null;
+				};
+				if (use != null && ch.getFunction(upgrade.type()) != null)
+					sb.append("<center>").append(button("Utiliser : " + upgrade.name(), use, 170)).append("</center>");
+				sb.append("<br1>");
+			}
+			sendHallPage(player, "Services de la salle", sb.toString());
+			return;
+		}
+
+		if (command.equalsIgnoreCase("charges"))
+		{
+			final Clan clan = player.getClan();
+			final long total = ch.getWeeklyCharges();
+			final long balance = (clan != null) ? clan.getWarehouse().getAdena() : 0;
+			final long weeks = (total > 0) ? balance / total : 0;
+
+			final StringBuilder sb = new StringBuilder("Tout est prélevé chaque semaine sur l'entrepôt du clan.<br><br><table width=270>");
+			sb.append("<tr><td width=170>Loyer de la salle</td><td width=100 align=right>").append(adena(ch.getLease())).append("</td></tr>");
+			for (ClanHallUpgradeData.Upgrade upgrade : data.getAll())
+			{
+				final ClanHallFunction chf = ch.getInstalledFunction(upgrade.type());
+				if (chf == null)
+					continue;
+
+				final ClanHallUpgradeData.Tier tier = upgrade.findByLvl(ch.getGrade(), chf.getLvl());
+				sb.append("<tr><td>").append(upgrade.name()).append((tier != null) ? " (" + tier.name() + ")" : "");
+				sb.append(chf.isSuspended() ? " <font color=\"FF6060\">suspendu</font>" : "");
+				sb.append("</td><td align=right>").append(adena((long) chf.getLease() * 604800000L / Math.max(1, chf.getRate()))).append("</td></tr>");
+			}
+			sb.append("<tr><td><font color=\"LEVEL\">Total par semaine</font></td><td align=right><font color=\"LEVEL\">").append(adena(total)).append("</font></td></tr></table><br>");
+			sb.append("Entrepôt du clan : <font color=\"LEVEL\">").append(adena(balance)).append(" adena</font><br1>");
+			sb.append((weeks >= 2) ? "Assez pour environ <font color=\"A0E0A0\">" + weeks + " semaines</font>." : "<font color=\"FF6060\">Attention : l'entrepôt couvre moins de deux semaines.</font>");
+			sb.append("<br1>Prochain loyer le ").append(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(ch.getPaidUntil())).append(".");
+			sendHallPage(player, "Charges de la salle", sb.toString());
+			return;
+		}
+
+		if (command.equalsIgnoreCase("security"))
+		{
+			final String content = "Tant que la porte est ouverte, n'importe qui peut entrer. Les intrus sont reconduits dehors d'un seul ordre.<br><br><center>"
+				+ button("Ouvrir la porte", "door open", 150) + "<br>" + button("Fermer la porte", "door close", 150) + "<br>"
+				+ button("Expulser les intrus", "banish_foreigner list", 150) + "</center>";
+			sendHallPage(player, "Porte et sécurité", content);
+			return;
+		}
+
+		// Ameliorations : commander, changer de niveau, retirer.
+		if (!validatePrivileges(player, PrivilegeType.CHP_SET_FUNCTIONS))
+			return;
+
+		String message = null;
+		try
+		{
+			if (command.equalsIgnoreCase("upgrade"))
+			{
+				final ClanHallUpgradeData.Upgrade upgrade = data.get(Integer.parseInt(val));
+				final ClanHallUpgradeData.Tier tier = upgrade.find(ch.getGrade(), Integer.parseInt(st.nextToken()));
+				final long balance = player.getClan().getWarehouse().getAdena();
+				final String content = "<font color=\"LEVEL\">" + upgrade.name() + " : " + tier.name() + "</font><br1>" + tier.effect() + "<br><br>"
+					+ "Coût : <font color=\"LEVEL\">" + adena(tier.price()) + " adena par semaine</font>, prélevés sur l'entrepôt du clan.<br1>"
+					+ "La première semaine est payée tout de suite. Un changement de niveau repart pour une semaine entière.<br1>"
+					+ "Entrepôt du clan : " + adena(balance) + " adena.<br><br><center>"
+					+ button("Valider", "upgrade_apply " + upgrade.type() + " " + tier.tier(), 120) + "<br>" + button("Retour", "upgrades", 120) + "</center>";
+				sendHallPage(player, "Commander une amélioration", content);
+				return;
+			}
+
+			if (command.equalsIgnoreCase("upgrade_remove"))
+			{
+				final ClanHallUpgradeData.Upgrade upgrade = data.get(Integer.parseInt(val));
+				final String content = "Retirer l'installation <font color=\"LEVEL\">" + upgrade.name() + "</font> ?<br1>La semaine en cours n'est pas remboursée.<br><br><center>"
+					+ button("Retirer", "upgrade_remove_apply " + upgrade.type(), 120) + "<br>" + button("Retour", "upgrades", 120) + "</center>";
+				sendHallPage(player, "Retirer une installation", content);
+				return;
+			}
+
+			if (command.equalsIgnoreCase("upgrade_apply"))
+			{
+				final ClanHallUpgradeData.Upgrade upgrade = data.get(Integer.parseInt(val));
+				final ClanHallUpgradeData.Tier tier = upgrade.find(ch.getGrade(), Integer.parseInt(st.nextToken()));
+				message = ch.installUpgrade(player.getClan(), upgrade.type(), tier.lvl(), tier.price()) ? upgrade.name() + " : " + tier.name() + " installé." : "L'entrepôt du clan ne contient pas assez d'adena.";
+			}
+			else if (command.equalsIgnoreCase("upgrade_remove_apply"))
+			{
+				final ClanHallFunction chf = ch.getInstalledFunction(Integer.parseInt(val));
+				if (chf != null)
+				{
+					chf.removeFunction();
+					ch.refreshDecoration();
+					message = "Installation retirée.";
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			message = "Commande invalide.";
+		}
+
+		final StringBuilder sb = new StringBuilder();
+		if (message != null)
+			sb.append("<font color=\"LEVEL\">").append(message).append("</font><br><br>");
+		sb.append("Chaque installation se voit dans la salle et se paie chaque semaine sur l'entrepôt du clan.<br><br>");
+
+		for (ClanHallUpgradeData.Upgrade upgrade : data.getAll())
+		{
+			final ClanHallFunction chf = ch.getInstalledFunction(upgrade.type());
+			final ClanHallUpgradeData.Tier current = (chf != null) ? upgrade.findByLvl(ch.getGrade(), chf.getLvl()) : null;
+
+			sb.append("<table width=270><tr><td width=36><img src=\"icon.clanhall_upgrade_").append(upgrade.type()).append("\" width=32 height=32></td><td width=234>");
+			sb.append("<font color=\"LEVEL\">").append(upgrade.name()).append("</font><br1><font color=\"A0A0A0\">").append(upgrade.effect()).append("</font><br1>").append(state(ch, upgrade)).append("</td></tr></table>");
+
+			for (ClanHallUpgradeData.Tier tier : upgrade.forGrade(ch.getGrade()))
+			{
+				final String label = tier.name() + " · " + adena(tier.price());
+				if (current != null && current.tier() == tier.tier())
+					sb.append("<font color=\"LEVEL\">[").append(label).append("]</font> ");
+				else
+					sb.append("<a action=\"bypass -h npc_").append(getObjectId()).append("_upgrade ").append(upgrade.type()).append(" ").append(tier.tier()).append("\">").append(label).append("</a> ");
+			}
+			if (chf != null)
+				sb.append("<a action=\"bypass -h npc_").append(getObjectId()).append("_upgrade_remove ").append(upgrade.type()).append("\">Retirer</a>");
+			sb.append("<br><br>");
+		}
+		sendHallPage(player, "Améliorations de la salle", sb.toString());
+	}
+	
+	// Amenagement de la salle (ajout du projet) : liste des emplacements, choix d'un
+	// meuble de l'inventaire, reprise vers l'entrepot du clan.
+	private void handleFurnish(Player player, String command, String val, StringTokenizer st)
+	{
+		if (command.equalsIgnoreCase("furniture_shop"))
+		{
+			showBuyWindow(player, 950110);
+			return;
+		}
+		
+		if (!validatePrivileges(player, PrivilegeType.CHP_FURNISH))
+			return;
+		
+		final ClanHallFurnitureManager manager = ClanHallFurnitureManager.getInstance();
+		final ClanHall ch = getClanHall();
+		String message = null;
+		
+		try
+		{
+			if (command.equalsIgnoreCase("furnish_slot"))
+			{
+				showFurnitureChoice(player, Integer.parseInt(val));
+				return;
+			}
+			else if (command.equalsIgnoreCase("furnish_place"))
+				message = manager.place(player, ch, Integer.parseInt(val), Integer.parseInt(st.nextToken()));
+			else if (command.equalsIgnoreCase("furnish_remove"))
+			{
+				message = manager.remove(ch, Integer.parseInt(val));
+				if (message == null)
+					message = "Le meuble a été rangé dans l'entrepôt du clan.";
+			}
+		}
+		catch (Exception e)
+		{
+			message = "Commande invalide.";
+		}
+		
+		final StringBuilder sb = new StringBuilder();
+		final Map<Integer, Integer> placed = manager.getPlaced(ch.getId());
+		for (ClanHallFurnitureManager.Slot slot : manager.getSlots(ch.getId()).values())
+		{
+			final Integer itemId = placed.get(slot.id());
+			sb.append("<tr><td width=90><font color=\"999999\">").append(FURNITURE_CATEGORIES.getOrDefault(slot.category(), slot.category())).append(" ").append(manager.getOrdinal(ch.getId(), slot.id())).append("</font></td><td width=180>");
+			if (itemId == null)
+				sb.append("<a action=\"bypass -h npc_").append(getObjectId()).append("_furnish_slot ").append(slot.id()).append("\">Poser un meuble</a>");
+			else
+				sb.append(ItemData.getInstance().getTemplate(itemId).getName()).append(" <a action=\"bypass -h npc_").append(getObjectId()).append("_furnish_remove ").append(slot.id()).append("\">[Reprendre]</a>");
+			sb.append("</td></tr>");
+		}
+		
+		final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
+		html.setFile("data/html/clanHallManager/furnish.htm");
+		html.replace("%message%", (message != null) ? "<font color=\"LEVEL\">" + message + "</font><br>" : "");
+		html.replace("%slots%", (sb.length() > 0) ? sb.toString() : "<tr><td>Cette salle n'a pas encore d'emplacement pour le mobilier.</td></tr>");
+		html.replace("%objectId%", getObjectId());
+		player.sendPacket(html);
+	}
+	
+	private void showFurnitureChoice(Player player, int slotId)
+	{
+		final ClanHallFurnitureManager.Slot slot = ClanHallFurnitureManager.getInstance().getSlots(getClanHall().getId()).get(slotId);
+		if (slot == null)
+			return;
+		
+		final StringBuilder sb = new StringBuilder();
+		for (ItemInstance item : player.getInventory().getItems())
+		{
+			if (slot.category().equals(ClanHallFurnitureManager.getInstance().getCategory(item.getItemId())))
+				sb.append("<a action=\"bypass -h npc_").append(getObjectId()).append("_furnish_place ").append(slotId).append(" ").append(item.getObjectId()).append("\">").append(item.getName()).append("</a><br>");
+		}
+		
+		final NpcHtmlMessage html = new NpcHtmlMessage(getObjectId());
+		html.setFile("data/html/clanHallManager/furnish-choice.htm");
+		html.replace("%category%", FURNITURE_CATEGORIES.getOrDefault(slot.category(), slot.category()) + " " + ClanHallFurnitureManager.getInstance().getOrdinal(getClanHall().getId(), slotId));
+		html.replace("%items%", (sb.length() > 0) ? sb.toString() : "Vous n'avez aucun meuble de ce type.<br>Le catalogue du mobilier est disponible auprès de moi.<br>");
+		html.replace("%objectId%", getObjectId());
+		player.sendPacket(html);
+	}
 	private void revalidateDeco(Player player)
 	{
 		getClanHall().getZone().broadcastPacket(new ClanHallDecoration(getClanHall()));

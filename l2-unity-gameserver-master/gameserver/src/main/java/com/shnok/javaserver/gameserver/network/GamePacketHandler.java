@@ -846,6 +846,10 @@ public final class GamePacketHandler implements IPacketHandler<GameClient>, ICli
 							case 0x40:
 								msg = new RequestPartyMarker();
 								break;
+							// Crochetage d'une porte de salle de clan : ajout du projet.
+							case 0x41:
+								msg = new RequestLockpick();
+								break;
 							default:
 								printDebugDoubleOpcode(opcode, id2, buf, state, client);
 								break;

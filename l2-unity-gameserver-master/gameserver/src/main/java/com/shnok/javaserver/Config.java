@@ -60,6 +60,17 @@ public final class Config
 	public static int CLAN_WAREHOUSE_MIN_LEVEL;
 	public static int CLAN_TITLE_MIN_LEVEL;
 	public static boolean SUBUNIT_LEADER_CAN_BE_CLAN_LEADER;
+	
+	// Crochetage des portes de salle de clan (ajout du projet).
+	public static boolean LOCKPICK_ENABLED;
+	public static int LOCKPICK_ITEM_ID;
+	public static int LOCKPICK_PINS;
+	public static int LOCKPICK_BASE_DIFFICULTY;
+	public static int LOCKPICK_DIFFICULTY_PER_GRADE;
+	public static int LOCKPICK_DOOR_OPEN_SECONDS;
+	public static int LOCKPICK_KARMA;
+	public static boolean LOCKPICK_REQUIRE_OWNER_ONLINE;
+	public static int LOCKPICK_DOOR_COOLDOWN_MINUTES;
 	public static boolean MEMBERS_CAN_WITHDRAW_FROM_CLANWH;
 	
 	/** Manor */
@@ -569,6 +580,15 @@ public final class Config
 		CLAN_WAREHOUSE_MIN_LEVEL = clans.getProperty("ClanWarehouseMinLevel", 1);
 		CLAN_TITLE_MIN_LEVEL = clans.getProperty("ClanTitleMinLevel", 3);
 		SUBUNIT_LEADER_CAN_BE_CLAN_LEADER = clans.getProperty("SubUnitLeaderCanBeClanLeader", false);
+		LOCKPICK_ENABLED = clans.getProperty("LockpickEnabled", true);
+		LOCKPICK_ITEM_ID = clans.getProperty("LockpickItemId", 95100);
+		LOCKPICK_PINS = clans.getProperty("LockpickPins", 3);
+		LOCKPICK_BASE_DIFFICULTY = clans.getProperty("LockpickBaseDifficulty", 10);
+		LOCKPICK_DIFFICULTY_PER_GRADE = clans.getProperty("LockpickDifficultyPerGrade", 2);
+		LOCKPICK_DOOR_OPEN_SECONDS = clans.getProperty("LockpickDoorOpenSeconds", 45);
+		LOCKPICK_KARMA = clans.getProperty("LockpickKarma", 720);
+		LOCKPICK_REQUIRE_OWNER_ONLINE = clans.getProperty("LockpickRequireOwnerOnline", true);
+		LOCKPICK_DOOR_COOLDOWN_MINUTES = clans.getProperty("LockpickDoorCooldownMinutes", 10);
 		CLAN_DISSOLVE_DAYS = clans.getProperty("DaysToPassToDissolveAClan", 7);
 		ALLY_JOIN_DAYS_WHEN_LEAVED = clans.getProperty("DaysBeforeJoinAllyWhenLeaved", 1);
 		ALLY_JOIN_DAYS_WHEN_DISMISSED = clans.getProperty("DaysBeforeJoinAllyWhenDismissed", 1);

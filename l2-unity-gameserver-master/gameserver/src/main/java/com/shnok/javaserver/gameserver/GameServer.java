@@ -25,6 +25,7 @@ import com.shnok.javaserver.gameserver.data.manager.BuyListManager;
 import com.shnok.javaserver.gameserver.data.manager.CastleManager;
 import com.shnok.javaserver.gameserver.data.manager.CastleManorManager;
 import com.shnok.javaserver.gameserver.data.manager.ClanHallManager;
+import com.shnok.javaserver.gameserver.data.manager.ClanHallFurnitureManager;
 import com.shnok.javaserver.gameserver.data.manager.CoupleManager;
 import com.shnok.javaserver.gameserver.data.manager.CursedWeaponManager;
 import com.shnok.javaserver.gameserver.data.manager.DerbyTrackManager;
@@ -238,6 +239,7 @@ public class GameServer
 		ObserverGroupData.getInstance();
 		
 		CastleManager.getInstance().spawnEntities();
+		ClanHallFurnitureManager.getInstance();
 
 		if(Config.OLY_ENABLED) {
 			StringUtil.printSection("Olympiads & Heroes");
