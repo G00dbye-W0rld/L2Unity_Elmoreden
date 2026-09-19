@@ -486,8 +486,18 @@ public class ModelTable
         }
 
         string path = $"Data/Animations/{folderFile[0]}/{folderFile[1]}/{folderFile[1]}";
+        GameObject npc = Resources.Load<GameObject>(path);
 
-        return Resources.Load<GameObject>(path);
+        // Les donnees Classic rangent certains modeles dans des paquets numerotes
+        // (LineageNPCs4.a_traderB_MHuman_m00) alors que l'import les a mis dans le
+        // paquet de base : sans ce repli, le PNJ prenait le modele de secours.
+        string basePackage = folderFile[0].TrimEnd('0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+        if (npc == null && basePackage != folderFile[0])
+        {
+            npc = Resources.Load<GameObject>($"Data/Animations/{basePackage}/{folderFile[1]}/{folderFile[1]}");
+        }
+
+        return npc;
     }
 
     // -------
