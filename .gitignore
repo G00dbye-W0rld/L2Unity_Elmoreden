@@ -68,3 +68,21 @@
 # jamais dans l'historique : ils doublent des donnees deja versionnees, et
 # leur interet est justement d'etre anterieurs a la version suivie.
 /_backup_*/
+
+# Assets regeneres depuis le client Orfen (7,2 Go) : ils se refabriquent avec
+# Scripts/Tools/Blender/OrfenNpcImport.py et OrfenItemImport.py, puis les menus
+# L2 > PNJ et L2 > Objets. Les fichiers deja suivis restent suivis ; pour ajouter
+# malgre tout un asset fait a la main ici, utiliser git add -f.
+l2-unity-main/l2-unity/Assets/Resources/Data/Animations/**/*.fbx
+l2-unity-main/l2-unity/Assets/Resources/Data/Animations/**/*.anim
+l2-unity-main/l2-unity/Assets/Resources/Data/Animations/**/*.prefab
+l2-unity-main/l2-unity/Assets/Resources/Data/Animations/**/*.asset
+l2-unity-main/l2-unity/Assets/Resources/Data/Animations/**/*.mat
+l2-unity-main/l2-unity/Assets/Resources/Data/Animations/**/*.png
+l2-unity-main/l2-unity/Assets/Resources/Data/Animations/**/*.import.json
+l2-unity-main/l2-unity/Assets/Resources/Data/SysTextures/**/*.png
+l2-unity-main/l2-unity/Assets/Resources/Data/SysTextures/**/*.mat
+l2-unity-main/l2-unity/Assets/Resources/Data/SysTextures/armor_materials.import.json
+l2-unity-main/l2-unity/Assets/Resources/Data/Textures/Agit_B_t/
+l2-unity-main/l2-unity/Assets/Resources/Data/Animations/**/*.meta
+l2-unity-main/l2-unity/Assets/Resources/Data/SysTextures/**/*.meta
