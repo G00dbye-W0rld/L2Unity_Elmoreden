@@ -29,6 +29,9 @@ public class ItemSpawner
     // pas besoin). Ne s'applique PAS au placeholder (deja calibre separement).
     private readonly float _worldScale;
 
+    // Echelle des modeles d'arme poses au sol (voir SpawnItem).
+    private const float WeaponGroundScale = 100f;
+
     public ItemSpawner(Transform itemsContainer, float worldScale = 1f)
     {
         _itemsContainer = itemsContainer;
@@ -97,14 +100,30 @@ public class ItemSpawner
 
         position.y = World.Instance.GetGroundHeight(position);
 
-        GameObject go = Object.Instantiate(prefab, position, Quaternion.identity, _itemsContainer);
+        // Une arme au sol reutilise son modele d'equipement, couche a plat.
+        bool weaponModel = prefab.GetComponent<WorldItem>() == null && prefab != _placeholderPrefab;
+        Quaternion rotation = weaponModel ? Quaternion.Euler(90f, Random.Range(0f, 360f), 0f) : Quaternion.identity;
+        GameObject go = Object.Instantiate(prefab, position, rotation, _itemsContainer);
         go.name = $"Item_{itemTemplateId}_{objectId}";
 
         Renderer renderer = go.GetComponentInChildren<Renderer>();
+        if (weaponModel)
+        {
+            // Dans la main, l'arme est portee par un os dont l'echelle compense celle du modele :
+            // au sol, sans ce facteur, elle est 100 fois trop petite.
+            go.transform.localScale = Vector3.one * WeaponGroundScale;
+            MakePickable(go, renderer);
+        }
 
         if (prefab != _placeholderPrefab)
         {
-            go.transform.localScale = Vector3.one * _worldScale;
+            // Le facteur d'echelle vise les petits objets (potions, materiaux) : armes et
+            // armures au sol gardent leur taille reelle.
+            bool equipment = ItemTable.Instance.GetWeapon(itemTemplateId) != null || ItemTable.Instance.GetArmor(itemTemplateId) != null;
+            if (!equipment)
+            {
+                go.transform.localScale = Vector3.one * _worldScale;
+            }
 
             // Les meshes "dropitems" n'ont pas forcement leur pivot a leur
             // base (confirme visuellement : l'objet s'enfoncait legerement
@@ -155,7 +174,19 @@ public class ItemSpawner
         if (!_meshPrefabCache.TryGetValue(meshName, out GameObject prefab))
         {
             prefab = Resources.Load<GameObject>($"Prefabs/World/DropItems/{meshName}");
+
+            // Les armes n'ont pas de modele "dropitems" : leur modele d'equipement sert au sol.
+            if (prefab == null && grp.DropModel.StartsWith("LineageWeapons", System.StringComparison.OrdinalIgnoreCase))
+            {
+                prefab = Resources.Load<GameObject>($"Data/Animations/{grp.DropModel.Replace('.', '/')}");
+            }
+
             _meshPrefabCache[meshName] = prefab;
+        }
+
+        if (prefab != null && prefab.GetComponent<WorldItem>() == null)
+        {
+            return prefab;
         }
 
         if (prefab == null)
@@ -169,11 +200,35 @@ public class ItemSpawner
             if (!_materialCache.TryGetValue(materialName, out overrideMaterial))
             {
                 overrideMaterial = Resources.Load<Material>($"Data/Animations/DropItems/Materials/{materialName}");
+
+                // Une armure au sol porte la texture du personnage : materiau range avec ceux des armures.
+                if (overrideMaterial == null && grp.DropTexture.Contains("."))
+                {
+                    string package = grp.DropTexture.Substring(0, grp.DropTexture.IndexOf('.'));
+                    overrideMaterial = Resources.Load<Material>($"Data/SysTextures/{package}/Materials/{materialName}");
+                }
+
                 _materialCache[materialName] = overrideMaterial;
             }
         }
 
         return prefab;
+    }
+
+    // Modele d'arme : on lui ajoute ce qu'ont les prefabs de drop (ramassage, collider de clic).
+    private static void MakePickable(GameObject go, Renderer renderer)
+    {
+        go.tag = "Pickup";
+        BoxCollider collider = go.AddComponent<BoxCollider>();
+        if (renderer != null)
+        {
+            Bounds bounds = renderer.bounds;
+            collider.center = go.transform.InverseTransformPoint(bounds.center);
+            Vector3 size = go.transform.InverseTransformVector(bounds.size);
+            collider.size = new Vector3(Mathf.Abs(size.x), Mathf.Abs(size.y), Mathf.Abs(size.z));
+        }
+
+        go.AddComponent<WorldItem>();
     }
 
     private static string StripNamespace(string value)
