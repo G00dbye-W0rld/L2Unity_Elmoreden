@@ -644,7 +644,23 @@ public class NewHumanoidAnimationController : NewBaseAnimationController
 
     public override void Emote(int action)
     {
-        Debug.Log($"[{transform.name}] Social Action: {action}");
+        // Le serveur tire l'action au hasard : si ce PNJ n'a pas ce clip, on prend un de ceux qu'il a.
+        if (GetAnimationClip(AnimationCategory.Social, action) == null)
+        {
+            int count = 0;
+            while (GetAnimationClip(AnimationCategory.Social, count) != null)
+            {
+                count++;
+            }
+
+            if (count == 0)
+            {
+                return;
+            }
+
+            action %= count;
+        }
+
         if (PlayAnimation(AnimationCategory.Social, action))
         {
             if (!_animancerState.HasEvents)

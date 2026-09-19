@@ -2291,10 +2291,17 @@ MonoBehaviour:
     _title: 
     _isHpShowable: 0
     _pvpFlag: 0
+    _relation: 0
+    _autoAttackable: 0
     _npcId: 0
     _npcClass: 
     _playerClass: 0
     _isMage: 0
+    _clanId: 0
+    _clanCrestId: 0
+    _allyId: 0
+    _allyCrestId: 0
+    _clanPrivileges: 0
     _position: {x: 0, y: 0, z: 0}
     _heading: 0
     _owned: 0
@@ -2307,8 +2314,10 @@ MonoBehaviour:
     _runSpeed: 0
     _moveSpeedMultiplier: 0
     _walkSpeed: 0
+    _swimSpeed: 0
     _scaledRunSpeed: 0
     _scaledWalkSpeed: 0
+    _scaledSwimSpeed: 0
     _attackSpeedMultiplier: 0
     _attackRange: 0
     _pAtkSpd: 0
@@ -2324,10 +2333,14 @@ MonoBehaviour:
     _rhand: 0
     _serverNameColor: 0
     _serverTitleColor: 0
+    _enchantEffect: 0
   _race: 1
   _raceId: 0
   _running: 0
   _sitting: 0
+  _swimming: 0
+  _operateType: 0
+  _storeMessage: 
 --- !u!114 &6706968058968661886
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2615,18 +2628,20 @@ MonoBehaviour:
   _castSpdMultiplier: 1
   _runSpdMultiplier: 1
   _walkSpdMultiplier: 1
+  _swimSpdMultiplier: 1
   _nockArrowRatio: 0.2
   _shootArrowRatio: 0.6
   _defaultIdleAnimationSpeed: 0.3
   _defaultAtkWaitAnimationSpeed: 0.5
   _defaultRunAnimationSpeed: 0.35
-  _defaultWalkAnimationSpeed: 0.4
+  _defaultWalkAnimationSpeed: 0.45
+  _defaultSwimAnimationSpeed: 0.4
   _defaultJumpAnimationSpeed: 1.25
   _defaultDieAnimationSpeed: 0.5
   _defaultAnimContainer: {fileID: 11400000, guid: 4960fec57468108458f28f62201830b3, type: 2}
-  _atkAnimContainer: {fileID: 11400000, guid: f81bc503f1d9c41408ca9e08a373027b, type: 2}
-  _spAtkAnimContainer: {fileID: 11400000, guid: 18feea3870cb89545a11008528031690, type: 2}
-  _socialAnimContainer: {fileID: 11400000, guid: 239562d5ac2e5b244b1b3d763f17d553, type: 2}
+  _atkAnimContainer: {fileID: 11400000, guid: 20c8c4f84b5714b4eb544b6cbbcfa822, type: 2}
+  _spAtkAnimContainer: {fileID: 11400000, guid: cec829240795fd44eb9190a744781369, type: 2}
+  _socialAnimContainer: {fileID: 11400000, guid: d44f4cc747d120944ae3d90c4e41a93e, type: 2}
   _lastAnimationType: 0
   _weaponAnim: 0
   _atkAnimIndex: 0

@@ -116,6 +116,10 @@ public class NpcSpawner : EntitySpawnStrategy<Appearance, Stats, NpcStatus>
         CharacterController controller = npcGo.GetComponent<CharacterController>();
         if (controller != null)
         {
+            // Un CharacterController repose a skinWidth au-dessus du sol : le bas de la capsule
+            // doit etre skinWidth au-dessus des pieds pour que ceux-ci touchent le terrain.
+            controller.center = new Vector3(controller.center.x, controller.height / 2f + controller.skinWidth, controller.center.z);
+
             CapsuleCollider blockingCollider = npcGo.AddComponent<CapsuleCollider>();
             blockingCollider.center = controller.center;
             blockingCollider.height = controller.height;

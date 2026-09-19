@@ -46,6 +46,11 @@ public class NewMonsterAnimationController : NewBaseAnimationController
     {
         if (PlayAnimation((int)MonsterAnimationEvent.atk01))
         {
+            // La vitesse se calcule sur la duree du clip d'attaque, pas sur celle du dernier clip joue.
+            if (_atkSpd > 0)
+            {
+                UpdateAttackAnimationSpeed(_lastPlayedClipDuration, _atkSpd);
+            }
             _animancerState.EffectiveSpeed = _atkSpdMultiplier;
 
             if (!_animancerState.HasEvents)

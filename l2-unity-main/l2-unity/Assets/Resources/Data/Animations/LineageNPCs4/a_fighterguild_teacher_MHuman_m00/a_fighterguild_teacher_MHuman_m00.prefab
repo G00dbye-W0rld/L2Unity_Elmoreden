@@ -1725,10 +1725,17 @@ MonoBehaviour:
     _title: 
     _isHpShowable: 0
     _pvpFlag: 0
+    _relation: 0
+    _autoAttackable: 0
     _npcId: 0
     _npcClass: 
     _playerClass: 0
     _isMage: 0
+    _clanId: 0
+    _clanCrestId: 0
+    _allyId: 0
+    _allyCrestId: 0
+    _clanPrivileges: 0
     _position: {x: 0, y: 0, z: 0}
     _heading: 0
     _owned: 0
@@ -1741,8 +1748,10 @@ MonoBehaviour:
     _runSpeed: 0
     _moveSpeedMultiplier: 0
     _walkSpeed: 0
+    _swimSpeed: 0
     _scaledRunSpeed: 0
     _scaledWalkSpeed: 0
+    _scaledSwimSpeed: 0
     _attackSpeedMultiplier: 0
     _attackRange: 0
     _pAtkSpd: 0
@@ -1758,10 +1767,14 @@ MonoBehaviour:
     _rhand: 0
     _serverNameColor: 0
     _serverTitleColor: 0
+    _enchantEffect: 0
   _race: 0
   _raceId: 13
   _running: 0
   _sitting: 0
+  _swimming: 0
+  _operateType: 0
+  _storeMessage: 
 --- !u!114 &7520963659285253413
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2038,17 +2051,19 @@ MonoBehaviour:
   _castSpdMultiplier: 1
   _runSpdMultiplier: 1
   _walkSpdMultiplier: 1
+  _swimSpdMultiplier: 1
   _nockArrowRatio: 0.2
   _shootArrowRatio: 0.6
   _defaultIdleAnimationSpeed: 0.3
   _defaultAtkWaitAnimationSpeed: 0.5
   _defaultRunAnimationSpeed: 0.35
-  _defaultWalkAnimationSpeed: 0.4
+  _defaultWalkAnimationSpeed: 0.45
+  _defaultSwimAnimationSpeed: 0.4
   _defaultJumpAnimationSpeed: 1.25
   _defaultDieAnimationSpeed: 0.5
   _defaultAnimContainer: {fileID: 11400000, guid: 3444fad13190b854b841e5e1f9a1cd48, type: 2}
-  _atkAnimContainer: {fileID: 0}
-  _spAtkAnimContainer: {fileID: 0}
+  _atkAnimContainer: {fileID: 11400000, guid: 3df7f344acd06074cb0212acccf786b4, type: 2}
+  _spAtkAnimContainer: {fileID: 11400000, guid: 3c139b045e437324e9acfd8fa11e820e, type: 2}
   _socialAnimContainer: {fileID: 11400000, guid: e0638213b8d6ad145b96d47b07f2c365, type: 2}
   _lastAnimationType: 0
   _weaponAnim: 0

@@ -80,6 +80,23 @@ public abstract class NewBaseAnimationController : MonoBehaviour
 
     protected abstract AnimationClip GetAnimationClip(AnimationCategory animationCategory, int index);
 
+    // Vrai pour un modele sans aucune animation (statue, obelisque, coffre).
+    public bool IsStaticModel
+    {
+        get
+        {
+            for (int i = 0; i < 64; i++)
+            {
+                if (GetAnimationClip(AnimationCategory.Default, i) != null)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
+
     public virtual void WeaponAnimChanged(WeaponAnimType weapon) { }
 
     public virtual void SetRunSpeed(float value)

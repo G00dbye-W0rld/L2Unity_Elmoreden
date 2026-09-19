@@ -1129,10 +1129,17 @@ MonoBehaviour:
     _title: 
     _isHpShowable: 0
     _pvpFlag: 0
+    _relation: 0
+    _autoAttackable: 0
     _npcId: 0
     _npcClass: 
     _playerClass: 0
     _isMage: 0
+    _clanId: 0
+    _clanCrestId: 0
+    _allyId: 0
+    _allyCrestId: 0
+    _clanPrivileges: 0
     _position: {x: 0, y: 0, z: 0}
     _heading: 0
     _owned: 0
@@ -1145,8 +1152,10 @@ MonoBehaviour:
     _runSpeed: 0
     _moveSpeedMultiplier: 0
     _walkSpeed: 0
+    _swimSpeed: 0
     _scaledRunSpeed: 0
     _scaledWalkSpeed: 0
+    _scaledSwimSpeed: 0
     _attackSpeedMultiplier: 0
     _attackRange: 0
     _pAtkSpd: 0
@@ -1162,10 +1171,14 @@ MonoBehaviour:
     _rhand: 0
     _serverNameColor: 0
     _serverTitleColor: 0
+    _enchantEffect: 0
   _race: 5
   _raceId: 0
   _running: 0
   _sitting: 0
+  _swimming: 0
+  _operateType: 0
+  _storeMessage: 
 --- !u!114 &1071639820596355511
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1370,9 +1383,10 @@ MonoBehaviour:
   _castSpdMultiplier: 1
   _runSpdMultiplier: 1
   _walkSpdMultiplier: 1
+  _swimSpdMultiplier: 1
   _nockArrowRatio: 0.2
   _shootArrowRatio: 0.65
-  _animContainer: {fileID: 11400000, guid: 79a0bb04403b3b045b421f3d866f38ee, type: 2}
+  _animContainer: {fileID: 11400000, guid: 321aefd427fc53d4fa76cde5e575ff45, type: 2}
 --- !u!1 &2802377428121475190
 GameObject:
   m_ObjectHideFlags: 0

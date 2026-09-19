@@ -107,6 +107,12 @@ public class World : MonoBehaviour
         _eventProcessor.QueueEvent(() => NpcHtmlWindow.Instance.RefreshContent(objectId, html, itemId));
         return _worldSpawner.ExecuteWithEntityAsync(objectId, e =>
         {
+            // Une statue ou un obelisque (modele sans animation) ne se tourne pas vers le joueur.
+            if (e.ReferenceHolder.NewAnimationController != null && e.ReferenceHolder.NewAnimationController.IsStaticModel)
+            {
+                return;
+            }
+
             ((NetworkEntityReferenceHolder)e.ReferenceHolder).NetworkTransformReceive.LookAt(PlayerEntity.Instance.transform);
         });
     }
