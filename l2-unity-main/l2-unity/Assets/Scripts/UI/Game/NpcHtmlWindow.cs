@@ -233,6 +233,7 @@ public class NpcHtmlWindow : L2PopupWindow
     public override void HideWindow(bool silent)
     {
         base.HideWindow(silent);
+        ClanHallFurniture.ShowSlotLabels(false);
 
         if (!silent && !_isWindowHidden)
             AudioManager.Instance.PlayUISound("window_close");
@@ -260,6 +261,9 @@ public class NpcHtmlWindow : L2PopupWindow
 
         string processedHtml = PreProcessHtml(htmlString, npcId, itemId);
         ProcessHtmlContent(_content, processedHtml);
+
+        // Page d'amenagement d'une salle de clan : on montre ou sont les emplacements.
+        ClanHallFurniture.ShowSlotLabels(htmlString.Contains("_furnish_slot ") || htmlString.Contains("_furnish_remove "));
     }
 
     private string PreProcessHtml(string html, int npcId, int itemId)
@@ -944,10 +948,12 @@ public class NpcHtmlWindow : L2PopupWindow
         if (attributes.TryGetValue("src", out string src))
         {
             string name = src.Substring(src.LastIndexOf('.') + 1);
-            image.image = Resources.Load<Texture2D>("Data/UI/Assets/html/" + name);
+            // "icon.xxx" : les icones d'objets, comme dans le client d'origine.
+            string folder = src.StartsWith("icon.", StringComparison.OrdinalIgnoreCase) ? "Data/SysTextures/Icon/" : "Data/UI/Assets/html/";
+            image.image = Resources.Load<Texture2D>(folder + name);
             if (image.image == null)
             {
-                Debug.LogWarning($"Image HTML introuvable : Data/UI/Assets/html/{name}");
+                Debug.LogWarning($"Image HTML introuvable : {folder}{name}");
             }
         }
         if (attributes.TryGetValue("width", out string width))
@@ -975,6 +981,18 @@ public class NpcHtmlWindow : L2PopupWindow
         container.Add(imageContainer);
     }
 
+    // "width=100%" existe dans les HTM : int.Parse levait une exception et la
+    // page entiere perdait son tableau.
+    private static Length HtmlLength(string value)
+    {
+        if (value.EndsWith("%") && float.TryParse(value.TrimEnd('%'), out float percent))
+        {
+            return new Length(percent, LengthUnit.Percent);
+        }
+
+        return int.TryParse(value, out int pixels) ? new Length(pixels) : new Length(100f, LengthUnit.Percent);
+    }
+
     private void ProcessTable(VisualElement container, Dictionary<string, string> attributes, string tableHtml)
     {
         VisualElement wrapper = _htmlWrapper.Instantiate()[0];
@@ -983,11 +1001,11 @@ public class NpcHtmlWindow : L2PopupWindow
 
         if (attributes.TryGetValue("height", out string tableHeight))
         {
-            tableContainer.style.height = int.Parse(tableHeight);
+            tableContainer.style.height = HtmlLength(tableHeight);
         }
         if (attributes.TryGetValue("width", out string tableWidth))
         {
-            tableContainer.style.width = int.Parse(tableWidth);
+            tableContainer.style.width = HtmlLength(tableWidth);
         }
         else
         {

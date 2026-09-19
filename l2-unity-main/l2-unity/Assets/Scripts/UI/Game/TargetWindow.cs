@@ -219,8 +219,9 @@ public class TargetWindow : L2PopupWindow
         }
 
         bool isPlayer = target.Identity.EntityType == EntityType.Player || target.Identity.EntityType == EntityType.User;
-        _clanLabel.style.display = isPlayer ? DisplayStyle.Flex : DisplayStyle.None;
-        _allyLabel.style.display = isPlayer ? DisplayStyle.Flex : DisplayStyle.None;
+        // On masque la ligne entiere : vide, elle garde sa hauteur et pousse la barre de vie hors du cadre.
+        _clanLabel.parent.style.display = isPlayer ? DisplayStyle.Flex : DisplayStyle.None;
+        _allyLabel.parent.style.display = isPlayer ? DisplayStyle.Flex : DisplayStyle.None;
         _windowEle.EnableInClassList("with-clan", isPlayer);
 
         if (!isPlayer)
