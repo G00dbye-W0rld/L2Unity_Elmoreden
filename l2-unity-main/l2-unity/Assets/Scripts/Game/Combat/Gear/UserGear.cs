@@ -211,7 +211,7 @@ public class UserGear : HumanoidGear
             case ItemSlot.SLOT_CHEST:
                 return itemId == _torsoMeta.Id;
             case ItemSlot.SLOT_FULL_ARMOR:
-                return itemId == _fullarmorMeta.Id;
+                return _fullarmorMeta != null && itemId == _fullarmorMeta.Id;
             case ItemSlot.SLOT_LEGS:
                 return itemId == _legsMeta.Id;
             case ItemSlot.SLOT_GLOVES:
@@ -221,6 +221,12 @@ public class UserGear : HumanoidGear
         }
 
         return true;
+    }
+
+    private static bool IsFullArmor(int itemId)
+    {
+        Armor armor = itemId != 0 ? ItemTable.Instance.GetArmor(itemId) : null;
+        return armor != null && armor.Armorgrp.BodyPart == ItemSlot.SLOT_FULL_ARMOR;
     }
 
     public override void EquipAllArmors(Appearance apr)
@@ -238,6 +244,11 @@ public class UserGear : HumanoidGear
         if (appearance.Legs != 0)
         {
             EquipArmor(appearance.Legs, ItemSlot.SLOT_LEGS);
+        }
+        else if (IsFullArmor(appearance.Chest))
+        {
+            // Armure complete : le serveur la donne au torse seulement, sa piece du bas va aux jambes.
+            EquipArmor(appearance.Chest, ItemSlot.SLOT_LEGS);
         }
         else
         {
@@ -278,7 +289,8 @@ public class UserGear : HumanoidGear
             return;
         }
 
-        ModelTable.L2ArmorPiece armorPiece = ModelTable.Instance.GetArmorPiece(armor, _referenceHolder.Entity.RaceId);
+        bool lowerPiece = slot == ItemSlot.SLOT_LEGS && armor.Armorgrp.BodyPart == ItemSlot.SLOT_FULL_ARMOR;
+        ModelTable.L2ArmorPiece armorPiece = ModelTable.Instance.GetArmorPiece(armor, _referenceHolder.Entity.RaceId, lowerPiece);
         if (armorPiece == null)
         {
             Debug.LogWarning($"Can't find armor {itemId} for race {_referenceHolder.Entity.RaceId} in slot {slot} in ModelTable");

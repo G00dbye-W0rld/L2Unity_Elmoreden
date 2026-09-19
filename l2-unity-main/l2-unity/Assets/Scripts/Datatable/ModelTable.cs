@@ -355,12 +355,18 @@ public class ModelTable
         int armorMaterials = 0;
         foreach (KeyValuePair<int, Armor> kvp in ItemTable.Instance.Armors)
         {
-            for (int i = 0; i < RACE_COUNT; i++)
+            // part 0 : piece principale ; part 1 : piece du bas d'une armure complete.
+            for (int n = 0; n < RACE_COUNT * 2; n++)
             {
-                string model = kvp.Value.Armorgrp.Model[i];
+                int i = n % RACE_COUNT;
+                bool lower = n >= RACE_COUNT;
+                string model = lower ? kvp.Value.Armorgrp.LowerModel[i] : kvp.Value.Armorgrp.Model[i];
                 if (model == null)
                 {
-                    Debug.LogWarning($"Model string is null for race {(CharacterModelType)i} in armor {kvp.Key}");
+                    if (!lower)
+                    {
+                        Debug.LogWarning($"Model string is null for race {(CharacterModelType)i} in armor {kvp.Key}");
+                    }
                     continue;
                 }
 
@@ -387,9 +393,9 @@ public class ModelTable
                     continue;
                 }
 
-                string texture = kvp.Value.Armorgrp.Texture[i];
+                string texture = lower ? kvp.Value.Armorgrp.LowerTexture[i] : kvp.Value.Armorgrp.Texture[i];
 
-                if (l2Model.materials.ContainsKey(texture))
+                if (texture == null || l2Model.materials.ContainsKey(texture))
                 {
                     continue;
                 }
@@ -503,7 +509,8 @@ public class ModelTable
     // -------
     // Getters
     // -------
-    public L2ArmorPiece GetArmorPiece(Armor armor, CharacterModelType raceId)
+    // lower : piece du bas d'une armure complete (null si l'armure n'en a pas).
+    public L2ArmorPiece GetArmorPiece(Armor armor, CharacterModelType raceId, bool lower = false)
     {
         if (armor == null)
         {
@@ -511,43 +518,33 @@ public class ModelTable
             return null;
         }
 
-        string model = armor.Armorgrp.Model[(byte)raceId];
-        if (!_armors.ContainsKey(model))
+        string[] models = lower ? armor.Armorgrp.LowerModel : armor.Armorgrp.Model;
+        string[] textures = lower ? armor.Armorgrp.LowerTexture : armor.Armorgrp.Texture;
+        string model = models != null ? models[(byte)raceId] : null;
+        string texture = textures != null && textures.Length >= RACE_COUNT ? textures[(byte)raceId] : null;
+        if (model == null)
         {
-            Debug.LogWarning($"Can't find armor model {model} in ModelTable. Material is {armor.Armorgrp.Texture[(byte)raceId]}.");
+            if (!lower)
+            {
+                Debug.LogWarning($"Armor {armor.Id} has no model for {raceId}.");
+            }
             return null;
         }
 
-        GameObject baseModel = _armors[model].baseModel;
-        if (baseModel == null)
+        if (!_armors.TryGetValue(model, out L2Armor armorModel) || armorModel.baseModel == null)
         {
-            Debug.LogWarning($"Can't find armor model {model} for {raceId} in ModelTable. Material is {armor.Armorgrp.Texture[(byte)raceId]}.");
+            Debug.LogWarning($"Can't find armor model {model} for {raceId} in ModelTable. Material is {texture}.");
             return null;
         }
 
-        if (_armors[model].materials == null)
+        Material material = null;
+        if (texture == null || armorModel.materials == null || !armorModel.materials.TryGetValue(texture, out material) || material == null)
         {
-            Debug.LogWarning($"Can't find armor material for {model} and {raceId} in ModelTable. Material is {armor.Armorgrp.Texture[(byte)raceId]}.");
+            Debug.LogWarning($"Can't find armor material for {model} and {raceId} in ModelTable. Material is {texture}.");
             return null;
         }
 
-        if (armor.Armorgrp.Texture == null || armor.Armorgrp.Texture.Length < RACE_COUNT || armor.Armorgrp.Texture[(byte)raceId] == null)
-        {
-            Debug.LogWarning($"Can't find armor material for {model} and {raceId} in ModelTable. Material is {armor.Armorgrp.Texture[(byte)raceId]}.");
-            return null;
-        }
-
-        Material material;
-        _armors[model].materials.TryGetValue(armor.Armorgrp.Texture[(byte)raceId], out material);
-
-        if (material == null)
-        {
-            Debug.LogWarning($"Can't find armor material for {model} and {raceId} in ModelTable. Material is {armor.Armorgrp.Texture[(byte)raceId]}.");
-            return null;
-        }
-
-        L2ArmorPiece armorModel = new L2ArmorPiece(baseModel, material);
-        return armorModel;
+        return new L2ArmorPiece(armorModel.baseModel, material);
     }
 
     public L2ArmorPiece GetArmorPieceByItemId(int itemId, CharacterModelType raceId)

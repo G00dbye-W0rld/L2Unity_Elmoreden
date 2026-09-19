@@ -18,7 +18,10 @@
 
     public static string[] SplitJSON(string value)
     {
-        return value.Replace(";{1;1}", string.Empty).Replace(";{1}", string.Empty).Replace("{", string.Empty).Replace("}", string.Empty).Replace("[", string.Empty).Replace("]", string.Empty).Split(";");
+        // Les compteurs ";{1}", ";{2}" (boucliers), ";{1;1}"... ne sont pas des noms : un "2" restant
+        // passait pour un modele introuvable et l'arme n'etait pas equipee.
+        value = System.Text.RegularExpressions.Regex.Replace(value, @";\{\d+(;\d+)*\}", string.Empty);
+        return value.Replace("{", string.Empty).Replace("}", string.Empty).Replace("[", string.Empty).Replace("]", string.Empty).Split(";");
     }
 
     public static string ReorderColorBytes(string colorString)

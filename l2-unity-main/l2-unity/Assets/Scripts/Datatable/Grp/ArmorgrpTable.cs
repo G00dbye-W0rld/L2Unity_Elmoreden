@@ -52,6 +52,8 @@ public class ArmorgrpTable
                 Armorgrp armorgrp = new Armorgrp();
                 armorgrp.Model = new string[ModelTable.RACE_COUNT];
                 armorgrp.Texture = new string[ModelTable.RACE_COUNT];
+                armorgrp.LowerModel = new string[ModelTable.RACE_COUNT];
+                armorgrp.LowerTexture = new string[ModelTable.RACE_COUNT];
                 string[] modTex;
 
                 string[] keyvals = line.Split('\t');
@@ -78,74 +80,46 @@ public class ArmorgrpTable
                             armorgrp.BodyPart = ItemSlotParser.ParseBodyPart(value); //TODO for fullbody store 2 models and textures for one item
                             break;
                         case "m_HumnFigh": // {{[Fighter.MFighter_m002_g]};{[mfighter.mfighter_m002_t10_g]}}
-                            modTex = DatUtils.ParseArray(value);
-                            armorgrp.Model[(byte)CharacterModelType.MFighter] = modTex[0];
-                            armorgrp.Texture[(byte)CharacterModelType.MFighter] = modTex[1];
+                            SetRaceModels(armorgrp, CharacterModelType.MFighter, value);
                             break;
                         case "f_HumnFigh":
-                            modTex = DatUtils.ParseArray(value);
-                            armorgrp.Model[(byte)CharacterModelType.FFighter] = modTex[0];
-                            armorgrp.Texture[(byte)CharacterModelType.FFighter] = modTex[1];
+                            SetRaceModels(armorgrp, CharacterModelType.FFighter, value);
                             break;
                         case "m_DarkElf":
-                            modTex = DatUtils.ParseArray(value);
-                            armorgrp.Model[(byte)CharacterModelType.MDarkElf] = modTex[0];
-                            armorgrp.Texture[(byte)CharacterModelType.MDarkElf] = modTex[1];
+                            SetRaceModels(armorgrp, CharacterModelType.MDarkElf, value);
                             break;
                         case "f_DarkElf":
-                            modTex = DatUtils.ParseArray(value);
-                            armorgrp.Model[(byte)CharacterModelType.FDarkElf] = modTex[0];
-                            armorgrp.Texture[(byte)CharacterModelType.FDarkElf] = modTex[1];
+                            SetRaceModels(armorgrp, CharacterModelType.FDarkElf, value);
                             break;
                         case "m_Dorf":
-                            modTex = DatUtils.ParseArray(value);
-                            armorgrp.Model[(byte)CharacterModelType.MDwarf] = modTex[0];
-                            armorgrp.Texture[(byte)CharacterModelType.MDwarf] = modTex[1];
+                            SetRaceModels(armorgrp, CharacterModelType.MDwarf, value);
                             break;
                         case "f_Dorf":
-                            modTex = DatUtils.ParseArray(value);
-                            armorgrp.Model[(byte)CharacterModelType.FDwarf] = modTex[0];
-                            armorgrp.Texture[(byte)CharacterModelType.FDwarf] = modTex[1];
+                            SetRaceModels(armorgrp, CharacterModelType.FDwarf, value);
                             break;
                         case "m_Elf":
-                            modTex = DatUtils.ParseArray(value);
-                            armorgrp.Model[(byte)CharacterModelType.MElf] = modTex[0];
-                            armorgrp.Texture[(byte)CharacterModelType.MElf] = modTex[1];
+                            SetRaceModels(armorgrp, CharacterModelType.MElf, value);
                             break;
                         case "f_Elf":
-                            modTex = DatUtils.ParseArray(value);
-                            armorgrp.Model[(byte)CharacterModelType.FElf] = modTex[0];
-                            armorgrp.Texture[(byte)CharacterModelType.FElf] = modTex[1];
+                            SetRaceModels(armorgrp, CharacterModelType.FElf, value);
                             break;
                         case "m_HumnMyst":
-                            modTex = DatUtils.ParseArray(value);
-                            armorgrp.Model[(byte)CharacterModelType.MMagic] = modTex[0];
-                            armorgrp.Texture[(byte)CharacterModelType.MMagic] = modTex[1];
+                            SetRaceModels(armorgrp, CharacterModelType.MMagic, value);
                             break;
                         case "f_HumnMyst":
-                            modTex = DatUtils.ParseArray(value);
-                            armorgrp.Model[(byte)CharacterModelType.FMagic] = modTex[0];
-                            armorgrp.Texture[(byte)CharacterModelType.FMagic] = modTex[1];
+                            SetRaceModels(armorgrp, CharacterModelType.FMagic, value);
                             break;
                         case "m_OrcFigh":
-                            modTex = DatUtils.ParseArray(value);
-                            armorgrp.Model[(byte)CharacterModelType.MOrc] = modTex[0];
-                            armorgrp.Texture[(byte)CharacterModelType.MOrc] = modTex[1];
+                            SetRaceModels(armorgrp, CharacterModelType.MOrc, value);
                             break;
                         case "f_OrcFigh":
-                            modTex = DatUtils.ParseArray(value);
-                            armorgrp.Model[(byte)CharacterModelType.FOrc] = modTex[0];
-                            armorgrp.Texture[(byte)CharacterModelType.FOrc] = modTex[1];
+                            SetRaceModels(armorgrp, CharacterModelType.FOrc, value);
                             break;
                         case "m_OrcMage":
-                            modTex = DatUtils.ParseArray(value);
-                            armorgrp.Model[(byte)CharacterModelType.MShaman] = modTex[0];
-                            armorgrp.Texture[(byte)CharacterModelType.MShaman] = modTex[1];
+                            SetRaceModels(armorgrp, CharacterModelType.MShaman, value);
                             break;
                         case "f_OrcMage":
-                            modTex = DatUtils.ParseArray(value);
-                            armorgrp.Model[(byte)CharacterModelType.FShaman] = modTex[0];
-                            armorgrp.Texture[(byte)CharacterModelType.FShaman] = modTex[1];
+                            SetRaceModels(armorgrp, CharacterModelType.FShaman, value);
                             break;
                         case "mp_bonus": //mp_bonus=0
                             armorgrp.MpBonus = int.Parse(value);
@@ -162,6 +136,26 @@ public class ArmorgrpTable
             }
 
             Debug.Log($"Successfully imported {_armorgrps.Count} armorgrp(s)");
+        }
+    }
+
+    // {{[modele]};{[texture]}} ou, pour une armure complete, {{[haut];[bas]};{[tex haut];[tex bas]}} :
+    // la premiere moitie donne les modeles, la seconde les textures dans le meme ordre.
+    private static void SetRaceModels(Armorgrp armorgrp, CharacterModelType race, string value)
+    {
+        string[] modTex = DatUtils.ParseArray(value);
+        int half = modTex.Length / 2;
+        if (half == 0)
+        {
+            return;
+        }
+
+        armorgrp.Model[(byte)race] = modTex[0];
+        armorgrp.Texture[(byte)race] = modTex[half];
+        if (half >= 2)
+        {
+            armorgrp.LowerModel[(byte)race] = modTex[1];
+            armorgrp.LowerTexture[(byte)race] = modTex[half + 1];
         }
     }
 }

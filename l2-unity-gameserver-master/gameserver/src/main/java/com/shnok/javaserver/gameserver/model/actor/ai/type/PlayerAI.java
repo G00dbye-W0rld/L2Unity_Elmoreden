@@ -437,7 +437,9 @@ public class PlayerAI extends PlayableAI<Player>
 		}
 		
 		final boolean isShiftPressed = _currentIntention.isShiftPressed();
-		if (_actor.getMove().maybeMoveToPawn(target, 100, isShiftPressed))
+		// Meme portee que canDoInteract : a 100, un comptoir empechait d'atteindre un marchand.
+		final int radii = (int) (_actor.getCollisionRadius() + ((target instanceof Creature creature) ? creature.getCollisionRadius() : 0));
+		if (_actor.getMove().maybeMoveToPawn(target, Math.max(0, Npc.INTERACTION_DISTANCE - radii), isShiftPressed))
 		{
 			if (isShiftPressed)
 				doIdleIntention();

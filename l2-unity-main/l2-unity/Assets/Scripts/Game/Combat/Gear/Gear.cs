@@ -12,6 +12,8 @@ public class Gear : MonoBehaviour
     [SerializeField] protected Transform _rightHandBone;
     [SerializeField] protected Transform _leftHandBone;
     [SerializeField] protected Transform _shieldBone;
+    // Orientation du bouclier sur son os, reglable dans l'inspecteur.
+    [SerializeField] protected Vector3 _shieldRotation = new Vector3(-90f, 0f, 0f);
 
     [Header("Weapons")]
     [Header("Meta")]
@@ -290,6 +292,8 @@ public class Gear : MonoBehaviour
             {
                 _leftHandWeapon = go.transform;
                 go.transform.SetParent(GetShieldBone(), false);
+                // L'os du bouclier n'a pas la meme orientation que le modele : sans ca, le bouclier est a plat.
+                go.transform.localRotation = Quaternion.Euler(_shieldRotation);
             }
             else if (weapon.Weapongrp.WeaponType == WeaponType.bow || leftSlot)
             {

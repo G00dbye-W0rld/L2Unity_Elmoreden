@@ -496,6 +496,13 @@ public class WorldCombat : MonoBehaviour
 
     public float GetInteractRange(Entity attacker, Entity target)
     {
+        // Un PNJ se parle de loin (le serveur accepte 150, soit 2,86) : a bout touchant,
+        // un comptoir empechait d'arriver assez pres pour declencher le dialogue.
+        if (target != null && target.Identity.EntityType == EntityType.NPC)
+        {
+            return 2.1f;
+        }
+
         return Mathf.Min(
             attacker.Appearance.CollisionRadius + target.Appearance.CollisionRadius + 0.4f, // added extra distance to not be too close
             2.857142857142857f); // hardcoded maximum interaction distance in the server

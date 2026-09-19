@@ -89,6 +89,8 @@ public class IconTable
 
     private string CleanIconName(string name)
     {
-        return name.Replace("icon.", "");
+        // "icon.x", "BranchIcon.x", "BranchSys2.x"... : toutes les icones sont rangees a plat dans Icon.
+        int dot = name.IndexOf('.');
+        return dot >= 0 ? name.Substring(dot + 1) : name;
     }
 }
