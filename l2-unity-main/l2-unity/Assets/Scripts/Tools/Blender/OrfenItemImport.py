@@ -131,7 +131,7 @@ def export_texture(package, name):
     return resolve_texture(out, name)
 
 
-def convert_mesh(package, name, target):
+def convert_mesh(package, name, target, with_bones=True):
     out = os.path.join(WORK, "mesh", name)
     shutil.rmtree(out, ignore_errors=True)
     log = umodel("-export", "-png", "-out=" + out, package + ".ukx", name)
@@ -140,7 +140,9 @@ def convert_mesh(package, name, target):
     mesh_file = find_file(out, "SkeletalMesh", name, ".psk") or find_file(out, "StaticMesh", name, ".pskx")
 
     bpy.ops.wm.read_homefile(use_empty=True)
-    psk.pskimport(mesh_file, context=bpy.context, bImportmesh=True, bImportbone=True, fBonesize=5.0,
+    # Une arme ou un bouclier est un objet fixe : sans armature, il garde l'orientation
+    # des modeles d'origine (avec, le rendu suit l'os et l'arme est tournee de 90 degres).
+    psk.pskimport(mesh_file, context=bpy.context, bImportmesh=True, bImportbone=with_bones, fBonesize=5.0,
                   fBonesizeRatio=0.4, bDontInvertRoot=True, bScaleDown=True, bToSRGB=True)
     mesh_obj = next((o for o in bpy.data.objects if o.type == "MESH"), None)
     slots = [m.name for m in mesh_obj.data.materials] if mesh_obj else []
@@ -181,7 +183,25 @@ def import_icons(ids):
             shutil.copy2(found[key], os.path.join(dest, name + ".png"))
             copied += 1
     print("Icones copiees : %d / %d" % (copied, len(missing)), flush=True)
-    return {"icons": copied, "missing": len(missing) - copied}
+    return {"icons": copied, "missing": len(missing) - copied, "symbols": import_symbols()}
+
+
+def import_symbols():
+    # Vignettes posees sur les icones d'objet : le grade, dans le paquet symbol du client.
+    dest = os.path.join(SYSTEX, "Symbol")
+    os.makedirs(dest, exist_ok=True)
+    out = os.path.join(WORK, "symbol")
+    if not glob.glob(os.path.join(out, "**", "*.png"), recursive=True):
+        umodel("-export", "-png", "-out=" + out, "symbol")
+
+    copied = 0
+    for png in glob.glob(os.path.join(out, "**", "*.png"), recursive=True):
+        name = os.path.splitext(os.path.basename(png))[0].lower()
+        if name.startswith("grade_"):
+            shutil.copy2(png, os.path.join(dest, name + ".png"))
+            copied += 1
+    print("Vignettes de grade copiees : %d" % copied, flush=True)
+    return copied
 
 
 def import_weapons(ids):
@@ -202,7 +222,7 @@ def import_weapons(ids):
         package, name = ref.split(".", 1)
         target = os.path.join(ANIMATIONS, package, "Models", name + ".fbx")
         try:
-            out, slots = convert_mesh(package, name, target)
+            out, slots = convert_mesh(package, name, target, with_bones=False)
             if out is None:
                 results[ref] = "introuvable dans Orfen"
             else:

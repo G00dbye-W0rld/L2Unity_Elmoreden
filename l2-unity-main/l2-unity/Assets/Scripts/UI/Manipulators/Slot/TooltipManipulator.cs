@@ -51,6 +51,11 @@ public class TooltipManipulator : Manipulator
         _value = value;
     }
     
+    public void SetValue(ItemTooltipInfo value)
+    {
+        _value = value;
+    }
+
     public void SetValue(SkillWindowInfo value)
     {
         _value = value;

@@ -13,6 +13,10 @@ public class InventorySlot : L2DraggableSlot
     private ItemType2 _type2;
     private int _enchantLevel;
     private Label _enchantLevelLabel;
+    private Label _countLabel;
+    private VisualElement _gradeLabel;
+    private static readonly System.Collections.Generic.Dictionary<string, Texture2D> _gradeSymbols =
+        new System.Collections.Generic.Dictionary<string, Texture2D>();
     public int Count { get { return _count; } }
     public long RemainingTime { get { return _remainingTime; } }
     public ItemType1 Type1 { get { return _type1; } }
@@ -79,6 +83,8 @@ public class InventorySlot : L2DraggableSlot
 
             AddTooltip(item);
             UpdateEnchantLevelLabel();
+            UpdateCountLabel();
+            UpdateGradeLabel();
 
             _slotDragManipulator.enabled = true;
         }
@@ -116,24 +122,71 @@ public class InventorySlot : L2DraggableSlot
 
     protected virtual void AddTooltip(ItemInstance item)
     {
-        string namePrefix = _enchantLevel > 0 ? $"+{_enchantLevel} " : "";
-        string tooltipText = $"{namePrefix}{_name}";
-        if (_count > 0)
-        {
-            tooltipText = $"{namePrefix}{_name} ({_count:n0})";
-        }
-
-        if (item.Type2 == ItemType2.TYPE2_WEAPON ||
-            item.Type2 == ItemType2.TYPE2_ACCESSORY ||
-            item.Type2 == ItemType2.TYPE2_SHIELD_ARMOR)
-        {
-            tooltipText = $"{namePrefix}{_name}";
-        }
-
         if (_tooltipManipulator != null)
         {
-            _tooltipManipulator.SetValue(tooltipText);
+            _tooltipManipulator.SetValue(ItemTooltipInfo.Build(item, item.ItemData, _name, _enchantLevel));
         }
+    }
+
+    // Quantite en surimpression (coin bas-droit) : rien pour un exemplaire unique,
+    // "99+" au-dela de 99, comme dans le client d'origine.
+    private void UpdateCountLabel()
+    {
+        if (_countLabel == null)
+        {
+            _countLabel = new Label();
+            _countLabel.pickingMode = PickingMode.Ignore;
+            _countLabel.style.position = UnityEngine.UIElements.Position.Absolute;
+            _countLabel.style.right = 1;
+            _countLabel.style.bottom = 0;
+            _countLabel.style.fontSize = 10;
+            _countLabel.style.color = new Color(0.97f, 0.97f, 0.97f);
+            _countLabel.style.unityTextAlign = TextAnchor.LowerRight;
+            _countLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+            _slotElement.Add(_countLabel);
+        }
+
+        _countLabel.style.display = _count > 1 ? DisplayStyle.Flex : DisplayStyle.None;
+        _countLabel.text = _count > 99 ? "99+" : _count.ToString();
+    }
+
+    // Vignette de grade (coin haut-gauche), celle du client : symbol.grade_d et ses voisines.
+    // Rien sur un objet sans grade.
+    private void UpdateGradeLabel()
+    {
+        if (_gradeLabel == null)
+        {
+            _gradeLabel = new VisualElement();
+            _gradeLabel.pickingMode = PickingMode.Ignore;
+            _gradeLabel.style.position = UnityEngine.UIElements.Position.Absolute;
+            _gradeLabel.style.left = 1;
+            _gradeLabel.style.top = 1;
+            _gradeLabel.style.width = 12;
+            _gradeLabel.style.height = 12;
+            _slotElement.Add(_gradeLabel);
+        }
+
+        ItemGrade grade = ItemTable.Instance.GetItem(_id)?.Itemgrp?.Grade ?? ItemGrade.none;
+        Texture2D symbol = GradeSymbol(grade);
+        _gradeLabel.style.display = symbol == null ? DisplayStyle.None : DisplayStyle.Flex;
+        _gradeLabel.style.backgroundImage = symbol != null ? new StyleBackground(symbol) : new StyleBackground();
+    }
+
+    private static Texture2D GradeSymbol(ItemGrade grade)
+    {
+        if (grade == ItemGrade.none)
+        {
+            return null;
+        }
+
+        string name = grade.ToString().ToLower();
+        if (!_gradeSymbols.TryGetValue(name, out Texture2D symbol))
+        {
+            symbol = Resources.Load<Texture2D>($"Data/SysTextures/Symbol/grade_{name}");
+            _gradeSymbols[name] = symbol;
+        }
+
+        return symbol;
     }
 
     public override void ClearManipulators()

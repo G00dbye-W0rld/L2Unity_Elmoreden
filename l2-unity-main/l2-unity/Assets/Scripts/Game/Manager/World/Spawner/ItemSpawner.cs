@@ -29,8 +29,15 @@ public class ItemSpawner
     // pas besoin). Ne s'applique PAS au placeholder (deja calibre separement).
     private readonly float _worldScale;
 
-    // Echelle des modeles d'arme poses au sol (voir SpawnItem).
-    private const float WeaponGroundScale = 100f;
+    // Echelle des modeles d'arme poses au sol : la meme qu'une arme tenue en main.
+    private static float WeaponGroundScale()
+    {
+        Gear gear = PlayerEntity.Instance != null && PlayerEntity.Instance.ReferenceHolder != null
+            ? PlayerEntity.Instance.ReferenceHolder.Gear
+            : null;
+
+        return gear != null ? gear.WeaponWorldScale() : 1f;
+    }
 
     public ItemSpawner(Transform itemsContainer, float worldScale = 1f)
     {
@@ -100,18 +107,21 @@ public class ItemSpawner
 
         position.y = World.Instance.GetGroundHeight(position);
 
-        // Une arme au sol reutilise son modele d'equipement, couche a plat.
+        // Une arme au sol reutilise son modele d'equipement, plantee pointe en bas et
+        // legerement inclinee. Sa longueur suit X, d'ou la rotation autour de Z.
         bool weaponModel = prefab.GetComponent<WorldItem>() == null && prefab != _placeholderPrefab;
-        Quaternion rotation = weaponModel ? Quaternion.Euler(90f, Random.Range(0f, 360f), 0f) : Quaternion.identity;
+        Quaternion rotation = weaponModel
+            ? Quaternion.Euler(0f, Random.Range(0f, 360f), 0f) * Quaternion.Euler(0f, 0f, -75f)
+            : Quaternion.identity;
         GameObject go = Object.Instantiate(prefab, position, rotation, _itemsContainer);
         go.name = $"Item_{itemTemplateId}_{objectId}";
 
         Renderer renderer = go.GetComponentInChildren<Renderer>();
         if (weaponModel)
         {
-            // Dans la main, l'arme est portee par un os dont l'echelle compense celle du modele :
-            // au sol, sans ce facteur, elle est 100 fois trop petite.
-            go.transform.localScale = Vector3.one * WeaponGroundScale;
+            // On multiplie l'echelle du prefab au lieu de la remplacer : c'est elle qui porte
+            // le facteur d'import du FBX, et l'ecraser rendait l'arme invisible.
+            go.transform.localScale *= WeaponGroundScale();
             MakePickable(go, renderer);
         }
 

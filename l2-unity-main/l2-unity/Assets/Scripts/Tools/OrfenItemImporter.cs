@@ -124,6 +124,80 @@ public static class OrfenItemImporter
         Debug.Log($"[Import objets] {count} materiau(x) rafraichi(s).");
     }
 
+    [MenuItem("L2/Objets/Reimporter les armes converties")]
+    public static void ImportWeapons()
+    {
+        int count = 0;
+        string[] manifests = Directory.GetFiles(AnimationsRoot, "*.import.json", SearchOption.AllDirectories);
+        try
+        {
+            for (int i = 0; i < manifests.Length; i++)
+            {
+                string path = manifests[i].Replace('\\', '/');
+                Manifest manifest = JsonUtility.FromJson<Manifest>(File.ReadAllText(path));
+                if (manifest.kind != "weapon")
+                {
+                    continue;
+                }
+
+                EditorUtility.DisplayProgressBar("Armes", path, (float)i / manifests.Length);
+                try
+                {
+                    ImportWeapon(path, manifest);
+                    count++;
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"[Import objets] {path} : {e}");
+                }
+            }
+        }
+        finally
+        {
+            EditorUtility.ClearProgressBar();
+            AssetDatabase.SaveAssets();
+        }
+
+        Debug.Log($"[Import objets] {count} arme(s) reimportee(s).");
+    }
+
+    // Couvre aussi les boucliers d'origine du projet, qui n'ont pas de manifeste d'import.
+    [MenuItem("L2/Objets/Reorienter les boucliers")]
+    public static void ReorientShields()
+    {
+        int count = 0;
+        foreach (string path in Directory.GetFiles(AnimationsRoot, "*_sh.prefab", SearchOption.AllDirectories))
+        {
+            string prefabPath = path.Replace('\\', '/');
+            GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath));
+            if (instance == null)
+            {
+                continue;
+            }
+
+            try
+            {
+                Renderer renderer = instance.GetComponentInChildren<Renderer>();
+                Mesh mesh = renderer is SkinnedMeshRenderer skinned
+                    ? skinned.sharedMesh
+                    : instance.GetComponentInChildren<MeshFilter>()?.sharedMesh;
+                if (renderer != null && mesh != null)
+                {
+                    OrientShield(instance, renderer.transform, mesh);
+                    PrefabUtility.SaveAsPrefabAsset(instance, prefabPath);
+                    count++;
+                }
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(instance);
+            }
+        }
+
+        AssetDatabase.SaveAssets();
+        Debug.Log($"[Import objets] {count} bouclier(s) reoriente(s).");
+    }
+
     [MenuItem("L2/Objets/Recaler l'echelle des armes importees")]
     public static void FixWeaponScale()
     {
@@ -142,6 +216,13 @@ public static class OrfenItemImporter
         }
 
         Debug.Log($"[Import objets] Echelle recalee pour {count} arme(s).");
+    }
+
+    // Utile apres avoir depose une icone a la main : ne touche que celles mal reglees.
+    [MenuItem("L2/Objets/Regler les icones importees")]
+    public static void FixIconsMenu()
+    {
+        Debug.Log($"[Import objets] {FixIcons()} icone(s) reglee(s).");
     }
 
     // Memes reglages que les icones deja presentes (sprite, sans mipmap, filtrage point).
@@ -231,6 +312,7 @@ public static class OrfenItemImporter
         try
         {
             instance.name = manifest.mesh;
+            OrientWeapon(instance, IsShield(manifest.mesh));
             foreach (Renderer renderer in instance.GetComponentsInChildren<Renderer>(true))
             {
                 Material[] shared = renderer.sharedMaterials;
@@ -251,6 +333,89 @@ public static class OrfenItemImporter
         {
             UnityEngine.Object.DestroyImmediate(instance);
         }
+    }
+
+    // Les modeles d'Orfen n'ont pas tous le meme sens. On les remet d'apres leur forme :
+    // la longueur le long de X (la lame), la plus fine dimension le long de Z (le tranchant).
+    private static void OrientWeapon(GameObject instance, bool shield)
+    {
+        Renderer renderer = instance.GetComponentInChildren<Renderer>();
+        Mesh mesh = renderer is SkinnedMeshRenderer skinned ? skinned.sharedMesh : instance.GetComponentInChildren<MeshFilter>()?.sharedMesh;
+        if (mesh == null)
+        {
+            return;
+        }
+
+        Transform model = renderer.transform;
+        if (shield)
+        {
+            OrientShield(instance, model, mesh);
+            return;
+        }
+
+        Vector3 size = mesh.bounds.size;
+        int thin = size.x <= size.y && size.x <= size.z ? 0 : (size.y <= size.z ? 1 : 2);
+
+        // X est la longueur d'origine de tous ces modeles. On ne cherche la plus grande
+        // dimension que si X est justement la plus fine : sur un bouclier rond, les deux
+        // autres cotes sont a un millimetre pres et le choix basculerait d'un modele a l'autre.
+        int main = thin != 0 ? 0 : (size.y >= size.z ? 1 : 2);
+
+        // Axes du mesh exprimes dans le repere du prefab (le FBX porte deja sa propre rotation).
+        Vector3 meshThin = ToPrefab(instance, model, Axis(thin));
+        Vector3 meshMain = ToPrefab(instance, model, Axis(main));
+
+        instance.transform.localRotation =
+            Quaternion.LookRotation(Vector3.forward, Vector3.right) * Quaternion.Inverse(Quaternion.LookRotation(meshThin, meshMain));
+    }
+
+    // Sur l'os de bouclier, l'axe qui descend le long du bras est Z, pas X : mesure faite en
+    // rejouant les poses wait_1HS, atkWait_1HS et run_1HS sur le squelette du joueur. Le modele
+    // porte sa hauteur sur X et sa face bombee sur Y, d'ou le quart de tour. On annule d'abord
+    // la rotation que le FBX transporte, pour ne pas dependre de la facon dont il a ete exporte.
+    private static void OrientShield(GameObject instance, Transform model, Mesh mesh)
+    {
+        Quaternion chain = Quaternion.Inverse(instance.transform.rotation) * model.rotation;
+        // Le quart de tour sur Z met la hauteur du bouclier le long du bras ; celui sur X la
+        // fait pivoter autour de cette hauteur pour que la face regarde devant et non sur le
+        // cote. L'axe a ete etabli par elimination : un demi-tour sur Z retournait le
+        // bouclier, un quart sur Y le couchait, donc sa hauteur suit bien X.
+        Quaternion rotation =
+            Quaternion.Euler(90f, 0f, 0f) * Quaternion.Euler(0f, 0f, 90f) * Quaternion.Inverse(chain);
+
+        // Demi-tour autour de la largeur du bouclier, l'axe median du maillage : il remet la
+        // pointe en bas et la face bombee vers l'avant, qui etaient inverses tous les deux.
+        Vector3 size = mesh.bounds.size;
+        int thin = size.x <= size.y && size.x <= size.z ? 0 : (size.y <= size.z ? 1 : 2);
+        int longest = size.x >= size.y && size.x >= size.z ? 0 : (size.y >= size.z ? 1 : 2);
+        if (thin != longest)
+        {
+            Vector3 width = ToPrefab(instance, model, Axis(3 - thin - longest));
+            rotation *= Quaternion.AngleAxis(180f, width);
+
+            // Quart de tour autour de la hauteur : le bouclier se porte de profil, sa face
+            // tournee vers l'exterieur, pas vers l'avant du personnage.
+            Vector3 height = ToPrefab(instance, model, Axis(longest));
+            rotation *= Quaternion.AngleAxis(90f, height);
+        }
+
+        instance.transform.localRotation = rotation;
+    }
+
+    private static Vector3 ToPrefab(GameObject instance, Transform model, Vector3 axis)
+    {
+        return instance.transform.InverseTransformDirection(model.TransformDirection(axis));
+    }
+
+    // Convention du client : les boucliers se terminent par _sh, les armes par _wp.
+    private static bool IsShield(string mesh)
+    {
+        return mesh != null && mesh.EndsWith("_sh", System.StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static Vector3 Axis(int index)
+    {
+        return index == 0 ? Vector3.right : (index == 1 ? Vector3.up : Vector3.forward);
     }
 
     // Piece d'armure : meme construction que OrcShamanPrefabGenerator (etape 1), les os

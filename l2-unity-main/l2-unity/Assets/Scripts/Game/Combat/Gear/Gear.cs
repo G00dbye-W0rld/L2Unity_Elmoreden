@@ -12,8 +12,9 @@ public class Gear : MonoBehaviour
     [SerializeField] protected Transform _rightHandBone;
     [SerializeField] protected Transform _leftHandBone;
     [SerializeField] protected Transform _shieldBone;
-    // Orientation du bouclier sur son os, reglable dans l'inspecteur.
-    [SerializeField] protected Vector3 _shieldRotation = new Vector3(-90f, 0f, 0f);
+
+    // Retouche d'orientation du bouclier sur son os, si un modele tombe de travers.
+    [SerializeField] protected Vector3 _shieldRotation = Vector3.zero;
 
     [Header("Weapons")]
     [Header("Meta")]
@@ -174,6 +175,53 @@ public class Gear : MonoBehaviour
         _arrow.localScale = Vector3.one * GetWeaponSizeRatio();
     }
 
+    private bool _weaponsHidden;
+    private bool _arrowWasVisible;
+
+    // Range les modeles d'arme sans rien desequiper : le serveur garde l'equipement,
+    // c'est purement visuel, le temps d'une emote.
+    public void SetWeaponsHidden(bool hidden)
+    {
+        if (_weaponsHidden == hidden)
+        {
+            return;
+        }
+
+        _weaponsHidden = hidden;
+
+        if (_rightHandWeapon != null)
+        {
+            _rightHandWeapon.gameObject.SetActive(!hidden);
+        }
+
+        if (_leftHandWeapon != null)
+        {
+            _leftHandWeapon.gameObject.SetActive(!hidden);
+        }
+
+        // La fleche n'est la que pour un arc : on ne la fait reapparaitre que si elle y etait.
+        if (_arrow != null)
+        {
+            if (hidden)
+            {
+                _arrowWasVisible = _arrow.gameObject.activeSelf;
+                _arrow.gameObject.SetActive(false);
+            }
+            else if (_arrowWasVisible)
+            {
+                _arrow.gameObject.SetActive(true);
+            }
+        }
+    }
+
+    // Echelle qu'une arme prend une fois en main : sert a poser la meme taille au sol.
+    public float WeaponWorldScale()
+    {
+        Transform bone = GetRightHandBone();
+        float boneScale = bone != null ? bone.lossyScale.x : 1f;
+        return (boneScale > 0.0001f ? boneScale : 1f) * GetWeaponSizeRatio();
+    }
+
     private float GetWeaponSizeRatio()
     {
         if (_weaponSizeRatio == 0)
@@ -292,8 +340,8 @@ public class Gear : MonoBehaviour
             {
                 _leftHandWeapon = go.transform;
                 go.transform.SetParent(GetShieldBone(), false);
-                // L'os du bouclier n'a pas la meme orientation que le modele : sans ca, le bouclier est a plat.
-                go.transform.localRotation = Quaternion.Euler(_shieldRotation);
+                // Retouche par-dessus l'orientation du prefab, sans l'effacer.
+                go.transform.localRotation = Quaternion.Euler(_shieldRotation) * go.transform.localRotation;
             }
             else if (weapon.Weapongrp.WeaponType == WeaponType.bow || leftSlot)
             {

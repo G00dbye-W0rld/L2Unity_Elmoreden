@@ -43,6 +43,22 @@
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
+        <ui:VisualElement name="ItemTooltip" style="max-width: 260px; width: 260px;">
+            <ui:VisualElement name="Content" class="tooltip-background" style="align-items: stretch; max-width: 260px; width: 260px;">
+                <ui:VisualElement name="ItemTooltipFirst" class="skill-tooltip-first">
+                    <ui:VisualElement name="ItemTooltipIcon" class="l2-slot" style="border-radius: 2px;" />
+                    <ui:VisualElement style="margin-left: 6px; flex-shrink: 1;">
+                        <ui:Label text="Objet" name="ItemTooltipName" class="l2-color-4 tooltip-skill-name" style="white-space: normal;" />
+                        <ui:Label text="" name="ItemTooltipKind" class="l2-color-2 tooltip-skill-type" style="font-size: 12px;" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="ItemTooltipStats" class="skill-tooltip-second" />
+                <ui:VisualElement style="max-height: 3px; border-bottom-width: 1px; border-radius: 0.3px; border-color: rgba(55, 51, 43, 0.6);" />
+                <ui:VisualElement name="ItemTooltipDescriptionContainer" class="skill-tooltip-description-container">
+                    <ui:Label name="ItemTooltipDescription" text="" enable-rich-text="false" class="skill-tooltip-group l2-color-6" style="white-space: normal;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
         <ui:VisualElement name="EffectTooltip" style="flex-grow: 1;">
             <ui:VisualElement name="Content" class="tooltip-background" style="max-width: 170px; align-items: stretch; font-size: 12px;">
                 <ui:VisualElement class="effect-tooltip-section">

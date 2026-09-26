@@ -107,6 +107,13 @@ public class ItemNameTable
 
     public ItemName GetItemName(int id)
     {
+        // La table est videe apres le chargement (nettoyage memoire) : ne pas planter
+        // si on l'interroge ensuite.
+        if (_itemNames == null)
+        {
+            return null;
+        }
+
         ItemName itemName;
         _itemNames.TryGetValue(id, out itemName);
         return itemName;

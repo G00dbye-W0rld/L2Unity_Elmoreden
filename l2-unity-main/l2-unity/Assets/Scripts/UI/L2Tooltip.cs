@@ -12,6 +12,7 @@ public class L2ToolTip : L2PopupWindow
     private VisualElement _skillTooltip;
     private VisualElement _labelTooltip;
     private VisualElement _effectTooltip;
+    private VisualElement _itemTooltip;
     private VisualElement _value;
     private VisualElement _tooltipTarget;
     private Coroutine _updateStyleCoroutine;
@@ -55,6 +56,7 @@ public class L2ToolTip : L2PopupWindow
         _skillTooltip = GetElementById("SkillTooltip");
         _labelTooltip = GetElementById("LabelTooltip");
         _effectTooltip = GetElementById("EffectTooltip");
+        _itemTooltip = GetElementById("ItemTooltip");
     }
 
     public void UpdateTooltip<T>(L2Slot.SlotType type, T value, VisualElement target)
@@ -67,6 +69,7 @@ public class L2ToolTip : L2PopupWindow
         _skillTooltip.style.display = DisplayStyle.None;
         _labelTooltip.style.display = DisplayStyle.None;
         _effectTooltip.style.display = DisplayStyle.None;
+        _itemTooltip.style.display = DisplayStyle.None;
 
         switch (type)
         {
@@ -104,8 +107,90 @@ public class L2ToolTip : L2PopupWindow
         _skillTooltip.style.display = DisplayStyle.Flex;
     }
 
+    // Infobulle d'objet : nom, type, statistiques et description. Une statistique deja
+    // active (objet equipe) est en bleu, une statistique seulement potentielle en gris clair.
+    private static readonly Color ActiveStatColor = new Color(0.55f, 0.72f, 1f);
+    private static readonly Color PotentialStatColor = new Color(0.72f, 0.72f, 0.72f);
+
+    private static VisualElement StatLine(string label, string value, bool active)
+    {
+        VisualElement line = new VisualElement();
+        line.AddToClassList("skill-tooltip-group");
+
+        Label name = new Label(label);
+        name.AddToClassList("tooltip-group-label");
+        name.style.color = active ? ActiveStatColor : PotentialStatColor;
+
+        Label amount = new Label(value);
+        amount.AddToClassList("tooltip-group-value");
+        amount.style.color = active ? ActiveStatColor : PotentialStatColor;
+
+        line.Add(name);
+        line.Add(amount);
+        return line;
+    }
+
+    private void DisplayItemTooltip(ItemTooltipInfo info)
+    {
+        GetLabelById("ItemTooltipName").text = info.Count > 1 ? $"{info.Name} ({info.Count:n0})" : info.Name;
+
+        // "Arc, grade d"
+        var parts = new System.Collections.Generic.List<string>();
+        if (!string.IsNullOrEmpty(info.Kind)) parts.Add(info.Kind);
+        if (!string.IsNullOrEmpty(info.Grade)) parts.Add(info.Grade.ToLower());
+
+        Label kind = GetLabelById("ItemTooltipKind");
+        kind.text = string.Join(", ", parts);
+        kind.style.display = parts.Count == 0 ? DisplayStyle.None : DisplayStyle.Flex;
+
+        VisualElement icon = GetElementById("ItemTooltipIcon");
+        Texture2D texture = IconTable.Instance.LoadTextureByName(info.Icon);
+        icon.style.backgroundImage = texture != null ? new StyleBackground(texture) : new StyleBackground();
+
+        VisualElement stats = GetElementById("ItemTooltipStats");
+        stats.Clear();
+        foreach (ItemTooltipInfo.Stat stat in info.Stats)
+        {
+            stats.Add(StatLine(stat.Label + " :", stat.Value, stat.Active));
+        }
+
+        // Panoplie : les pieces portees en bleu, celles qui manquent en gris clair.
+        if (!string.IsNullOrEmpty(info.SetName))
+        {
+            stats.Add(StatLine("Panoplie :", info.SetName, info.SetComplete));
+            foreach (ItemTooltipInfo.Stat piece in info.SetPieces)
+            {
+                stats.Add(StatLine("   " + piece.Label, piece.Value, piece.Active));
+            }
+
+            if (!string.IsNullOrEmpty(info.SetBonus))
+            {
+                Label bonus = new Label(info.SetBonus);
+                bonus.style.color = info.SetComplete ? ActiveStatColor : PotentialStatColor;
+                bonus.style.whiteSpace = WhiteSpace.Normal;
+                bonus.AddToClassList("skill-tooltip-group");
+                stats.Add(bonus);
+            }
+        }
+
+        stats.style.display = stats.childCount > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+
+        Label description = GetLabelById("ItemTooltipDescription");
+        description.text = info.Description;
+        GetElementById("ItemTooltipDescriptionContainer").style.display =
+            string.IsNullOrEmpty(info.Description) ? DisplayStyle.None : DisplayStyle.Flex;
+
+        _itemTooltip.style.display = DisplayStyle.Flex;
+    }
+
     private void DisplayDefaultTooltip<T>(T value)
     {
+        if (value is ItemTooltipInfo itemInfo)
+        {
+            DisplayItemTooltip(itemInfo);
+            return;
+        }
+
         string stringVal;
 
         if (value is SkillWindowInfo info)

@@ -29,6 +29,7 @@ public class ItemTable
     public Dictionary<int, Armor> Armors { get { return _armors; } }
     public Dictionary<int, EtcItem> EtcItems { get { return _etcItems; } }
 
+    public static int ADENA_ID = 57;
     public static int NAKED_CHEST = 21;
     public static int NAKED_LEGS = 28;
     public static int NAKED_GLOVES = 48;

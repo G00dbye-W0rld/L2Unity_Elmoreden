@@ -69,13 +69,13 @@ public class ItemStatDataTable
                         case "object_id":
                             itemStatData.ObjectId = int.Parse(value);
                             break;
-                        case "p_Defense":
+                        case "pDefense":
                             itemStatData.PDef = int.Parse(value);
                             break;
-                        case "m_Defense":
+                        case "mDefense":
                             itemStatData.MDef = int.Parse(value);
                             break;
-                        case "PAttack":
+                        case "pAttack":
                             itemStatData.PAtk = int.Parse(value);
                             break;
                         case "mAttack":
@@ -99,10 +99,10 @@ public class ItemStatDataTable
                         case "speed":
                             itemStatData.Speed = int.Parse(value);
                             break;
-                        case "ShieldDefence":
+                        case "ShieldDefense":
                             itemStatData.ShieldDef = int.Parse(value);
                             break;
-                        case "ShieldDefenceRate":
+                        case "ShieldDefenseRate":
                             itemStatData.ShieldDefRate = int.Parse(value);
                             break;
                         case "pavoid":

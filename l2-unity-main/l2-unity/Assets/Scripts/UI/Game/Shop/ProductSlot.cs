@@ -1,3 +1,4 @@
+using UnityEngine;
 using System;
 using UnityEngine.UIElements;
 
@@ -39,6 +40,25 @@ public class ProductSlot : InventorySlot
         SwapBasket();
     }
 
+    // Un marchand a souvent un stock illimite : le serveur envoie alors 0, que la fenetre de
+    // quantite prenait pour un maximum de 0. On se limite alors a ce que le joueur peut payer.
+    private int AvailableCount()
+    {
+        if (Product.Count > 0)
+        {
+            return Product.Count;
+        }
+
+        int adena = 0;
+        if (PlayerInventory.Instance != null)
+        {
+            ItemInstance purse = PlayerInventory.Instance.Items.Find(i => i.ItemId == ItemTable.ADENA_ID);
+            adena = purse != null ? purse.Count : 0;
+        }
+
+        return Product.Price > 0 ? Mathf.Max(1, adena / Product.Price) : 9999;
+    }
+
     public virtual void SwapBasket()
     {
         // Un objet d'INVENTAIRE non empilable (ObjectId reel, exemplaire
@@ -59,7 +79,7 @@ public class ProductSlot : InventorySlot
             smParams[0] = new SMParam(SMParam.SMParamType.TYPE_ITEM_NAME, Product.ItemId);
             SystemMessage systemMessage = new SystemMessage(smParams, SystemMessageTable.Instance.SystemMessages[72]);
 
-            L2InputAmountWindow.Instance.ShowWindow(systemMessage, Product.Count, (amount) =>
+            L2InputAmountWindow.Instance.ShowWindow(systemMessage, AvailableCount(), (amount) =>
             {
                 ((ShopSlotContainer)_currentSlotContainer).AdjacentContainer.AddToBasket(Product, amount);
             }, () => { });
