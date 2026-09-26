@@ -65,6 +65,30 @@ def base_mesh(race, group):
     return None
 
 
+def canonical_bones(race, group, mesh):
+    # La casse des os telle que le squelette de la race la porte. Le psk d'Orfen nomme
+    # l'os racine "bip01" alors que les squelettes orc et chaman du projet portent
+    # "Bip01" : Unity lie les courbes par comparaison sensible a la casse, et un seul
+    # ecart suffit a ce que le clip ne pilote plus rien (T-pose silencieuse).
+    # On lit un clip de combat, jamais un clip social, qui pourrait deja etre fautif.
+    for path in sorted(glob.glob(os.path.join(race_dir(race, group), "Clips", "*.anim"))):
+        if not os.path.basename(path).startswith(mesh + ".ao_"):
+            continue
+        if "social" in os.path.basename(path).lower():
+            continue
+        names = {}
+        with open(path, "r", errors="replace") as fh:
+            for line in fh:
+                if "path: " in line:
+                    for seg in line.split("path: ", 1)[1].strip().split("/"):
+                        if seg:
+                            names[seg.lower()] = seg
+        if names:
+            return names
+    return {}
+
+
+
 def missing_sequences(race, group, mesh):
     # Certaines races ont des clips suffixes ".001" : on compare sans ce suffixe.
     have = set()
@@ -109,6 +133,24 @@ def convert(race, group, package):
     armature.animation_data_create()
     armature.animation_data.action = None
 
+    # Le squelette importe suit le nommage d'Orfen. On le realigne sur celui de la race
+    # avant l'export, sinon les courbes ne se lient a rien du tout cote Unity.
+    canon = canonical_bones(race, group, mesh)
+    renames = []
+    for bone in armature.data.bones:
+        want = canon.get(bone.name.lower())
+        if want and want != bone.name:
+            renames.append((bone.name, want))
+    for old, new in renames:
+        armature.data.bones[old].name = new
+
+    # Blender corrige normalement les chemins des actions au renommage ; on s'en assure.
+    for action in bpy.data.actions:
+        for curve in action.fcurves:
+            for old, new in renames:
+                curve.data_path = curve.data_path.replace(
+                    'pose.bones["%s"]' % old, 'pose.bones["%s"]' % new)
+
     # On ne garde que les sequences manquantes, sinon le FBX embarque tout le jeu d'animations.
     keep = {m.lower() for m in missing}
     for action in list(bpy.data.actions):
@@ -125,7 +167,8 @@ def convert(race, group, package):
         obj.select_set(True)
     bpy.ops.export_scene.fbx(filepath=target, use_selection=True, bake_anim=True,
                              bake_anim_use_all_actions=True, bake_anim_use_nla_strips=False)
-    return "ok (%d/%d sequences)" % (kept, len(missing))
+    note = "" if not renames else ", os realignes : " + ", ".join("%s->%s" % r for r in renames)
+    return "ok (%d/%d sequences)%s" % (kept, len(missing), note)
 
 
 for race, group, package in RACES:
