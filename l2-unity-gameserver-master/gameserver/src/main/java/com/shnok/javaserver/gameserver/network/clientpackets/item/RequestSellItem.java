@@ -10,6 +10,7 @@ import com.shnok.javaserver.gameserver.model.actor.instance.Merchant;
 import com.shnok.javaserver.gameserver.model.holder.IntIntHolder;
 import com.shnok.javaserver.gameserver.model.item.instance.ItemInstance;
 import com.shnok.javaserver.gameserver.network.clientpackets.L2GameClientPacket;
+import com.shnok.javaserver.gameserver.network.serverpackets.item.ItemList;
 import com.shnok.javaserver.gameserver.network.serverpackets.unused.NpcHtmlMessage;
 
 public final class RequestSellItem extends L2GameClientPacket
@@ -79,7 +80,10 @@ public final class RequestSellItem extends L2GameClientPacket
 		}
 		
 		player.addAdena((int) totalPrice, false);
-		
+
+		// Sans cela le client garde les objets vendus a l'ecran et la vente parait sans effet.
+		player.sendPacket(new ItemList(player, true));
+
 		// Send the htm, if existing.
 		String htmlFolder = "";
 		if (merchant instanceof Fisherman)

@@ -93,12 +93,6 @@ public final class RequestBuyItem extends L2GameClientPacket
 			if (product == null)
 				return;
 			
-			if (!product.getItem().isStackable() && i.getValue() > 1)
-			{
-				sendPacket(SystemMessage.getSystemMessage(SystemMessageId.YOU_HAVE_EXCEEDED_QUANTITY_THAT_CAN_BE_INPUTTED));
-				return;
-			}
-			
 			price = product.getPrice();
 			if (i.getId() >= 3960 && i.getId() <= 4026)
 				price *= Config.RATE_SIEGE_GUARDS_PRICE;
@@ -162,10 +156,10 @@ public final class RequestBuyItem extends L2GameClientPacket
 			if (product.hasLimitedStock())
 			{
 				if (product.decreaseCount(i.getValue()))
-					player.getInventory().addItem(i.getId(), i.getValue());
+					giveItems(player, i.getId(), i.getValue(), product);
 			}
 			else
-				player.getInventory().addItem(i.getId(), i.getValue());
+				giveItems(player, i.getId(), i.getValue(), product);
 		}
 		
 		// Add to castle treasury and send the htm, if existing.
@@ -193,5 +187,25 @@ public final class RequestBuyItem extends L2GameClientPacket
 			}
 		}
 		player.sendPacket(new ItemList(player, true));
+	}
+
+	/**
+	 * Un objet non empilable achete en plusieurs exemplaires donne autant d'objets distincts.
+	 * La boucle est faite ici pour ne pas dependre de MultipleItemDrop, qui vise les butins.
+	 * @param player : l'acheteur.
+	 * @param itemId : l'objet achete.
+	 * @param count : la quantite demandee.
+	 * @param product : l'entree de la liste de vente, qui porte le modele d'objet.
+	 */
+	private static void giveItems(Player player, int itemId, int count, Product product)
+	{
+		if (product.getItem().isStackable())
+		{
+			player.getInventory().addItem(itemId, count);
+			return;
+		}
+
+		for (int i = 0; i < count; i++)
+			player.getInventory().addItem(itemId, 1);
 	}
 }
