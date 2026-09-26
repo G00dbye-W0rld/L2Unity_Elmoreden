@@ -229,34 +229,37 @@ public class CharacterCreator : MonoBehaviour
     public void ChangeCharacterFace(int faceIndex)
     {
         PlayerAppearance newAppearance = CopyAppearance();
-        newAppearance.Face = (byte)faceIndex;
-
-        if (newAppearance != null)
+        if (newAppearance == null)
         {
-            currentPawn.GetComponent<Entity>().UpdateAppearance(newAppearance);
+            return;
         }
+
+        newAppearance.Face = (byte)faceIndex;
+        currentPawn.GetComponent<Entity>().UpdateAppearance(newAppearance);
     }
 
     public void ChangeCharacterHairStyle(int hairStyleIndex)
     {
         PlayerAppearance newAppearance = CopyAppearance();
-        newAppearance.HairStyle = (byte)hairStyleIndex;
-
-        if (newAppearance != null)
+        if (newAppearance == null)
         {
-            currentPawn.GetComponent<Entity>().UpdateAppearance(newAppearance);
+            return;
         }
+
+        newAppearance.HairStyle = (byte)hairStyleIndex;
+        currentPawn.GetComponent<Entity>().UpdateAppearance(newAppearance);
     }
 
     public void ChangeCharacterHairColor(int hairColorIndex)
     {
         PlayerAppearance newAppearance = CopyAppearance();
-        newAppearance.HairColor = (byte)hairColorIndex;
-
-        if (newAppearance != null)
+        if (newAppearance == null)
         {
-            currentPawn.GetComponent<Entity>().UpdateAppearance(newAppearance);
+            return;
         }
+
+        newAppearance.HairColor = (byte)hairColorIndex;
+        currentPawn.GetComponent<Entity>().UpdateAppearance(newAppearance);
     }
 
     private PlayerAppearance CopyAppearance()
