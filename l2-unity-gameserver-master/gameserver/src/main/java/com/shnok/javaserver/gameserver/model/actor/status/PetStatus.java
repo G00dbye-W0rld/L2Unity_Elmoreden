@@ -49,7 +49,7 @@ public class PetStatus extends SummonStatus<Pet>
 		
 		boolean levelIncreased = super.addLevel(value);
 		if (levelIncreased)
-			_actor.broadcastPacket(new SocialAction(_actor, 15));
+			_actor.broadcastPacket(new SocialAction(_actor, SocialAction.LEVEL_UP));
 		
 		return levelIncreased;
 	}

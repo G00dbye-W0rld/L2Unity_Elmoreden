@@ -96,8 +96,26 @@ public class ActionWindow : L2PopupWindow
         tokenSlotContainer.CreateSlots(16, L2Slot.SlotType.Action);
 
         L2SlotContainer socialSlotContainer = new L2SlotContainer();
-        socialSlotContainer.Initialize(_socialContainer, SLOTS_PER_ROW, 16);
-        socialSlotContainer.CreateSlots(17, L2Slot.SlotType.Action); //-> Will add a padding
+        // 20 emotes : les 17 solos et les 3 a deux.
+        socialSlotContainer.Initialize(_socialContainer, SLOTS_PER_ROW, 24);
+        socialSlotContainer.CreateSlots(24, L2Slot.SlotType.Action);
+
+        // Emotes : la table du client dit lesquelles en sont, inutile de les citer une par une.
+        // On les range dans l'ordre du jeu d'origine, celui de leur identifiant social.
+        List<ActionData> socials = new List<ActionData>();
+        foreach (ActionData data in ActionNameTable.Instance.Actions.Values)
+        {
+            if (data.IsSocial)
+            {
+                socials.Add(data);
+            }
+        }
+
+        socials.Sort((a, b) => a.Type.CompareTo(b.Type));
+        for (int i = 0; i < socials.Count && i < 24; i++)
+        {
+            socialSlotContainer.AssignAction(i, (ActionType)socials[i].Id);
+        }
 
         L2GameUI.Instance.WindowLoadComplete();
     }

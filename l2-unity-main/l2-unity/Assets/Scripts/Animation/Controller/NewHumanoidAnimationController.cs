@@ -19,6 +19,12 @@ public class NewHumanoidAnimationController : NewBaseAnimationController
     [SerializeField] private float _defaultJumpAnimationSpeed = 1.25f;
     [SerializeField] private float _defaultDieAnimationSpeed = 0.5f;
 
+    // L'import fige toutes les animations a 24 images par seconde, alors que le client les
+    // dessine a leur propre cadence. Les douze emotes d'origine tournent entre 6 et 20,
+    // d'ou un ralenti ; les huit ajoutees plus tard sont toutes a 30, d'ou une acceleration.
+    [SerializeField] private float _defaultSocialAnimationSpeed = 0.5f;
+    [SerializeField] private float _modernSocialAnimationSpeed = 1.25f;
+
     [Header("Humanoids")]
     [SerializeField] protected L2HumanoidAnimationContainerDefault _defaultAnimContainer; //TODO: Cache in Singleton?
     [SerializeField] protected L2HumanoidAnimationContainerAtk _atkAnimContainer; //TODO: Cache in Singleton?
@@ -642,6 +648,24 @@ public class NewHumanoidAnimationController : NewBaseAnimationController
         }
     }
 
+    // Les emotes se jouent les mains vides, comme dans le client d'origine. Seules la
+    // victoire et la charge gardent l'arme au poing, elles sont faites pour ça.
+    private const int SocialVictory = 3;
+    private const int SocialAdvance = 4;
+
+    protected override void OnPlayAnimation(AnimationCategory animationCategory, int index)
+    {
+        Gear gear = _entityReferenceHolder != null ? _entityReferenceHolder.Gear : null;
+        if (gear == null)
+        {
+            return;
+        }
+
+        bool emote = animationCategory == AnimationCategory.Social
+                     && index != SocialVictory && index != SocialAdvance;
+        gear.SetWeaponsHidden(emote);
+    }
+
     public override void Emote(int action)
     {
         // Le serveur tire l'action au hasard : si ce PNJ n'a pas ce clip, on prend un de ceux qu'il a.
@@ -663,6 +687,17 @@ public class NewHumanoidAnimationController : NewBaseAnimationController
 
         if (PlayAnimation(AnimationCategory.Social, action))
         {
+            // Les emotes 14 a 21 sont les modernes, dessinees a 30 images par seconde.
+            _animancerState.EffectiveSpeed = action >= 14
+                ? _modernSocialAnimationSpeed
+                : _defaultSocialAnimationSpeed;
+
+            // Voix de l'emote. Muette tant que l'evenement FMOD n'existe pas.
+            if (_entityReferenceHolder?.AudioHandler != null
+                && SocialActionText.TryGetVoice(action, out EntitySoundEvent voice))
+            {
+                _entityReferenceHolder.AudioHandler.PlaySound(voice);
+            }
             if (!_animancerState.HasEvents)
             {
                 _animancerState.Events.OnEnd = Wait;

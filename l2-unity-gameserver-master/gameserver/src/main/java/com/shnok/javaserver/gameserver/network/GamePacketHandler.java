@@ -668,6 +668,9 @@ public final class GamePacketHandler implements IPacketHandler<GameClient>, ICli
 					case 0xc8:
 						msg = new PetitionVote();
 						break;
+					case 0xc9:
+						msg = new RequestCoupleAction();
+						break;
 					case 0xCA:
 						msg = new GameGuardReply();
 						break;

@@ -56,6 +56,7 @@ public abstract class NewBaseAnimationController : MonoBehaviour
         // Debug.Log("PlayAnim! " + transform.name + " - " + index);
 
         _lastAnim = index;
+        OnPlayAnimation(animationCategory, index);
 
         AnimationClip clip = GetAnimationClip(animationCategory, index);
         if (clip == null)
@@ -77,6 +78,9 @@ public abstract class NewBaseAnimationController : MonoBehaviour
 
         return true;
     }
+
+    // Point unique traverse par toute lecture d'animation, quelle qu'en soit l'origine.
+    protected virtual void OnPlayAnimation(AnimationCategory animationCategory, int index) { }
 
     protected abstract AnimationClip GetAnimationClip(AnimationCategory animationCategory, int index);
 

@@ -20,4 +20,23 @@ public enum EntitySoundEvent : int
     Breathe,
     PreAtk_1,
     PreAtk_2,
+
+    // Voix des emotes, telles que le client les nomme dans ChrSound.
+    Greeting,
+    Victory,
+    Followme,
+    Angry,
+    Agree,
+    Salute,
+    Wonder,
+    Tired,
+    Laugh,
+    Cheer,
+    Dance,
+    Cry,
+    Humming,
+    Scare,
+    Admiration,
+    Tease_1,
+    Warmup,
 }

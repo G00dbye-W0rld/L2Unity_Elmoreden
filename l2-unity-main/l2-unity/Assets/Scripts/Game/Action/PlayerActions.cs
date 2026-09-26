@@ -72,10 +72,40 @@ public class PlayerActions : MonoBehaviour
         if (_actions.TryGetValue(actionType, out L2Action action))
         {
             action.UseAction();
+            return;
         }
-        else
+
+        // Les emotes ne sont pas enregistrees une par une : la table du client dit
+        // lesquelles en sont, et sous quel identifiant social les envoyer.
+        ActionData data = ActionNameTable.Instance.GetAction(actionType);
+        if (data != null && data.IsSocial)
         {
-            Debug.LogWarning("Action not found.");
+            L2Action social = new SocialAction(data.Type, data.IsCouple);
+            _actions.Add(actionType, social);
+            social.UseAction();
+            return;
         }
+
+        Debug.LogWarning($"Action not found: {(int)actionType}.");
+    }
+
+    // Commande de chat, "/socialbow" et compagnie : la table porte le nom sans la barre.
+    public bool UseCommand(string command)
+    {
+        if (string.IsNullOrEmpty(command))
+        {
+            return false;
+        }
+
+        foreach (ActionData data in ActionNameTable.Instance.Actions.Values)
+        {
+            if (data.IsSocial && string.Equals(data.Command, command, System.StringComparison.OrdinalIgnoreCase))
+            {
+                UseAction((ActionType)data.Id);
+                return true;
+            }
+        }
+
+        return false;
     }
 }

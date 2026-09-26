@@ -2586,6 +2586,55 @@ public final class Player extends Playable
 		_requesterId = requesterId;
 	}
 	
+	/** Identifiant du message de confirmation d'une emote a deux : une entree libre de la
+	 * table du client, dont le texte francais est dans SystemMsg_fr. */
+	public static final int COUPLE_ACTION_MESSAGE_ID = 7490;
+
+	private int _coupleRequesterId;
+	private int _coupleActionId;
+
+	public void setCoupleRequest(int requesterId, int actionId)
+	{
+		_coupleRequesterId = requesterId;
+		_coupleActionId = actionId;
+	}
+
+	/**
+	 * Reponse a une emote a deux. Les deux personnages se tournent l'un vers l'autre puis
+	 * jouent leur moitie en meme temps, sinon le geste ne veut rien dire.
+	 * @param answer : 1 pour accepter.
+	 */
+	public void coupleAnswer(int answer)
+	{
+		final int requesterId = _coupleRequesterId;
+		final int actionId = _coupleActionId;
+		_coupleRequesterId = 0;
+		_coupleActionId = 0;
+
+		if (requesterId == 0)
+			return;
+
+		final Player requester = World.getInstance().getPlayer(requesterId);
+		if (requester == null)
+			return;
+
+		// Un refus ne dit rien au demandeur, comme dans le jeu d'origine.
+		if (answer != 1)
+			return;
+
+		if (!isIn3DRadius(requester, 150))
+		{
+			requester.sendPacket(SystemMessageId.TARGET_TOO_FAR);
+			return;
+		}
+
+		getPosition().setHeadingTo(requester);
+		requester.getPosition().setHeadingTo(this);
+
+		broadcastPacket(new SocialAction(this, actionId));
+		requester.broadcastPacket(new SocialAction(requester, actionId));
+	}
+
 	public void engageAnswer(int answer)
 	{
 		if (!_isUnderMarryRequest || _requesterId == 0)
@@ -5999,7 +6048,7 @@ public final class Player extends Playable
 			_shortcutList.restore();
 			sendPacket(new ShortCutInit(this));
 			
-			broadcastPacket(new SocialAction(this, 15));
+			broadcastPacket(new SocialAction(this, SocialAction.LEVEL_UP));
 			sendPacket(new SkillCoolTime(this));
 			return true;
 		}

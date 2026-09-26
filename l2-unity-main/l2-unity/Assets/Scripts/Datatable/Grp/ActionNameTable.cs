@@ -79,6 +79,17 @@ public class ActionNameTable
                         case "name":
                             actionData.Descripion = DatUtils.CleanupString(value);
                             break;
+                        case "type":
+                            int.TryParse(value, out int type);
+                            actionData.Type = type;
+                            break;
+                        case "category":
+                            int.TryParse(value, out int category);
+                            actionData.Category = category;
+                            break;
+                        case "desc":
+                            actionData.Command = DatUtils.CleanupString(value);
+                            break;
                     }
                 }
 
@@ -90,5 +101,40 @@ public class ActionNameTable
 
             Debug.Log($"Successfully imported {_actions.Count} actionName(s)");
         }
+
+        ReadFrenchOverrides();
+    }
+
+    // Remplace le nom affiche sans toucher a l'icone ni a la commande de chat.
+    private void ReadFrenchOverrides()
+    {
+        string path = Path.Combine(Application.streamingAssetsPath, "Data/Meta/ActionName_fr.txt");
+        if (!File.Exists(path))
+        {
+            return;
+        }
+
+        int count = 0;
+        foreach (string line in File.ReadAllLines(path, System.Text.Encoding.UTF8))
+        {
+            if (line.Length == 0 || line[0] == '#')
+            {
+                continue;
+            }
+
+            int tab = line.IndexOf('\t');
+            if (tab <= 0 || !int.TryParse(line.Substring(0, tab), out int id))
+            {
+                continue;
+            }
+
+            if (_actions.TryGetValue(id, out ActionData action))
+            {
+                action.Name = line.Substring(tab + 1);
+                count++;
+            }
+        }
+
+        Debug.Log($"Loaded {count} french action name(s).");
     }
 }

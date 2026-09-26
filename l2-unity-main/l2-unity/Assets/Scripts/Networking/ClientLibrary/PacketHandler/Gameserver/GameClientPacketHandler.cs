@@ -467,6 +467,16 @@ public class GameClientPacketHandler : ClientPacketHandler
         SendPacket(packet);
     }
 
+    public void SendRequestSocialAction(int actionId)
+    {
+        SendPacket(new RequestSocialActionPacket(actionId));
+    }
+
+    public void SendRequestCoupleAction(int targetId, int actionId)
+    {
+        SendPacket(new RequestCoupleActionPacket(targetId, actionId));
+    }
+
     public void SendRequestSellItem(int listId, List<Product> products)
     {
         RequestSellItemPacket packet = new RequestSellItemPacket(listId, products);

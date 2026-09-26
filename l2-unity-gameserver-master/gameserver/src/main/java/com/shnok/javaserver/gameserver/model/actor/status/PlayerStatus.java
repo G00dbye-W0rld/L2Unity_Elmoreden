@@ -618,7 +618,7 @@ public class PlayerStatus extends PlayableStatus<Player>
 			
 			setCp(getMaxCp());
 			
-			_actor.broadcastPacket(new SocialAction(_actor, 15));
+			_actor.broadcastPacket(new SocialAction(_actor, SocialAction.LEVEL_UP));
 			_actor.sendPacket(SystemMessageId.YOU_INCREASED_YOUR_LEVEL);
 		}
 		

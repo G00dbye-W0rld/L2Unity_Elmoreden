@@ -321,6 +321,11 @@ public class ChatWindow : L2Window
             {
                 // Commandes de clan du client d'origine, traitees dans TryClanCommand.
             }
+            else if (text.StartsWith("/") && PlayerActions.Instance != null
+                     && PlayerActions.Instance.UseCommand(text[1..].Trim()))
+            {
+                // Emotes : /socialbow, /socialhello... les noms viennent de ActionName.
+            }
             else if (text.StartsWith("/invite ", System.StringComparison.OrdinalIgnoreCase))
             {
                 // Contrairement aux actions/clic droit, /invite vise un nom

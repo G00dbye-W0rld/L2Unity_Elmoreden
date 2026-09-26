@@ -270,8 +270,31 @@ public class World : MonoBehaviour
             else
             {
                 e.AnimationController.Emote(action);
+                AnnounceSocialAction(e, action);
             }
         });
+    }
+
+    // Didascalie dans le canal Role Play. Reservee aux joueurs : les PNJ et les monstres
+    // jouent des emotes en permanence, le canal serait noye.
+    private static void AnnounceSocialAction(Entity entity, int action)
+    {
+        if (entity == null || entity.Identity == null || ChatWindow.Instance == null)
+        {
+            return;
+        }
+
+        EntityType type = entity.Identity.EntityType;
+        if (type != EntityType.Player && type != EntityType.User)
+        {
+            return;
+        }
+
+        string text = SocialActionText.Get(action);
+        if (!string.IsNullOrEmpty(text))
+        {
+            ChatWindow.Instance.ReceiveChatMessage(new SocialActionMessage(entity.Identity.Name, text));
+        }
     }
 
     public void DestroyWorld()

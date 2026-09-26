@@ -32,7 +32,9 @@ public class RequestSocialAction extends L2GameClientPacket
 			return;
 		}
 		
-		if (_actionId < 2 || _actionId > 13)
+		// Les 17 emotes declarees par ActionName vont de 2 a 21. L'effet de montee de
+		// niveau a ete deplace hors de cette plage pour ne plus entrer en conflit.
+		if (_actionId < 2 || _actionId > 21)
 			return;
 		
 		if (player.isOperating() || player.getActiveRequester() != null || player.isAlikeDead() || player.getAI().getCurrentIntention().getType() != IntentionType.IDLE)

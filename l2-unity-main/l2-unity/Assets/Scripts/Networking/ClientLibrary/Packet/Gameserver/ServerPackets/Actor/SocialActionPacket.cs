@@ -1,6 +1,7 @@
 public class SocialActionPacket : ServerPacket
 {
-    public const int LEVELUP_ACTION = 15;
+    // Hors de la plage des emotes (2 a 21) : ActionName numerote la timidite 15.
+    public const int LEVELUP_ACTION = 100;
 
     public int ObjectId { get; private set; }
     public int Action { get; private set; }

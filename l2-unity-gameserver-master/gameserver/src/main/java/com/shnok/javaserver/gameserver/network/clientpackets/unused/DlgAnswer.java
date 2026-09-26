@@ -31,6 +31,8 @@ public final class DlgAnswer extends L2GameClientPacket
 			player.teleportAnswer(_answer, _requesterId);
 		else if (_messageId == 1983)
 			player.engageAnswer(_answer);
+		else if (_messageId == Player.COUPLE_ACTION_MESSAGE_ID)
+			player.coupleAnswer(_answer);
 		else if (_messageId == SystemMessageId.WOULD_YOU_LIKE_TO_OPEN_THE_GATE.getId())
 			player.activateGate(_answer, 1);
 		else if (_messageId == SystemMessageId.WOULD_YOU_LIKE_TO_CLOSE_THE_GATE.getId())

@@ -20,4 +20,8 @@ public enum HumanoidAnimationSocialEvent : byte
     social18,
     social19,
     social20,
+    social21,
+    social22,
+    social23,
+    social24,
 }
