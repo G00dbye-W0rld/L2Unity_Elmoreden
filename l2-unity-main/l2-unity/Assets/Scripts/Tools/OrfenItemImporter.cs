@@ -387,16 +387,20 @@ public static class OrfenItemImporter
         // pointe en bas et la face bombee vers l'avant, qui etaient inverses tous les deux.
         Vector3 size = mesh.bounds.size;
         int thin = size.x <= size.y && size.x <= size.z ? 0 : (size.y <= size.z ? 1 : 2);
-        int longest = size.x >= size.y && size.x >= size.z ? 0 : (size.y >= size.z ? 1 : 2);
-        if (thin != longest)
+
+        // X est la hauteur d'origine de ces modeles. On ne cherche la plus grande dimension
+        // que si X est justement la plus fine : sur un bouclier rond hauteur et largeur sont
+        // a deux millimetres pres, et prendre la plus grande basculerait d'un modele a l'autre.
+        int height = thin != 0 ? 0 : (size.y >= size.z ? 1 : 2);
+        if (thin != height)
         {
-            Vector3 width = ToPrefab(instance, model, Axis(3 - thin - longest));
-            rotation *= Quaternion.AngleAxis(180f, width);
+            // Demi-tour autour de la largeur : remet la pointe en bas et la face bombee
+            // du bon cote, les deux etant inverses ensemble.
+            rotation *= Quaternion.AngleAxis(180f, ToPrefab(instance, model, Axis(3 - thin - height)));
 
             // Quart de tour autour de la hauteur : le bouclier se porte de profil, sa face
-            // tournee vers l'exterieur, pas vers l'avant du personnage.
-            Vector3 height = ToPrefab(instance, model, Axis(longest));
-            rotation *= Quaternion.AngleAxis(90f, height);
+            // tournee vers l'exterieur et non vers l'avant du personnage.
+            rotation *= Quaternion.AngleAxis(-90f, ToPrefab(instance, model, Axis(height)));
         }
 
         instance.transform.localRotation = rotation;

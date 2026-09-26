@@ -68,16 +68,15 @@ public class PlayerMoveDirection extends L2GameClientPacket
         // Generate a Location based on target coords.
         final Location moveDirection = new Location((int)(_moveDirectionX * 100), (int)(_moveDirectionY * 100), (int)(_moveDirectionZ * 100));
 
+        player.getAI().tryToMoveTo(moveDirection, null, _requireResponse);
+
         // Le client pilote le deplacement par direction, pas par destination : il n'y a donc
         // jamais d'arrivee, et une direction nulle est sa facon de dire "je m'arrete". Sans
-        // ce cas l'IA restait en MOVE_TO indefiniment, et tout ce qui exige un personnage au
-        // repos (les emotes, par exemple) etait refuse en silence.
+        // ce retour au repos l'IA restait en MOVE_TO indefiniment, et tout ce qui exige un
+        // personnage au repos (les emotes, par exemple) etait refuse en silence.
+        // Le passage par tryToMoveTo est garde : c'est lui qui diffuse l'arret aux autres
+        // joueurs, sans quoi leur client continue d'extrapoler le dernier deplacement.
         if (moveDirection.getX() == 0 && moveDirection.getY() == 0 && moveDirection.getZ() == 0)
-        {
             player.getAI().tryToIdle();
-            return;
-        }
-
-        player.getAI().tryToMoveTo(moveDirection, null, _requireResponse);
     }
 }
