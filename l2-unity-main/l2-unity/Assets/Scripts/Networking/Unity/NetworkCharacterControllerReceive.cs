@@ -7,6 +7,9 @@ public class NetworkCharacterControllerReceive : MonoBehaviour
     private NetworkTransformReceive _networkTransformReceive;
     private Entity _entity;
     [SerializeField] private Vector3 _direction;
+
+    // Au-dela, ce n'est plus de la derive mais un saut : on recale meme en pleine course.
+    [SerializeField] private float _resyncDistance = 3f;
     [SerializeField] private float _distanceToDestination;
     [SerializeField] private float _speed;
     [SerializeField] private Vector3 _destination;
@@ -87,7 +90,16 @@ public class NetworkCharacterControllerReceive : MonoBehaviour
             Debug.LogWarning("UpdateMoveDirection: is outdated " + direction + " timestamp: " + timestamp + " lastUpdateTimestamp: " + lastUpdateTimestamp);
             return;
         }
-        _networkTransformReceive.SetNewPosition(position);
+        // Tant que le personnage avance, c'est sa direction qui fait foi. Le recaler sur une
+        // position vieille d'un rafraichissement le ferait reculer en boucle, pendant que la
+        // direction le repousse en avant : c'est ce combat qui le faisait glisser ou refaire
+        // son trajet sans fin. On ne corrige donc qu'a l'arret, ou s'il a vraiment derive.
+        bool moving = direction.x != 0f || direction.z != 0f;
+        if (!moving || VectorUtils.Distance2D(transform.position, position) > _resyncDistance)
+        {
+            _networkTransformReceive.SetNewPosition(position);
+        }
+
         lastUpdateTimestamp = timestamp;
 
         _speed = _entity.Running ? _entity.Stats.ScaledRunSpeed : _entity.Stats.ScaledWalkSpeed;
