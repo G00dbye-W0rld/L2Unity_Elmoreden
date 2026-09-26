@@ -166,6 +166,15 @@ def import_icons(ids):
             m = re.search(r"\ticon=\{\[([^\].]+)\.([^\]]+)\]", line)
             if m:
                 wanted[m.group(2).lower()] = m.group(2)
+    # Icones de la fenetre d'actions : elles ne viennent d'aucune table d'objets.
+    actions = os.path.join(META, "ActionName_Classic-eu.txt")
+    if os.path.exists(actions):
+        with open(actions, encoding="utf-8", errors="replace") as h:
+            for line in h:
+                m = re.search(r"\ticon=\[([^\].]+)\.([^\]]+)\]", line)
+                if m:
+                    wanted[m.group(2).lower()] = m.group(2)
+
     dest = os.path.join(SYSTEX, "Icon")
     missing = {k: v for k, v in wanted.items() if not exists_ci(dest, v + ".png")}
     print("Icones : %d referencees, %d manquantes" % (len(wanted), len(missing)), flush=True)
