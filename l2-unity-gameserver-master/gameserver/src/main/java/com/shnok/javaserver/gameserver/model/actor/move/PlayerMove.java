@@ -108,6 +108,17 @@ public class PlayerMove extends CreatureMove<Player>
 //		_actor.broadcastPacket(new MoveToPawn(_actor, pawn, offset));
 	}
 	
+	/**
+	 * Un joueur se deplace par direction, pas vers une destination : le decrire avec un
+	 * MoveToLocation envoie a l'observateur un point deja perime, qui le fait reculer puis
+	 * refaire le trajet en boucle. On ne decrit donc rien, la direction est de toute facon
+	 * rediffusee dans les 100 ms.
+	 */
+	@Override
+	public void describeMovementTo(Player player)
+	{
+	}
+
 	@Override
 	protected void moveToLocation(Location moveDirection, boolean pathfinding)
 	{

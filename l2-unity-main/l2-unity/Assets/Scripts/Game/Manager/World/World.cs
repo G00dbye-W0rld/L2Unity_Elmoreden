@@ -129,6 +129,13 @@ public class World : MonoBehaviour
     {
         return _worldSpawner.ExecuteWithEntityAsync(id, e =>
         {
+            // Un joueur se deplace par direction : lui imposer une destination le ferait
+            // reculer vers un point deja perime, puis repartir, sans fin.
+            if (e.Identity != null && e.Identity.EntityType == EntityType.User)
+            {
+                return;
+            }
+
             e.Identity.Position = currentPosition;
             StartCoroutine(HandleUpdateDestination(e, currentPosition, destination));
         });
