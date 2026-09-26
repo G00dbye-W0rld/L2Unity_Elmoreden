@@ -31,23 +31,27 @@ public class InventoryUpdateTaskManager implements Runnable
 		// Loop all inventories and if needed, send the IU and update weight.
 		for (Inventory inv : _list)
 		{
-			// If the item update list is empty, remove the inventory from the manager.
-			if (inv.getUpdateList().isEmpty())
-			{
-				_list.remove(inv);
-				continue;
-			}
-			
 			// Don't send packet if the Playable isn't visible and isn't teleporting.
 			final Playable owner = inv.getOwner();
 			if (!owner.isVisible() && !owner.isTeleporting())
 			{
+				// Le poids reste a jour meme sans envoi : sinon la penalite de surcharge
+				// se figeait jusqu'au changement d'inventaire suivant.
+				inv.updateWeight();
 				_list.remove(inv);
 				continue;
 			}
-			
-			owner.sendIU();
+
+			if (!inv.getUpdateList().isEmpty())
+				owner.sendIU();
+
+			// Le poids est recalcule meme si la liste a deja ete videe ailleurs (envoi direct
+			// d'ItemList ou d'InventoryUpdate) : sinon la penalite de surcharge restait perimee.
 			inv.updateWeight();
+
+			// Plus rien a envoyer : l'inventaire quitte le gestionnaire.
+			if (inv.getUpdateList().isEmpty())
+				_list.remove(inv);
 		}
 	}
 	
