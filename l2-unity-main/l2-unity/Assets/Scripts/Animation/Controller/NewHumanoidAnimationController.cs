@@ -25,6 +25,9 @@ public class NewHumanoidAnimationController : NewBaseAnimationController
     [SerializeField] private float _defaultSocialAnimationSpeed = 0.5f;
     [SerializeField] private float _modernSocialAnimationSpeed = 1.25f;
 
+    // La victoire et la charge etaient deja dessinees a 24 : le ralenti ne les concerne pas.
+    [SerializeField] private float _fastSocialAnimationSpeed = 1f;
+
     [Header("Humanoids")]
     [SerializeField] protected L2HumanoidAnimationContainerDefault _defaultAnimContainer; //TODO: Cache in Singleton?
     [SerializeField] protected L2HumanoidAnimationContainerAtk _atkAnimContainer; //TODO: Cache in Singleton?
@@ -688,9 +691,18 @@ public class NewHumanoidAnimationController : NewBaseAnimationController
         if (PlayAnimation(AnimationCategory.Social, action))
         {
             // Les emotes 14 a 21 sont les modernes, dessinees a 30 images par seconde.
-            _animancerState.EffectiveSpeed = action >= 14
-                ? _modernSocialAnimationSpeed
-                : _defaultSocialAnimationSpeed;
+            if (action >= 14)
+            {
+                _animancerState.EffectiveSpeed = _modernSocialAnimationSpeed;
+            }
+            else if (action == SocialVictory || action == SocialAdvance)
+            {
+                _animancerState.EffectiveSpeed = _fastSocialAnimationSpeed;
+            }
+            else
+            {
+                _animancerState.EffectiveSpeed = _defaultSocialAnimationSpeed;
+            }
 
             // Voix de l'emote. Muette tant que l'evenement FMOD n'existe pas.
             if (_entityReferenceHolder?.AudioHandler != null
