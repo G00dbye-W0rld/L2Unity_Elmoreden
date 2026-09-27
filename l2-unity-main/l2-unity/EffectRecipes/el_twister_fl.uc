@@ -124,8 +124,6 @@ defaultproperties
          RelativeWarmupTime=0.100000
      End Object
      Emitters(3)=SpriteEmitter'SpriteEmitter17'
-     bRotEmitter=True
-     RotPerSecond=(Pitch=0,Yaw=0,Roll=30000)
      bUseDynamicLights=False
      bSelfRotation=True
      bAcceptsProjectors=False

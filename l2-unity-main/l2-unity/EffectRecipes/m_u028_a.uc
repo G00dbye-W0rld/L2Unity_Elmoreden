@@ -132,9 +132,6 @@ defaultproperties
          GetVelocityDirectionFrom=PTVD_StartPositionAndOwner
      End Object
      Emitters(3)=SpriteEmitter'SpriteEmitter26'
-     AutoReplay=True
-     bRotEmitter=True
-     RotPerSecond=(Pitch=0,Yaw=50000,Roll=0)
      Physics=10
      bNoDelete=False
      bRelativeTrail=True

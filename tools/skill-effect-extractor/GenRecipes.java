@@ -30,6 +30,13 @@ public class GenRecipes {
         "LifeSpan", "RemoteRole", "AmbientGlow", "CollisionRadius", "CollisionHeight",
         "SoundVolume", "SoundRadius"));
     // Les drapeaux d'acteur (bXxx) sont admis en bloc : ils sont nombreux et inoffensifs.
+    // Ces proprietes de classe sont des scalaires : une valeur de structure ou de
+    // tableau signale un mauvais decalage, et non une donnee exotique.
+    static final Set<String> SCALAR = new HashSet<>(Arrays.asList(
+        "DrawScale", "AccSpeed", "Speed", "RotPerSecond", "LifeSpan", "AmbientGlow",
+        "SoundVolume", "SoundRadius", "CollisionRadius", "CollisionHeight", "Physics",
+        "RemoteRole", "Tag", "AutoReplay", "AutoReset"));
+
     static final Pattern FLAG = Pattern.compile("^b[A-Z][A-Za-z0-9_]*$");
     static final Pattern IDENT = Pattern.compile("^[A-Za-z][A-Za-z0-9_]*$");
 
@@ -194,6 +201,9 @@ public class GenRecipes {
                         break;
                     }
                     if (undecoded(kv[1])) { ok = false; break; }
+                    // Un scalaire dont la valeur est une structure trahit le decalage.
+                    if (SCALAR.contains(kv[0]) && ("10".equals(kv[2]) || "9".equals(kv[2])
+                        || kv[1].startsWith("("))) { ok = false; break; }
                 }
                 if (ok) return pr;
             } catch (Exception ignored) {}

@@ -199,8 +199,6 @@ defaultproperties
          LifetimeRange=(Min=3.000000,Max=3.000000)
      End Object
      Emitters(5)=SpriteEmitter'SpriteEmitter18'
-     bRotEmitter=True
-     RotPerSecond=(Pitch=0,Yaw=100000,Roll=0)
      Physics=10
      bNoDelete=False
      bRelativeTrail=True

@@ -131,7 +131,6 @@ defaultproperties
          StartVelocityRange=(X=(Min=-200.000000,Max=-200.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
      End Object
      Emitters(3)=SpriteEmitter'SpriteEmitter33'
-     RotPerSecond=(Pitch=0,Yaw=0,Roll=30000)
      bUseDynamicLights=False
      bAcceptsProjectors=False
      DrawScale=0.020000

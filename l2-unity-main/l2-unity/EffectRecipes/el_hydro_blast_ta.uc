@@ -164,7 +164,6 @@ defaultproperties
          StartVelocityRange=(X=(Min=-10.000000,Max=10.000000),Y=(Min=-10.000000,Max=10.000000),Z=(Min=-40.000000,Max=-40.000000))
      End Object
      Emitters(4)=SpriteEmitter'SpriteEmitter4'
-     RotPerSecond=(Pitch=0,Yaw=-30000,Roll=0)
      bNoDelete=False
      DrawScale=0.250000
      bDirectional=True

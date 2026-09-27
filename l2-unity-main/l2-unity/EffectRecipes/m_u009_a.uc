@@ -202,8 +202,6 @@ defaultproperties
          LifetimeRange=(Min=0.500000,Max=0.500000)
      End Object
      Emitters(5)=SpriteEmitter'SpriteEmitter6'
-     bRotEmitter=True
-     RotPerSecond=(Pitch=0,Yaw=32768,Roll=0)
      Physics=10
      bDynamicActorFilterState=True
      bUseDynamicLights=False

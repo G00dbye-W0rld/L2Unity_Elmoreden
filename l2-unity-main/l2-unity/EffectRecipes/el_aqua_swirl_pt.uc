@@ -36,7 +36,6 @@ defaultproperties
          GetVelocityDirectionFrom=PTVD_OwnerAndStartPosition
      End Object
      Emitters(0)=SpriteEmitter'SpriteEmitter11'
-     RotPerSecond=(Pitch=0,Yaw=0,Roll=30000)
      bNoDelete=False
      DrawScale=0.100000
      bDirectional=True

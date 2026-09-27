@@ -111,7 +111,6 @@ defaultproperties
          LifetimeRange=(Min=2.300000,Max=2.300000)
      End Object
      Emitters(2)=MeshEmitter'MeshEmitter3'
-     RotPerSecond=(Pitch=0,Yaw=5000,Roll=0)
      bNoDelete=False
      DrawScale=0.250000
      bDirectional=True

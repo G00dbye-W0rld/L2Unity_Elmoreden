@@ -170,8 +170,6 @@ defaultproperties
          GetVelocityDirectionFrom=PTVD_StartPositionAndOwner
      End Object
      Emitters(4)=SpriteEmitter'SpriteEmitter6'
-     bRotEmitter=True
-     RotPerSecond=(Pitch=0,Yaw=10000,Roll=0)
      Physics=10
      bNoDelete=False
      bTrailerPrePivot=True

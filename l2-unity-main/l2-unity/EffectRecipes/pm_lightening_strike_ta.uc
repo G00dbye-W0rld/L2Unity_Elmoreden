@@ -156,8 +156,6 @@ defaultproperties
          GetVelocityDirectionFrom=PTVD_OwnerAndStartPosition
      End Object
      Emitters(4)=BeamEmitter'BeamEmitter1'
-     bRotEmitter=True
-     RotPerSecond=(Pitch=0,Yaw=-10000,Roll=0)
      bNoDelete=False
      DrawScale=0.400000
      bDirectional=True

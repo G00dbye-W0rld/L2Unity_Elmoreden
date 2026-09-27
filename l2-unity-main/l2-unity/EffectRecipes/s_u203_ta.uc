@@ -194,8 +194,6 @@ defaultproperties
          InitialDelayRange=(Min=0.200000,Max=0.200000)
      End Object
      Emitters(5)=MeshEmitter'MeshEmitter0'
-     bRotEmitter=True
-     RotPerSecond=(Pitch=0,Yaw=131072,Roll=0)
      bLightChanged=True
      bNoDelete=False
      bSunAffect=True

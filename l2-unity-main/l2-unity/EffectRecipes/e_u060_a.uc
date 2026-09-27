@@ -103,7 +103,6 @@ defaultproperties
          GetVelocityDirectionFrom=PTVD_OwnerAndStartPosition
      End Object
      Emitters(2)=SpriteEmitter'SpriteEmitter10'
-     RotPerSecond=(Pitch=0,Yaw=33000,Roll=0)
      bNoDelete=False
      Tag=Emitter
      DrawScale=0.050000

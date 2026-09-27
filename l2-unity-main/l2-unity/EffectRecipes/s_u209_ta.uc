@@ -305,8 +305,6 @@ defaultproperties
          MaxAbsVelocity=(X=40000.000000,Y=10000.000000,Z=20000.000000)
      End Object
      Emitters(8)=SpriteEmitter'SpriteEmitter7'
-     bRotEmitter=True
-     RotPerSecond=(Pitch=0,Yaw=261440,Roll=0)
      bLightChanged=True
      bNoDelete=False
      bSunAffect=True

@@ -128,9 +128,6 @@ defaultproperties
          RelativeWarmupTime=1.000000
      End Object
      Emitters(3)=SpriteEmitter'SpriteEmitter10'
-     AutoReplay=True
-     bRotEmitter=True
-     RotPerSecond=(Pitch=0,Yaw=0,Roll=50000)
      bUseDynamicLights=False
      bAcceptsProjectors=False
      Tag=Emitter

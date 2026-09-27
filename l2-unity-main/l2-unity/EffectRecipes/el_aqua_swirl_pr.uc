@@ -126,8 +126,6 @@ defaultproperties
          StartVelocityRange=(X=(Min=-0.010000,Max=0.010000),Y=(Min=-0.010000,Max=0.010000),Z=(Min=-0.060000,Max=-0.060000))
      End Object
      Emitters(3)=SpriteEmitter'SpriteEmitter21'
-     bRotEmitter=True
-     RotPerSecond=(Pitch=0,Yaw=-50000,Roll=0)
      bNoDelete=False
      DrawScale=0.020000
      bDirectional=True

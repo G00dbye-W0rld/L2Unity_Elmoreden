@@ -30,8 +30,6 @@ defaultproperties
          VelocityLossRange=(X=(Min=7.000000,Max=7.000000),Y=(Min=7.000000,Max=7.000000),Z=(Min=7.000000,Max=7.000000))
      End Object
      Emitters(0)=MeshEmitter'MeshEmitter5'
-     bRotEmitter=True
-     RotPerSecond=(Pitch=0,Yaw=-131072,Roll=0)
      bNoDelete=False
      Rotation=(Pitch=0,Yaw=-1559020305,Roll=0)
      DrawScale=0.200000

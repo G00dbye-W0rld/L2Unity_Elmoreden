@@ -303,5 +303,7 @@ defaultproperties
          VelocityLossRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=1.000000),Z=(Min=1.000000,Max=1.500000))
      End Object
      Emitters(8)=SpriteEmitter'SpriteEmitter32'
-     DrawScale=(AutoDestroy=True,bNoDelete=False,bSunAffect=True,bDirectional=True)
+     bNoDelete=False
+     bSunAffect=True
+     bDirectional=True
 }

@@ -110,8 +110,6 @@ defaultproperties
          LifetimeRange=(Min=2.000000,Max=2.000000)
      End Object
      Emitters(2)=MeshEmitter'MeshEmitter4'
-     bRotEmitter=True
-     RotPerSecond=(Pitch=0,Yaw=0,Roll=20000)
      bLightChanged=True
      bSelfRotation=True
      bSunAffect=True

@@ -235,8 +235,6 @@ defaultproperties
          StartVelocityRange=(X=(Min=-10.000000,Max=10.000000),Y=(Min=-10.000000,Max=10.000000),Z=(Min=0.000000,Max=0.000000))
      End Object
      Emitters(6)=MeshEmitter'MeshEmitter6'
-     bRotEmitter=True
-     RotPerSecond=(Pitch=0,Yaw=0,Roll=5000)
      bLightChanged=True
      bNoDelete=False
      bSunAffect=True

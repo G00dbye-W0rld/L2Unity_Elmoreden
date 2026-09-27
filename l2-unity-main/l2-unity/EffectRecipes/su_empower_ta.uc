@@ -225,8 +225,6 @@ defaultproperties
          InitialDelayRange=(Min=1.000000,Max=1.000000)
      End Object
      Emitters(6)=SpriteEmitter'SpriteEmitter17'
-     bRotEmitter=True
-     RotPerSecond=(Pitch=0,Yaw=80000,Roll=0)
      bNoDelete=False
      Rotation=(Pitch=0,Yaw=1161466817,Roll=0)
      DrawScale=0.050000

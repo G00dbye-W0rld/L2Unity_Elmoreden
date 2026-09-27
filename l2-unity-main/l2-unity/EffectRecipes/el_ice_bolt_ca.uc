@@ -256,8 +256,6 @@ defaultproperties
          LifetimeRange=(Min=5.000000,Max=5.000000)
      End Object
      Emitters(6)=SpriteEmitter'SpriteEmitter39'
-     bRotEmitter=True
-     RotPerSecond=(Pitch=0,Yaw=32768,Roll=0)
      bNoDelete=False
      DrawScale=0.100000
      bDirectional=True

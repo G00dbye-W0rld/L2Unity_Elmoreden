@@ -254,8 +254,6 @@ defaultproperties
          RelativeWarmupTime=0.500000
      End Object
      Emitters(6)=SpriteEmitter'SpriteEmitter6'
-     bRotEmitter=True
-     RotPerSecond=(Pitch=0,Yaw=-2000,Roll=0)
      Physics=10
      bNoDelete=False
      bTrailerPrePivot=True

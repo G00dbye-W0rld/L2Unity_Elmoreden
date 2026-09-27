@@ -312,8 +312,6 @@ defaultproperties
          RelativeWarmupTime=0.200000
      End Object
      Emitters(8)=SpriteEmitter'SpriteEmitter13'
-     bRotEmitter=True
-     RotPerSecond=(Pitch=0,Yaw=0,Roll=32768)
      bLightChanged=True
      bSelfRotation=True
      bSunAffect=True

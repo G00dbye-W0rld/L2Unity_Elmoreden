@@ -123,9 +123,6 @@ defaultproperties
          LifetimeRange=(Min=3.000000,Max=3.000000)
      End Object
      Emitters(3)=SpriteEmitter'SpriteEmitter16'
-     AutoReplay=True
-     bRotEmitter=True
-     RotPerSecond=(Pitch=0,Yaw=100000,Roll=0)
      Physics=10
      bUseDynamicLights=False
      bNoDelete=False

@@ -107,8 +107,6 @@ defaultproperties
          InitialDelayRange=(Min=0.300000,Max=0.300000)
      End Object
      Emitters(2)=MeshEmitter'MeshEmitter7'
-     bRotEmitter=True
-     RotPerSecond=(Pitch=0,Yaw=-30000,Roll=0)
      bNoDelete=False
      DrawScale=0.250000
      bDirectional=True

@@ -189,8 +189,6 @@ defaultproperties
          VelocityLossRange=(X=(Min=2.000000,Max=2.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
      End Object
      Emitters(6)=SpriteEmitter'SpriteEmitter11'
-     bRotEmitter=True
-     RotPerSecond=(Pitch=0,Yaw=0,Roll=15000)
      bLightChanged=True
      bSelfRotation=True
      bSunAffect=True

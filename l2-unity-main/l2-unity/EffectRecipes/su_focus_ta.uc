@@ -96,8 +96,6 @@ defaultproperties
          VelocityLossRange=(X=(Min=2.000000,Max=5.000000),Y=(Min=2.000000,Max=5.000000),Z=(Min=2.000000,Max=2.000000))
      End Object
      Emitters(2)=SpriteEmitter'SpriteEmitter1'
-     bRotEmitter=True
-     RotPerSecond=(Pitch=0,Yaw=65536,Roll=0)
      bNoDelete=False
      DrawScale=0.250000
      bDirectional=True
