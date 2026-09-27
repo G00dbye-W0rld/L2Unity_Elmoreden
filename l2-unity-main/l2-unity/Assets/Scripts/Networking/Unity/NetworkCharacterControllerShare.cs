@@ -47,7 +47,8 @@ public class NetworkCharacterControllerShare : MonoBehaviour
     void Start()
     {
         _characterController = GetComponent<CharacterController>();
-        if (_characterController == null || World.Instance.OfflineMode)
+        // Meme garde que les autres composants reseau : World est absent hors du jeu.
+        if (_characterController == null || World.Instance == null || World.Instance.OfflineMode)
         {
             this.enabled = false;
             return;

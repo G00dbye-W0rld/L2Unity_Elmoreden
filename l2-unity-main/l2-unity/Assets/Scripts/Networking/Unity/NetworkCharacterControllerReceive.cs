@@ -28,7 +28,9 @@ public class NetworkCharacterControllerReceive : MonoBehaviour
 
     void Start()
     {
-        if (World.Instance.OfflineMode)
+        // World est absent dans les scenes de test : le meme garde qu'ailleurs dans le
+        // projet, sans quoi Start leve et les composants ne sont jamais affectes.
+        if (World.Instance == null || World.Instance.OfflineMode)
         {
             this.enabled = false;
         }

@@ -30,7 +30,8 @@ public class NetworkTransformShare : MonoBehaviour
 
     void Start()
     {
-        if (World.Instance.OfflineMode)
+        // Meme garde que les autres composants reseau : World est absent hors du jeu.
+        if (World.Instance == null || World.Instance.OfflineMode)
         {
             enabled = false;
             return;
