@@ -1,29 +1,94 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
 
 public class L2ParticleEmitterParser
 {
-    [MenuItem("L2/Outils/SkillEffects - (UC) Build ambient skilleffect", false, 402)]
+    private const string TodoFolder = "Resources/Data/Effects/_TODO";
+
+    // Types rencontres mais non convertis (VertMesh, Trail, Ribbon, Spark).
+    private static readonly SortedDictionary<string, int> _unsupported = new SortedDictionary<string, int>();
+
+    [MenuItem("L2/Outils/SkillEffects - (UC) Build one skilleffect", false, 402)]
     static void BuildSkillMenu()
     {
-        string title = "Select ambient sound list";
-        string directory = Path.Combine(Application.dataPath, "Data/Maps");
-        string extension = "uc";
+        string directory = Path.Combine(Application.dataPath, TodoFolder);
+        string file = EditorUtility.OpenFilePanel("Choisir une recette d'effet (.uc)", directory, "uc");
 
-        string fileToProcess = EditorUtility.OpenFilePanel(title, directory, extension);
-
-        if (!string.IsNullOrEmpty(fileToProcess))
+        if (!string.IsNullOrEmpty(file))
         {
-            Debug.Log("Selected file: " + fileToProcess);
+            Debug.Log(BuildFromFile(file) ? $"Prefab construit : {Path.GetFileNameWithoutExtension(file)}"
+                                          : $"Echec : {Path.GetFileNameWithoutExtension(file)}");
+            AssetDatabase.Refresh();
+        }
+    }
 
-            GameObject container = new GameObject(Path.GetFileNameWithoutExtension(fileToProcess));
-            container.SetActive(false);
-            L2Particle particle = container.AddComponent<L2Particle>();
-            particle.enabled = false;
+    // Traite d'un coup toutes les recettes du dossier _TODO.
+    [MenuItem("L2/Outils/SkillEffects - (UC) Build all skilleffects", false, 403)]
+    static void BuildAllSkillMenu()
+    {
+        string directory = Path.Combine(Application.dataPath, TodoFolder);
+        if (!Directory.Exists(directory))
+        {
+            Debug.LogError($"Dossier introuvable : {directory}");
+            return;
+        }
 
+        string[] files = Directory.GetFiles(directory, "*.uc");
+        _unsupported.Clear();
+        int done = 0;
+        List<string> failed = new List<string>();
+
+        try
+        {
+            for (int i = 0; i < files.Length; i++)
+            {
+                string name = Path.GetFileNameWithoutExtension(files[i]);
+                EditorUtility.DisplayProgressBar("Effets de skills", name, (float)i / files.Length);
+
+                if (BuildFromFile(files[i]))
+                {
+                    done++;
+                }
+                else
+                {
+                    failed.Add(name);
+                }
+            }
+        }
+        finally
+        {
+            EditorUtility.ClearProgressBar();
+            AssetDatabase.Refresh();
+        }
+
+        Debug.Log($"Effets construits : {done} / {files.Length}");
+        if (failed.Count > 0)
+        {
+            Debug.LogWarning($"Echecs : {string.Join(", ", failed)}");
+        }
+        if (_unsupported.Count > 0)
+        {
+            Debug.LogWarning("Types d'emetteurs non convertis : "
+                + string.Join(", ", _unsupported.Select(kv => $"{kv.Key} x{kv.Value}")));
+        }
+    }
+
+    // Construit le prefab d'une recette. Renvoie false si elle ne donne aucun emetteur.
+    static bool BuildFromFile(string fileToProcess)
+    {
+        GameObject container = new GameObject(Path.GetFileNameWithoutExtension(fileToProcess));
+        container.SetActive(false);
+        L2Particle particle = container.AddComponent<L2Particle>();
+        particle.enabled = false;
+
+        int built = 0;
+
+        try
+        {
             foreach (L2Emitter emitter in ParseParticleEmitterFile(fileToProcess))
             {
                 GameObject emitterGroup = new GameObject(emitter.name);
@@ -32,13 +97,13 @@ public class L2ParticleEmitterParser
                 if (emitterObject != null)
                 {
                     emitterObject.transform.SetParent(emitterGroup.transform);
+                    built++;
                 }
 
                 int particlesCount = emitter.maxParticles;
                 if (emitter.maxParticles == 0)
                 {
                     particlesCount = Mathf.Min(25, emitter.initialParticlesPerSecond);
-                    // particlesCount = 25;
                     emitter.maxParticles = -1;
                 }
 
@@ -54,7 +119,6 @@ public class L2ParticleEmitterParser
                 emitterGroup.SetActive(true);
 
                 ParticleGroup pg = emitterGroup.AddComponent<ParticleGroup>();
-
                 pg.enabled = true;
                 pg.Owner = particle;
                 pg.MaxCount = emitter.maxParticles;
@@ -64,15 +128,24 @@ public class L2ParticleEmitterParser
 
             container.SetActive(true);
 
-            string saveFolder = Path.Combine("Assets", "Resources", "Data", "Effects", container.name);
-            if (!Directory.Exists(saveFolder))
+            if (built > 0)
             {
-                Directory.CreateDirectory(saveFolder);
-            }
+                string saveFolder = Path.Combine("Assets", "Resources", "Data", "Effects", container.name);
+                if (!Directory.Exists(saveFolder))
+                {
+                    Directory.CreateDirectory(saveFolder);
+                }
 
-            string containerPrefabPath = Path.Combine(saveFolder, container.name + ".prefab");
-            PrefabUtility.SaveAsPrefabAsset(container, containerPrefabPath);
+                PrefabUtility.SaveAsPrefabAsset(container, Path.Combine(saveFolder, container.name + ".prefab"));
+            }
         }
+        finally
+        {
+            // Le conteneur ne sert qu'a la sauvegarde, il n'a rien a faire dans la scene.
+            Object.DestroyImmediate(container);
+        }
+
+        return built > 0;
     }
 
     private static List<L2Emitter> ParseParticleEmitterFile(string path)
@@ -104,6 +177,17 @@ public class L2ParticleEmitterParser
             {
                 // Debug.Log(line);
                 line = line.Trim();
+                if (line.StartsWith("Begin Object Class=") && line.Contains("Emitter Name=")
+                    && !line.StartsWith("Begin Object Class=SpriteEmitter Name=")
+                    && !line.StartsWith("Begin Object Class=MeshEmitter Name=")
+                    && !line.StartsWith("Begin Object Class=BeamEmitter Name="))
+                {
+                    string type = line.Substring("Begin Object Class=".Length);
+                    type = type.Substring(0, type.IndexOf(' '));
+                    _unsupported.TryGetValue(type, out int seen);
+                    _unsupported[type] = seen + 1;
+                }
+
                 if (line.StartsWith("Begin Object Class=SpriteEmitter Name=") || line.StartsWith("Begin Object Class=MeshEmitter Name=") || line.StartsWith("Begin Object Class=BeamEmitter Name="))
                 {
                     L2Emitter emitter = new L2Emitter();
