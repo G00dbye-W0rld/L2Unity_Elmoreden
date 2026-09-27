@@ -27,10 +27,8 @@ public class GenRecipes {
     static final Set<String> CLASS_PROPS = new HashSet<>(Arrays.asList(
         "AccSpeed", "AutoReplay", "AutoReset", "DrawScale", "Location", "Physics",
         "RotPerSecond", "Rotation", "Speed", "SwayRotationOrig", "Tag", "TexModifyInfo",
-        "LifeSpan", "RemoteRole", "Style", "AmbientGlow", "LightType", "LightEffect",
-        "LightBrightness", "LightHue", "LightSaturation", "LightRadius", "CollisionRadius",
-        "CollisionHeight", "SoundVolume", "SoundRadius", "AmbientSound", "Skins", "Mesh",
-        "DrawType", "ScaleGlow", "Texture", "Name"));
+        "LifeSpan", "RemoteRole", "AmbientGlow", "CollisionRadius", "CollisionHeight",
+        "SoundVolume", "SoundRadius"));
     // Les drapeaux d'acteur (bXxx) sont admis en bloc : ils sont nombreux et inoffensifs.
     static final Pattern FLAG = Pattern.compile("^b[A-Z][A-Za-z0-9_]*$");
     static final Pattern IDENT = Pattern.compile("^[A-Za-z][A-Za-z0-9_]*$");
@@ -52,6 +50,10 @@ public class GenRecipes {
             case "CoordinateSystem": return enumName(PTCS, raw);
             default: return null;
         }
+    }
+
+    static boolean undecoded(String v) {
+        return v.startsWith("<type") || v.equals("None") || v.contains("<type");
     }
 
     // Rend une valeur dans la syntaxe .uc.
@@ -95,6 +97,7 @@ public class GenRecipes {
 
         int written = 0, noEmitter = 0, noClassBlock = 0;
         SortedMap<String, Integer> types = new TreeMap<>();
+        SortedMap<String, Integer> skipped = new TreeMap<>();
         List<String> missingBlock = new ArrayList<>();
 
         try (UnrealPackage p = new UnrealPackage(new File(args[0]), true)) {
@@ -136,6 +139,7 @@ public class GenRecipes {
 
                     sb.append("     Begin Object Class=").append(type).append(" Name=").append(objName).append("\n");
                     for (String[] kv : Dump.props(em.getObjectRawData())) {
+                        if (undecoded(kv[1])) { skipped.merge(kv[0], 1, Integer::sum); continue; }
                         if ("9".equals(kv[2])) {
                             String[] items = kv[1].split("\u0001", -1);
                             for (int k = 0; k < items.length; k++) {
@@ -159,7 +163,7 @@ public class GenRecipes {
                     if (missingBlock.size() < 10) missingBlock.add(name);
                 } else {
                     for (String[] kv : cp) {
-                        if ("9".equals(kv[2])) continue;
+                        if ("9".equals(kv[2]) || undecoded(kv[1])) continue;
                         sb.append("     ").append(kv[0]).append("=")
                           .append(render(kv[0], kv[1], kv[2])).append("\n");
                     }
@@ -175,6 +179,7 @@ public class GenRecipes {
         System.out.println("classes sans emetteur : " + noEmitter);
         System.out.println("sans bloc de proprietes de classe : " + noClassBlock + " " + missingBlock);
         System.out.println("emetteurs par type : " + types);
+        if (!skipped.isEmpty()) System.out.println("proprietes non ecrites faute d'etre decodees : " + skipped);
     }
 
     static List<String[]> classProps(byte[] raw) {
@@ -188,6 +193,7 @@ public class GenRecipes {
                         ok = false;
                         break;
                     }
+                    if (undecoded(kv[1])) { ok = false; break; }
                 }
                 if (ok) return pr;
             } catch (Exception ignored) {}

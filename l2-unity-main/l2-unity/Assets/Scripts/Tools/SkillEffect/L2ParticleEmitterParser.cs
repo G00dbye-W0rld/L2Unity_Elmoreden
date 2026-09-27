@@ -7,7 +7,9 @@ using UnityEngine;
 
 public class L2ParticleEmitterParser
 {
-    private const string TodoFolder = "Resources/Data/Effects/_TODO";
+    // Hors de Assets : ces recettes ne servent qu'a la conversion et tout ce qui
+    // est sous Resources part dans le build joueur.
+    private const string RecipeFolder = "../EffectRecipes";
 
     // Types rencontres mais non convertis (VertMesh, Trail, Ribbon, Spark).
     private static readonly SortedDictionary<string, int> _unsupported = new SortedDictionary<string, int>();
@@ -15,7 +17,7 @@ public class L2ParticleEmitterParser
     [MenuItem("L2/Outils/SkillEffects - (UC) Build one skilleffect", false, 402)]
     static void BuildSkillMenu()
     {
-        string directory = Path.Combine(Application.dataPath, TodoFolder);
+        string directory = Path.Combine(Application.dataPath, RecipeFolder);
         string file = EditorUtility.OpenFilePanel("Choisir une recette d'effet (.uc)", directory, "uc");
 
         if (!string.IsNullOrEmpty(file))
@@ -30,10 +32,10 @@ public class L2ParticleEmitterParser
     [MenuItem("L2/Outils/SkillEffects - (UC) Build all skilleffects", false, 403)]
     static void BuildAllSkillMenu()
     {
-        string directory = Path.Combine(Application.dataPath, TodoFolder);
+        string directory = Path.Combine(Application.dataPath, RecipeFolder);
         if (!Directory.Exists(directory))
         {
-            Debug.LogError($"Dossier introuvable : {directory}");
+            Debug.LogError($"Dossier de recettes introuvable : {Path.GetFullPath(directory)}");
             return;
         }
 
@@ -49,13 +51,21 @@ public class L2ParticleEmitterParser
                 string name = Path.GetFileNameWithoutExtension(files[i]);
                 EditorUtility.DisplayProgressBar("Effets de skills", name, (float)i / files.Length);
 
-                if (BuildFromFile(files[i]))
+                try
                 {
-                    done++;
+                    if (BuildFromFile(files[i]))
+                    {
+                        done++;
+                    }
+                    else
+                    {
+                        failed.Add(name);
+                    }
                 }
-                else
+                catch (System.Exception e)
                 {
                     failed.Add(name);
+                    Debug.LogWarning($"{name} : {e.GetType().Name} {e.Message}");
                 }
             }
         }
@@ -517,7 +527,7 @@ public class L2ParticleEmitterParser
             go = GameObject.Instantiate(resource);
 
             string[] textureValues = emitter.texture.Split(".");
-            string textureName = textureValues.Length > 1 ? textureValues[2] : textureValues[1];
+            string textureName = textureValues[textureValues.Length - 1];
             texturePath = $"Data/SysTextures/{textureValues[0]}/{textureName}";
             isTextureEmitter = true;
         }
