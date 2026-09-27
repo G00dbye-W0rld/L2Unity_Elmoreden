@@ -59,3 +59,42 @@ recettes generees portent toutes les composantes, telles que le paquet les donne
 
 Outils de diagnostic ajoutes : `Types` (types d'emetteurs par classe),
 `VmRefs` (maillages animes references), `Cls2` (proprietes d'une classe).
+
+## Dependances des recettes : maillages et textures
+
+Les recettes referencent 205 maillages statiques et 230 textures. Un maillage
+absent fait echouer l'emetteur avec un message clair
+(`Couldn't load emitter mesh ...`) ; une **texture absente ne dit rien** et
+produit un sprite invisible. Toujours verifier les deux.
+
+Le chemin attendu par le parseur laisse tomber le groupe : la reference
+`LineageEffectsStaticmeshes.Aura.auraburn00` se resout en
+`Resources/Data/StaticMeshes/LineageEffectsStaticmeshes/auraburn00.fbx`.
+
+### Maillages (via umodel puis Blender)
+
+    cd "<client>/umodel_win32"
+    ./umodel_64.exe -game=l2 -path="<client>/staticmeshes" -export -out=<sortie> \
+        LineageEffectsStaticmeshes.usx
+    blender.exe --background --python <MAP_L2Unity>/tools/pskx-to-fbx.py -- <sortie>
+
+umodel sort du `.pskx`, le script du projet convertit en `.fbx`. Copier ensuite
+a plat dans `Resources/Data/StaticMeshes/<paquet>/`.
+
+### Textures (umodel seul)
+
+    ./umodel_64.exe -game=l2 -path="<client>/SysTextures" -export -png -out=<sortie> \
+        LineageEffectsTextures.utx
+
+Attention, ces paquets sont dans **SysTextures**, pas `Textures`. Copier a plat
+dans `Resources/Data/SysTextures/<paquet>/`.
+
+### Provenance relevee le 2026-09-27
+
+Interlude ne couvre qu'une partie : 88 maillages sur 155 et 9 textures sur 65,
+le reste venant d'Orfen. C'est attendu, puisque 102 des recettes sont elles-memes
+completees depuis Orfen.
+
+Les `.png` de `SysTextures` sont **ignores par git** (regle des assets
+regenerables) : seuls les `.fbx` sont versionnes, les textures se reproduisent
+avec la commande ci-dessus.
