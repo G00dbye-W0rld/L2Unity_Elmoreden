@@ -1,0 +1,115 @@
+class el_hydro_blast_ca extends Emitter;
+
+defaultproperties
+{
+     Begin Object Class=VertMeshEmitter Name=VertMeshEmitter2
+         VertexMesh=VertMesh'LineageEffectMeshes.water00'
+         RenderTwoSided=False
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         FadeOutStartTime=3.200000
+         MaxParticles=1
+         ForcedLifeTime=True
+         ForcedFade=True
+         RespawnDeadParticles=False
+         Name="water"
+         StartLocationOffset=(Z=-42.000000)
+         StartLocationPolarRange=(X=(Min=0.000000,Max=360.000000),Y=(Min=90.000000,Max=90.000000),Z=(Min=18.000000,Max=18.000000))
+         SpinParticles=True
+         SpinCCWorCW=(X=1.000000)
+         SpinsPerSecondRange=(X=(Min=-0.200000,Max=-0.200000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         StartSpinRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=0.500000)
+         SizeScale(1)=(RelativeTime=0.080000,RelativeSize=0.850000)
+         SizeScale(2)=(RelativeTime=0.150000,RelativeSize=0.950000)
+         SizeScale(3)=(RelativeTime=0.250000,RelativeSize=1.000000)
+         SizeScale(4)=(RelativeTime=0.750000,RelativeSize=1.000000)
+         SizeScale(5)=(RelativeTime=0.850000,RelativeSize=0.950000)
+         SizeScale(6)=(RelativeTime=0.900000,RelativeSize=0.850000)
+         SizeScale(7)=(RelativeTime=1.000000,RelativeSize=0.500000)
+         StartSizeRange=(X=(Min=0.580000,Max=0.580000),Y=(Min=0.580000,Max=0.580000),Z=(Min=0.630000,Max=0.630000))
+         InitialParticlesPerSecond=1000.000000
+         AutomaticInitialSpawning=False
+         DrawStyle=PTDS_AlphaBlend
+         LifetimeRange=(Min=3.200000,Max=3.200000)
+         InitialDelayRange=(Min=0.100000,Max=0.100000)
+     End Object
+     Emitters(0)=VertMeshEmitter'VertMeshEmitter2'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter6
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         Opacity=0.800000
+         FadeOutStartTime=0.912000
+         FadeOut=True
+         FadeInEndTime=0.144000
+         FadeIn=True
+         MaxParticles=55
+         ForcedMaxParticles=True
+         RespawnDeadParticles=False
+         Name="Bubble"
+         StartLocationOffset=(Z=12.000000)
+         StartLocationShape=PTLS_Polar
+         StartLocationPolarRange=(X=(Min=0.000000,Max=360.000000),Y=(Min=80.000000,Max=100.000000),Z=(Min=17.000000,Max=17.000000))
+         SpinParticles=True
+         SpinCCWorCW=(Y=0.500000,Z=0.500000)
+         SpinsPerSecondRange=(X=(Min=0.050000,Max=0.100000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         StartSpinRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=1.000000)
+         SizeScale(1)=(RelativeTime=0.740000,RelativeSize=0.700000)
+         SizeScale(2)=(RelativeTime=1.000000,RelativeSize=1.000000)
+         SizeScaleRepeats=3.000000
+         StartSizeRange=(X=(Min=6.000000,Max=8.000000),Y=(Min=6.000000,Max=8.000000),Z=(Min=6.000000,Max=8.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=25.000000
+         AutomaticInitialSpawning=False
+         DrawStyle=PTDS_AlphaBlend
+         Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0099'
+         TextureUSubdivisions=2
+         TextureVSubdivisions=2
+         SubdivisionEnd=3
+         UseRandomSubdivision=True
+         LifetimeRange=(Min=1.200000,Max=1.200000)
+         InitialDelayRange=(Min=0.100000,Max=0.100000)
+         VelocityLossRange=(X=(Min=1.000000,Max=1.000000),Y=(Min=1.000000,Max=1.000000),Z=(Min=1.000000,Max=1.000000))
+         GetVelocityDirectionFrom=PTVD_StartPositionAndOwner
+         WarmupTicksPerSecond=3.000000
+         RelativeWarmupTime=0.500000
+     End Object
+     Emitters(1)=SpriteEmitter'SpriteEmitter6'
+     Begin Object Class=MeshEmitter Name=MeshEmitter7
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.Aura.auracharge01'
+         UseMeshBlendMode=False
+         RenderTwoSided=True
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.503571,Color=(B=179,G=179,R=179,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScaleRepeats=30.000000
+         ColorMultiplierRange=(X=(Min=0.300000,Max=0.300000),Y=(Min=0.500000,Max=0.500000),Z=(Min=1.000000,Max=1.000000))
+         Opacity=0.250000
+         FadeOutStartTime=2.320000
+         FadeOut=True
+         FadeInEndTime=0.580000
+         FadeIn=True
+         MaxParticles=1
+         ForcedLifeTime=True
+         ForcedFade=True
+         RespawnDeadParticles=False
+         Name="Glow"
+         StartSizeRange=(X=(Min=0.400000,Max=0.400000),Y=(Min=0.400000,Max=0.400000),Z=(Min=0.500000,Max=0.500000))
+         InitialParticlesPerSecond=10000.000000
+         AutomaticInitialSpawning=False
+         LifetimeRange=(Min=2.900000,Max=2.900000)
+         InitialDelayRange=(Min=0.300000,Max=0.300000)
+     End Object
+     Emitters(2)=MeshEmitter'MeshEmitter7'
+     bRotEmitter=True
+     RotPerSecond=(Pitch=0,Yaw=-30000,Roll=0)
+     bNoDelete=False
+     DrawScale=0.250000
+     bDirectional=True
+}

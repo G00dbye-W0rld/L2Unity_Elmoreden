@@ -1,0 +1,132 @@
+class wh_sec_heal_ca extends Emitter;
+
+defaultproperties
+{
+     Begin Object Class=MeshEmitter Name=MeshEmitter10
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.White.white_center01'
+         UseMeshBlendMode=False
+         RenderTwoSided=True
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=125,G=125,R=125,A=0))
+         ColorScale(1)=(RelativeTime=0.507143,Color=(B=168,G=168,R=168,A=0))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=125,G=125,R=125,A=0))
+         ColorScaleRepeats=40.000000
+         Opacity=0.800000
+         FadeOutStartTime=2.604000
+         FadeOut=True
+         FadeInEndTime=0.588000
+         FadeIn=True
+         MaxParticles=1
+         RespawnDeadParticles=False
+         Name="Base"
+         StartLocationOffset=(Z=1.500000)
+         SpinParticles=True
+         SpinCCWorCW=(X=1.000000)
+         SpinsPerSecondRange=(X=(Min=0.020000,Max=0.020000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=0.500000)
+         SizeScale(1)=(RelativeTime=0.070000,RelativeSize=1.000000)
+         SizeScale(2)=(RelativeTime=1.000000,RelativeSize=1.050000)
+         StartSizeRange=(X=(Min=0.230000,Max=0.230000),Y=(Min=0.230000,Max=0.230000),Z=(Min=0.230000,Max=0.230000))
+         InitialParticlesPerSecond=500.000000
+         AutomaticInitialSpawning=False
+         DrawStyle=PTDS_Brighten
+         LifetimeRange=(Min=4.300000,Max=4.300000)
+     End Object
+     Emitters(0)=MeshEmitter'MeshEmitter10'
+     Begin Object Class=MeshEmitter Name=MeshEmitter13
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.White.white_sideRing'
+         UseMeshBlendMode=False
+         RenderTwoSided=True
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=231,G=231,R=231,A=255))
+         ColorScale(1)=(RelativeTime=0.485714,Color=(B=200,G=200,R=200,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScaleRepeats=30.000000
+         Opacity=0.800000
+         FadeOutStartTime=2.318000
+         FadeOut=True
+         FadeInEndTime=1.026000
+         FadeIn=True
+         MaxParticles=1
+         WeatherSoundCheck=True
+         RespawnDeadParticles=False
+         Name="swirl1"
+         StartLocationOffset=(Z=0.250000)
+         SpinParticles=True
+         SpinCCWorCW=(X=1.000000)
+         SpinsPerSecondRange=(X=(Min=0.020000,Max=0.020000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         StartSpinRange=(X=(Min=1.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseRegularSizeScale=False
+         StartSizeRange=(X=(Min=0.210000,Max=0.210000),Y=(Min=0.210000,Max=0.210000),Z=(Min=0.210000,Max=0.210000))
+         InitialParticlesPerSecond=500.000000
+         AutomaticInitialSpawning=False
+         DrawStyle=PTDS_Brighten
+         LifetimeRange=(Min=3.800000,Max=3.800000)
+         InitialDelayRange=(Min=0.300000,Max=0.300000)
+         VelocityLossRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=1.000000))
+     End Object
+     Emitters(1)=MeshEmitter'MeshEmitter13'
+     Begin Object Class=MeshEmitter Name=MeshEmitter14
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.White.white_centerRing'
+         UseMeshBlendMode=False
+         RenderTwoSided=True
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.482143,Color=(B=167,G=167,R=167,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScaleRepeats=40.000000
+         Opacity=0.500000
+         FadeOutStartTime=1.740000
+         FadeOut=True
+         FadeInEndTime=0.348000
+         FadeIn=True
+         MaxParticles=1
+         RespawnDeadParticles=False
+         Name="shield"
+         StartLocationOffset=(Z=0.500000)
+         SpinParticles=True
+         SpinCCWorCW=(X=1.000000)
+         SpinsPerSecondRange=(X=(Min=-0.020000,Max=-0.020000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseRegularSizeScale=False
+         StartSizeRange=(X=(Min=0.172000,Max=0.172000),Y=(Min=0.172000,Max=0.172000),Z=(Min=0.172000,Max=0.172000))
+         InitialParticlesPerSecond=100.000000
+         AutomaticInitialSpawning=False
+         DrawStyle=PTDS_Brighten
+         LifetimeRange=(Min=2.900000,Max=2.900000)
+         InitialDelayRange=(Min=0.380000,Max=0.380000)
+     End Object
+     Emitters(2)=MeshEmitter'MeshEmitter14'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter2
+         UseDirectionAs=PTDU_Normal
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         Opacity=0.500000
+         FadeOutStartTime=1.330000
+         FadeOut=True
+         FadeInEndTime=0.350000
+         FadeIn=True
+         MaxParticles=1
+         RespawnDeadParticles=False
+         Name="Ring"
+         StartLocationOffset=(Z=5.500000)
+         SpinParticles=True
+         SpinCCWorCW=(Y=0.500000,Z=0.500000)
+         SpinsPerSecondRange=(X=(Min=0.020000,Max=0.020000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         StartSpinRange=(X=(Min=-1.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         StartSizeRange=(X=(Min=19.000000,Max=19.000000),Y=(Min=19.000000,Max=19.000000),Z=(Min=19.000000,Max=19.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=500.000000
+         AutomaticInitialSpawning=False
+         DrawStyle=PTDS_Brighten
+         Texture=Texture'LineageEffectsTextures.Particles3.fx_m_t7009'
+         LifetimeRange=(Min=3.500000,Max=3.500000)
+         InitialDelayRange=(Min=0.350000,Max=0.350000)
+     End Object
+     Emitters(3)=SpriteEmitter'SpriteEmitter2'
+     bLightChanged=True
+     bNoDelete=False
+     bSunAffect=True
+     DrawScale=0.100000
+}

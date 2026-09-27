@@ -1,0 +1,133 @@
+class s_u215_ca_sp extends Emitter;
+
+defaultproperties
+{
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter0
+         UseDirectionAs=PTDU_Up
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorMultiplierRange=(X=(Min=1.000000,Max=1.000000),Y=(Min=0.800000,Max=0.800000),Z=(Min=0.800000,Max=0.800000))
+         FadeOutStartTime=0.600000
+         FadeOut=True
+         WeatherSoundCheck=True
+         RespawnDeadParticles=False
+         Name="01_Particle"
+         StartLocationRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=-5.000000,Max=5.000000),Z=(Min=-5.000000,Max=5.000000))
+         SpinsPerSecondRange=(X=(Min=0.100000,Max=0.300000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseSizeScale=True
+         StartSizeRange=(X=(Min=2.500000,Max=5.000000),Y=(Min=8.000000,Max=13.000000),Z=(Min=2.500000,Max=5.000000))
+         InitialParticlesPerSecond=10000.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Particles2.fx_m_t1020'
+         TextureUSubdivisions=2
+         TextureVSubdivisions=2
+         UseRandomSubdivision=True
+         SubdivisionEnd=3
+         LifetimeRange=(Min=0.700000,Max=0.700000)
+         StartVelocityRange=(X=(Min=100.000000,Max=300.000000),Y=(Min=-200.000000,Max=200.000000),Z=(Min=-200.000000,Max=200.000000))
+         VelocityLossRange=(X=(Min=5.000000,Max=5.000000),Y=(Min=5.000000,Max=5.000000),Z=(Min=5.000000,Max=5.000000))
+     End Object
+     Emitters(0)=SpriteEmitter'SpriteEmitter0'
+     Begin Object Class=MeshEmitter Name=MeshEmitter8
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.wooh02.spear04'
+         UseMeshBlendMode=False
+         RenderTwoSided=True
+         Acceleration=(X=200.000000)
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         Opacity=0.300000
+         FadeOutStartTime=0.153000
+         FadeOut=True
+         MaxParticles=1
+         WeatherSoundCheck=True
+         RespawnDeadParticles=False
+         Name="04_Slash1"
+         StartLocationOffset=(X=-20.000000)
+         StartLocationRange=(X=(Min=30.000000,Max=30.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         SpinParticles=True
+         SpinCCWorCW=()
+         SpinsPerSecondRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=-2.000000,Max=-2.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         StartSizeRange=(X=(Min=0.300000,Max=0.300000),Y=(Min=0.165000,Max=0.165000),Z=(Min=0.165000,Max=0.165000))
+         InitialParticlesPerSecond=10000.000000
+         AutomaticInitialSpawning=False
+         LifetimeRange=(Min=0.300000,Max=0.300000)
+         StartVelocityRange=(X=(Min=300.000000,Max=300.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         VelocityLossRange=(X=(Min=5.000000,Max=5.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+     End Object
+     Emitters(1)=MeshEmitter'MeshEmitter8'
+     Begin Object Class=MeshEmitter Name=MeshEmitter9
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.wooh02.spear04'
+         UseMeshBlendMode=False
+         RenderTwoSided=True
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.064286,Color=(B=200,G=153,R=55,A=255))
+         ColorScale(2)=(RelativeTime=0.314286,Color=(B=153,G=49,R=49,A=255))
+         ColorScale(3)=(RelativeTime=0.607143,Color=(B=104,G=43,R=43,A=255))
+         ColorScale(4)=(RelativeTime=1.000000,Color=(B=0,G=0,R=0,A=255))
+         FadeOutStartTime=0.350000
+         MaxParticles=2
+         WeatherSoundCheck=True
+         RespawnDeadParticles=False
+         Name="03_Slash2"
+         SpinParticles=True
+         SpinCCWorCW=()
+         SpinsPerSecondRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=1.000000,Max=1.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=2.000000)
+         SizeScale(1)=(RelativeTime=0.400000,RelativeSize=3.500000)
+         SizeScale(2)=(RelativeTime=1.000000,RelativeSize=4.000000)
+         StartSizeRange=(X=(Min=0.100000,Max=0.100000),Y=(Min=0.080000,Max=0.080000),Z=(Min=0.080000,Max=0.080000))
+         InitialParticlesPerSecond=50.000000
+         AutomaticInitialSpawning=False
+         LifetimeRange=(Min=0.350000,Max=0.350000)
+         StartVelocityRange=(X=(Min=350.000000,Max=350.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         VelocityLossRange=(X=(Min=6.000000,Max=6.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+     End Object
+     Emitters(2)=MeshEmitter'MeshEmitter9'
+     Begin Object Class=MeshEmitter Name=MeshEmitter12
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.Skill_Power.skill_power04'
+         UseMeshBlendMode=False
+         RenderTwoSided=True
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.064286,Color=(B=200,G=153,R=55,A=255))
+         ColorScale(2)=(RelativeTime=0.314286,Color=(B=153,G=49,R=49,A=255))
+         ColorScale(3)=(RelativeTime=0.607143,Color=(B=104,G=43,R=43,A=255))
+         ColorScale(4)=(RelativeTime=1.000000,Color=(B=0,G=0,R=0,A=255))
+         Opacity=0.610000
+         FadeOutStartTime=0.400000
+         MaxParticles=7
+         WeatherSoundCheck=True
+         RespawnDeadParticles=False
+         Name="MeshWave"
+         StartLocationRange=(X=(Min=-20.000000,Max=50.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         SpinParticles=True
+         SpinCCWorCW=()
+         SpinsPerSecondRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.500000,Max=2.000000))
+         StartSpinRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=1.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         UniformSize=True
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=2.000000)
+         SizeScale(1)=(RelativeTime=1.000000,RelativeSize=3.000000)
+         StartSizeRange=(X=(Min=0.070000,Max=0.070000),Y=(Min=0.070000,Max=0.070000),Z=(Min=0.070000,Max=0.070000))
+         InitialParticlesPerSecond=30.000000
+         AutomaticInitialSpawning=False
+         LifetimeRange=(Min=0.350000,Max=0.400000)
+         StartVelocityRange=(X=(Min=30.000000,Max=40.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+     End Object
+     Emitters(3)=MeshEmitter'MeshEmitter12'
+     bRotEmitter=True
+     bLightChanged=True
+     bNoDelete=False
+     bSunAffect=True
+     bFixedRotationDir=True
+     bDirectional=True
+     Rotation=(Pitch=0,Yaw=0,Roll=3307994)
+     DrawScale=0.200000
+     SwayRotationOrig=(Pitch=0,Yaw=0,Roll=3307994)
+}

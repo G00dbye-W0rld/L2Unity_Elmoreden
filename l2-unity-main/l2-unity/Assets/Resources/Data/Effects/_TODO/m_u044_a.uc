@@ -1,0 +1,100 @@
+class m_u044_a extends Emitter;
+
+defaultproperties
+{
+     Begin Object Class=MeshEmitter Name=MeshEmitter6
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.magiccircle.magiccirclewhite00'
+         UseMeshBlendMode=False
+         RenderTwoSided=True
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=125,G=125,R=125,A=0))
+         ColorScale(1)=(RelativeTime=0.578571,Color=(B=185,G=185,R=185,A=0))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=125,G=125,R=125,A=0))
+         ColorScaleRepeats=40.000000
+         FadeOutStartTime=2.960000
+         FadeOut=True
+         FadeInEndTime=0.600000
+         FadeIn=True
+         MaxParticles=1
+         ForcedLifeTime=True
+         ForcedFade=True
+         RespawnDeadParticles=False
+         Name="MeshEmitter1"
+         SpinParticles=True
+         SpinCCWorCW=()
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         StartSizeRange=(X=(Min=0.100000,Max=0.100000),Y=(Min=0.100000,Max=0.100000),Z=(Min=0.200000,Max=0.200000))
+         InitialParticlesPerSecond=100.000000
+         AutomaticInitialSpawning=False
+         DrawStyle=PTDS_Brighten
+     End Object
+     Emitters(0)=MeshEmitter'MeshEmitter6'
+     Begin Object Class=MeshEmitter Name=MeshEmitter7
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.magiccircle.magiccirclewhite01'
+         UseMeshBlendMode=False
+         RenderTwoSided=True
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=120,G=100,R=100,A=0))
+         ColorScale(1)=(RelativeTime=0.500000,Color=(B=210,G=185,R=185,A=0))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=120,G=100,R=100,A=0))
+         ColorScaleRepeats=20.000000
+         Opacity=0.600000
+         FadeOutStartTime=2.280000
+         FadeOut=True
+         FadeInEndTime=1.020000
+         FadeIn=True
+         MaxParticles=1
+         ForcedLifeTime=True
+         ForcedFade=True
+         RespawnDeadParticles=False
+         Name="MeshEmitter3"
+         StartLocationOffset=(Z=10.000000)
+         SpinParticles=True
+         SpinCCWorCW=()
+         SpinsPerSecondRange=(X=(Min=0.070000,Max=0.070000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         StartSizeRange=(X=(Min=0.110000,Max=0.110000),Y=(Min=0.110000,Max=0.110000),Z=(Min=0.200000,Max=0.200000))
+         InitialParticlesPerSecond=100.000000
+         AutomaticInitialSpawning=False
+         LifetimeRange=(Min=3.000000,Max=3.000000)
+         InitialDelayRange=(Min=0.200000,Max=0.200000)
+     End Object
+     Emitters(1)=MeshEmitter'MeshEmitter7'
+     Begin Object Class=MeshEmitter Name=MeshEmitter8
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.magiccircle.magiccirclewhite01'
+         UseMeshBlendMode=False
+         RenderTwoSided=True
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=125,G=125,R=125,A=0))
+         ColorScale(1)=(RelativeTime=0.500000,Color=(B=185,G=185,R=185,A=0))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=125,G=125,R=125,A=0))
+         ColorScaleRepeats=40.000000
+         FadeOutStartTime=1.980000
+         FadeOut=True
+         FadeInEndTime=0.900000
+         FadeIn=True
+         MaxParticles=1
+         ForcedLifeTime=True
+         ForcedFade=True
+         RespawnDeadParticles=False
+         Name="MeshEmitter0"
+         StartLocationOffset=(Z=12.000000)
+         SpinParticles=True
+         SpinCCWorCW=(X=1.000000)
+         SpinsPerSecondRange=(X=(Min=0.040000,Max=0.040000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         StartSizeRange=(X=(Min=0.085000,Max=0.085000),Y=(Min=0.085000,Max=0.085000),Z=(Min=0.300000,Max=0.300000))
+         InitialParticlesPerSecond=100.000000
+         AutomaticInitialSpawning=False
+         DrawStyle=PTDS_Brighten
+         LifetimeRange=(Min=3.000000,Max=3.000000)
+         InitialDelayRange=(Min=0.500000,Max=0.500000)
+     End Object
+     Emitters(2)=MeshEmitter'MeshEmitter8'
+     Physics=10
+     bNoDelete=False
+     bTrailerPrePivot=True
+}

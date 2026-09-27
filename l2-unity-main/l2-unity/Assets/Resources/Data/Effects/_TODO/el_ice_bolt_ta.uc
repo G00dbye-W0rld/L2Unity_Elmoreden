@@ -6,19 +6,19 @@ defaultproperties
          StaticMesh=StaticMesh'LineageEffectsStaticmeshes.Black.black_poison00'
          UseMeshBlendMode=False
          RenderTwoSided=True
-         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
          ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
-         ColorMultiplierRange=(X=(Min=0.680000,Max=0.680000),Y=(Min=0.850000,Max=0.850000))
+         ColorMultiplierRange=(X=(Min=0.680000,Max=0.680000),Y=(Min=0.850000,Max=0.850000),Z=(Min=1.000000,Max=1.000000))
          FadeOutStartTime=0.175000
          FadeOut=True
          MaxParticles=2
          RespawnDeadParticles=False
          Name="whiteclaw"
          SpinParticles=True
-         StartSpinRange=(X=(Max=1.000000),Y=(Max=0.020000),Z=(Max=0.020000))
+         StartSpinRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=0.020000),Z=(Min=0.000000,Max=0.020000))
          UseSizeScale=True
          UseRegularSizeScale=False
-         SizeScale(0)=(RelativeSize=1.000000)
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=1.000000)
          SizeScale(1)=(RelativeTime=0.070000,RelativeSize=3.000000)
          SizeScale(2)=(RelativeTime=0.370000,RelativeSize=4.500000)
          SizeScale(3)=(RelativeTime=1.000000,RelativeSize=5.800000)
@@ -33,22 +33,23 @@ defaultproperties
      Begin Object Class=MeshEmitter Name=MeshEmitter3
          StaticMesh=StaticMesh'LineageEffectsStaticmeshes.water.watericebolt00'
          RenderTwoSided=True
-         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
          ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
          FadeOutStartTime=4.000000
          MaxParticles=3
          RespawnDeadParticles=False
          Name="iceberg"
          SpinParticles=True
-         SpinCCWorCW=(X=0.000000)
+         SpinCCWorCW=(Y=0.500000,Z=0.500000)
          SpinsPerSecondRange=(X=(Min=0.015000,Max=0.015000),Y=(Min=-0.010000,Max=0.010000),Z=(Min=-0.010000,Max=0.010000))
          StartSpinRange=(X=(Min=-1.000000,Max=1.000000),Y=(Min=0.100000,Max=0.400000),Z=(Min=-1.000000,Max=1.000000))
          UseSizeScale=True
          UseRegularSizeScale=False
-         UniformSize=True
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=0.000000)
          SizeScale(1)=(RelativeTime=0.070000,RelativeSize=1.100000)
          SizeScale(2)=(RelativeTime=0.070000,RelativeSize=1.000000)
          StartSizeRange=(X=(Min=0.060500,Max=0.099000),Y=(Min=0.060500,Max=0.099000),Z=(Min=0.060500,Max=0.099000))
+         UniformSize=True
          InitialParticlesPerSecond=16.000000
          AutomaticInitialSpawning=False
          DrawStyle=PTDS_AlphaBlend
@@ -57,7 +58,7 @@ defaultproperties
      End Object
      Emitters(1)=MeshEmitter'MeshEmitter3'
      Begin Object Class=SpriteEmitter Name=SpriteEmitter1
-         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
          ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
          Opacity=0.200000
          FadeOutStartTime=1.000000
@@ -67,17 +68,17 @@ defaultproperties
          RespawnDeadParticles=False
          Name="Steam"
          StartLocationOffset=(Z=1.000000)
-         StartLocationRange=(X=(Min=-25.000000,Max=25.000000),Y=(Min=-25.000000,Max=25.000000))
+         StartLocationRange=(X=(Min=-25.000000,Max=25.000000),Y=(Min=-25.000000,Max=25.000000),Z=(Min=0.000000,Max=0.000000))
          StartLocationShape=PTLS_Polar
-         StartLocationPolarRange=(X=(Max=360.000000),Y=(Min=85.000000,Max=95.000000),Z=(Min=16.000000,Max=16.000000))
+         StartLocationPolarRange=(X=(Min=0.000000,Max=360.000000),Y=(Min=85.000000,Max=95.000000),Z=(Min=16.000000,Max=16.000000))
          SpinParticles=True
          SpinsPerSecondRange=(X=(Min=0.100000,Max=0.100000),Y=(Min=0.050000,Max=0.100000),Z=(Min=0.050000,Max=0.100000))
-         StartSpinRange=(X=(Max=1.000000))
+         StartSpinRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
          UseSizeScale=True
          UseRegularSizeScale=False
-         UniformSize=True
          SizeScale(0)=(RelativeTime=1.000000,RelativeSize=1.200000)
          StartSizeRange=(X=(Min=12.000000,Max=12.000000),Y=(Min=12.000000,Max=12.000000),Z=(Min=12.000000,Max=12.000000))
+         UniformSize=True
          InitialParticlesPerSecond=4.000000
          AutomaticInitialSpawning=False
          DrawStyle=PTDS_AlphaBlend
@@ -96,7 +97,7 @@ defaultproperties
      Begin Object Class=MeshEmitter Name=MeshEmitter6
          StaticMesh=StaticMesh'LineageEffectsStaticmeshes.water.watericebolt01'
          Acceleration=(Z=-350.000000)
-         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
          ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
          FadeOutStartTime=0.400000
          FadeOut=True
@@ -105,13 +106,13 @@ defaultproperties
          Name="icefrag"
          StartLocationOffset=(Z=4.000000)
          StartLocationShape=PTLS_Polar
-         StartLocationPolarRange=(X=(Max=360.000000),Y=(Min=30.000000,Max=150.000000),Z=(Min=10.000000,Max=10.000000))
+         StartLocationPolarRange=(X=(Min=0.000000,Max=360.000000),Y=(Min=30.000000,Max=150.000000),Z=(Min=10.000000,Max=10.000000))
          SpinParticles=True
-         SpinsPerSecondRange=(X=(Max=1.000000),Y=(Min=1.000000,Max=2.000000),Z=(Min=1.000000,Max=2.000000))
-         StartSpinRange=(X=(Max=1.000000),Y=(Max=1.000000),Z=(Max=1.000000))
+         SpinsPerSecondRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=1.000000,Max=2.000000),Z=(Min=1.000000,Max=2.000000))
+         StartSpinRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=1.000000),Z=(Min=0.000000,Max=1.000000))
          UseSizeScale=True
-         UniformSize=True
          StartSizeRange=(X=(Min=0.060000,Max=0.190000),Y=(Min=0.030000,Max=0.150000),Z=(Min=0.030000,Max=0.150000))
+         UniformSize=True
          InitialParticlesPerSecond=1000.000000
          AutomaticInitialSpawning=False
          LifetimeRange=(Min=1.000000,Max=1.000000)
@@ -122,12 +123,12 @@ defaultproperties
      End Object
      Emitters(3)=MeshEmitter'MeshEmitter6'
      Begin Object Class=MeshEmitter Name=MeshEmitter7
-         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.etc.etcpotion02'
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.Etc.etcpotion02'
          UseMeshBlendMode=False
          RenderTwoSided=True
-         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
          ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
-         ColorMultiplierRange=(X=(Min=0.633000,Max=0.816000),Y=(Min=0.612000,Max=0.838000),Z=(Min=0.676000))
+         ColorMultiplierRange=(X=(Min=0.633000,Max=0.816000),Y=(Min=0.612000,Max=0.838000),Z=(Min=0.676000,Max=1.000000))
          Opacity=0.340000
          FadeOutStartTime=3.280000
          FadeOut=True
@@ -136,21 +137,21 @@ defaultproperties
          MaxParticles=2
          RespawnDeadParticles=False
          Name="Wind"
-         StartLocationRange=(Z=(Min=-2.400000,Max=2.400000))
+         StartLocationRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=-2.400000,Max=2.400000))
          SpinParticles=True
-         SpinCCWorCW=(X=1.000000)
-         SpinsPerSecondRange=(X=(Min=3.000000,Max=5.000000))
-         StartSpinRange=(X=(Max=1.000000),Y=(Max=0.010000),Z=(Max=0.010000))
+         SpinCCWorCW=(X=1.000000,Y=0.500000,Z=0.500000)
+         SpinsPerSecondRange=(X=(Min=3.000000,Max=5.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         StartSpinRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=0.010000),Z=(Min=0.000000,Max=0.010000))
          UseSizeScale=True
          UseRegularSizeScale=False
-         SizeScale(0)=(RelativeSize=0.500000)
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=0.500000)
          SizeScale(1)=(RelativeTime=0.140000,RelativeSize=2.000000)
          SizeScale(2)=(RelativeTime=0.340000,RelativeSize=3.000000)
          SizeScale(3)=(RelativeTime=1.000000,RelativeSize=3.500000)
          StartSizeRange=(X=(Min=0.080400,Max=0.080400),Y=(Min=0.080400,Max=0.080400),Z=(Min=-0.036000,Max=0.036000))
          InitialParticlesPerSecond=3.000000
          AutomaticInitialSpawning=False
-         StartVelocityRange=(Z=(Min=-1.200000,Max=1.200000))
+         StartVelocityRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=-1.200000,Max=1.200000))
          WarmupTicksPerSecond=3.000000
          RelativeWarmupTime=0.300000
      End Object

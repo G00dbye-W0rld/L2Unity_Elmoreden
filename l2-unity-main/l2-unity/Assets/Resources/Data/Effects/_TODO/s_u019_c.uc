@@ -1,0 +1,78 @@
+class s_u019_c extends Emitter;
+
+defaultproperties
+{
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter15
+         Acceleration=(Z=50.000000)
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorMultiplierRange=(X=(Min=1.000000,Max=1.000000),Y=(Min=0.500000,Max=0.500000),Z=(Min=0.200000,Max=0.200000))
+         Opacity=0.800000
+         FadeOutStartTime=0.019980
+         FadeOut=True
+         CoordinateSystem=PTCS_Independent
+         MaxParticles=500
+         ResetAfterChange=True
+         RespawnDeadParticles=False
+         Name="LifeTicks"
+         StartLocationRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=-3.000000,Max=3.000000),Z=(Min=-3.000000,Max=3.000000))
+         StartLocationPolarRange=(X=(Min=0.000000,Max=360.000000),Y=(Min=90.000000,Max=90.000000),Z=(Min=10.000000,Max=10.000000))
+         UseRotationFrom=1
+         SpinParticles=True
+         StartSpinRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.090000,RelativeSize=1.500000)
+         SizeScale(1)=(RelativeTime=0.320000,RelativeSize=1.800000)
+         SizeScale(2)=(RelativeTime=1.000000,RelativeSize=2.000000)
+         StartSizeRange=(X=(Min=1.000000,Max=2.000000),Y=(Min=6.000000,Max=6.000000),Z=(Min=6.000000,Max=6.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=50.000000
+         AutomaticInitialSpawning=False
+         DrawStyle=PTDS_Brighten
+         Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0132'
+         TextureUSubdivisions=4
+         TextureVSubdivisions=2
+         SubdivisionStart=6
+         SubdivisionEnd=7
+         UseRandomSubdivision=True
+         LifetimeRange=(Min=0.300000,Max=0.300000)
+     End Object
+     Emitters(0)=SpriteEmitter'SpriteEmitter15'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter18
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.550000,Color=(B=160,G=160,R=160,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScaleRepeats=100.000000
+         ColorMultiplierRange=(X=(Min=1.000000,Max=1.000000),Y=(Min=0.300000,Max=0.300000),Z=(Min=0.200000,Max=0.200000))
+         FadeOutStartTime=10.000000
+         MaxParticles=1
+         ResetAfterChange=True
+         RespawnDeadParticles=False
+         Name="LifeCore"
+         StartLocationPolarRange=(X=(Min=0.000000,Max=360.000000),Y=(Min=90.000000,Max=90.000000),Z=(Min=10.000000,Max=10.000000))
+         UseRotationFrom=1
+         SpinParticles=True
+         SpinCCWorCW=(X=1.000000,Y=0.500000,Z=0.500000)
+         SpinsPerSecondRange=(X=(Min=1.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         StartSpinRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=1.000000)
+         SizeScale(1)=(RelativeTime=0.600000,RelativeSize=0.700000)
+         SizeScale(2)=(RelativeTime=1.000000,RelativeSize=1.000000)
+         SizeScaleRepeats=100.000000
+         StartSizeRange=(X=(Min=6.000000,Max=6.000000),Y=(Min=10.000000,Max=10.000000),Z=(Min=10.000000,Max=10.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=1000.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0000'
+         TextureUSubdivisions=4
+         TextureVSubdivisions=4
+         SubdivisionStart=6
+         SubdivisionEnd=7
+         UseRandomSubdivision=True
+         LifetimeRange=(Min=10.000000,Max=10.000000)
+     End Object
+     Emitters(1)=SpriteEmitter'SpriteEmitter18'
+     bDirectional=True
+}

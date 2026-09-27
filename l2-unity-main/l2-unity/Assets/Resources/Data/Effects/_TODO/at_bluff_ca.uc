@@ -1,0 +1,163 @@
+class at_bluff_ca extends Emitter;
+
+defaultproperties
+{
+     Begin Object Class=MeshEmitter Name=MeshEmitter3
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.Support.supportenchant01'
+         UseMeshBlendMode=False
+         RenderTwoSided=True
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.500000,Color=(B=170,G=170,R=170,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScaleRepeats=30.000000
+         ColorMultiplierRange=(X=(Min=0.202000,Max=1.000000),Y=(Min=0.557000,Max=0.632000),Z=(Min=0.204000,Max=0.204000))
+         Opacity=0.900000
+         FadeOutStartTime=1.200000
+         FadeOut=True
+         FadeInEndTime=0.400000
+         FadeIn=True
+         ForcedMaxParticles=True
+         RespawnDeadParticles=False
+         Name="Light"
+         SpinParticles=True
+         StartSpinRange=(X=(Min=-1.000000,Max=1.000000),Y=(Min=-1.000000,Max=1.000000),Z=(Min=-1.000000,Max=1.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=2.000000)
+         SizeScale(1)=(RelativeTime=0.800000,RelativeSize=0.200000)
+         SizeScale(2)=(RelativeTime=1.000000,RelativeSize=0.000000)
+         StartSizeRange=(X=(Min=0.300000,Max=0.500000),Y=(Min=0.300000,Max=0.500000),Z=(Min=0.300000,Max=0.500000))
+         InitialParticlesPerSecond=8.000000
+         AutomaticInitialSpawning=False
+         LifetimeRange=(Min=0.500000,Max=0.500000)
+     End Object
+     Emitters(0)=MeshEmitter'MeshEmitter3'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter2
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         Opacity=0.200000
+         FadeOutStartTime=0.160000
+         FadeOut=True
+         FadeInEndTime=0.075000
+         FadeIn=True
+         MaxParticles=11
+         ForcedMaxParticles=True
+         RespawnDeadParticles=False
+         Name="fire_swirl"
+         SpinParticles=True
+         StartSpinRange=(X=(Min=-1.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=0.000000)
+         SizeScale(1)=(RelativeTime=0.400000,RelativeSize=1.000000)
+         SizeScale(2)=(RelativeTime=1.000000,RelativeSize=2.000000)
+         StartSizeRange=(X=(Min=-15.000000,Max=-15.000000),Y=(Min=-10.000000,Max=-10.000000),Z=(Min=10.000000,Max=10.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=11.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Fire.fx_m_t2022'
+         LifetimeRange=(Min=0.500000,Max=0.500000)
+     End Object
+     Emitters(1)=SpriteEmitter'SpriteEmitter2'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter5
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.471429,Color=(B=128,G=128,R=128,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScaleRepeats=30.000000
+         Opacity=0.240000
+         FadeOutStartTime=0.300000
+         FadeOut=True
+         FadeInEndTime=0.150000
+         FadeIn=True
+         MaxParticles=7
+         ForcedMaxParticles=True
+         RespawnDeadParticles=False
+         Name="Center"
+         StartLocationRange=(X=(Min=-1.000000,Max=1.000000),Y=(Min=-5.000000,Max=5.000000),Z=(Min=-5.000000,Max=5.000000))
+         SpinParticles=True
+         SpinCCWorCW=(X=0.370000,Y=0.500000,Z=0.500000)
+         SpinsPerSecondRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         StartSpinRange=(X=(Min=-1.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=0.000000)
+         SizeScale(1)=(RelativeTime=0.400000,RelativeSize=1.000000)
+         SizeScale(2)=(RelativeTime=1.000000,RelativeSize=1.500000)
+         StartSizeRange=(X=(Min=24.648001,Max=24.648001),Y=(Min=24.648001,Max=24.648001),Z=(Min=24.648001,Max=24.648001))
+         UniformSize=True
+         InitialParticlesPerSecond=5.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0105'
+         LifetimeRange=(Min=0.600000,Max=0.600000)
+     End Object
+     Emitters(2)=SpriteEmitter'SpriteEmitter5'
+     Begin Object Class=MeshEmitter Name=MeshEmitter4
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.White.white_radiation00'
+         UseMeshBlendMode=False
+         RenderTwoSided=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorMultiplierRange=(X=(Min=1.000000,Max=1.000000),Y=(Min=0.490000,Max=0.490000),Z=(Min=0.139000,Max=0.139000))
+         Opacity=0.500000
+         FadeOutStartTime=3.040000
+         FadeOut=True
+         FadeInEndTime=0.266000
+         FadeIn=True
+         MaxParticles=4
+         ForcedMaxParticles=True
+         RespawnDeadParticles=False
+         Name="elet"
+         StartLocationRange=(X=(Min=-18.719999,Max=18.719999),Y=(Min=-18.719999,Max=18.719999),Z=(Min=-18.719999,Max=18.719999))
+         StartLocationShape=PTLS_Sphere
+         SpinParticles=True
+         SpinsPerSecondRange=(X=(Min=0.500000,Max=1.000000),Y=(Min=0.500000,Max=1.000000),Z=(Min=0.500000,Max=1.000000))
+         StartSpinRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=1.000000),Z=(Min=-1.000000,Max=1.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=1.000000)
+         SizeScale(1)=(RelativeTime=0.910000,RelativeSize=0.800000)
+         SizeScale(2)=(RelativeTime=1.000000,RelativeSize=0.300000)
+         StartSizeRange=(X=(Min=0.100000,Max=0.150000),Y=(Min=0.100000,Max=0.150000),Z=(Min=0.100000,Max=0.150000))
+         InitialParticlesPerSecond=1000.000000
+         AutomaticInitialSpawning=False
+         DrawStyle=PTDS_Brighten
+         LifetimeRange=(Min=1.500000,Max=1.500000)
+     End Object
+     Emitters(3)=MeshEmitter'MeshEmitter4'
+     Begin Object Class=MeshEmitter Name=MeshEmitter9
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.Etc.twist_m02'
+         UseMeshBlendMode=False
+         RenderTwoSided=True
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.521429,Color=(B=128,G=128,R=128,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScaleRepeats=60.000000
+         ColorMultiplierRange=(X=(Min=0.525000,Max=1.000000),Y=(Min=0.760000,Max=1.000000),Z=(Min=0.860000,Max=1.000000))
+         Opacity=0.500000
+         FadeOutStartTime=0.480000
+         FadeInEndTime=0.115200
+         FadeIn=True
+         MaxParticles=5
+         ForcedMaxParticles=True
+         RespawnDeadParticles=False
+         Name="swirl"
+         StartLocationOffset=(Z=-5.000000)
+         SpinParticles=True
+         SpinCCWorCW=(X=1.000000)
+         SpinsPerSecondRange=(X=(Min=2.000000,Max=3.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         StartSpinRange=(X=(Min=1.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseRegularSizeScale=False
+         StartSizeRange=(X=(Min=0.050000,Max=0.050000),Y=(Min=0.050000,Max=0.050000),Z=(Min=0.050000,Max=0.050000))
+         InitialParticlesPerSecond=5.000000
+         AutomaticInitialSpawning=False
+         LifetimeRange=(Min=0.480000,Max=0.480000)
+     End Object
+     Emitters(4)=MeshEmitter'MeshEmitter9'
+     bLightChanged=True
+     bNoDelete=False
+     bSunAffect=True
+     bDirectional=True
+}

@@ -1,0 +1,129 @@
+class e_u300_heart_ca extends Emitter;
+
+defaultproperties
+{
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter6
+         UseDirectionAs=PTDU_Normal
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.485714,Color=(B=172,G=172,R=172,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScaleRepeats=39.835999
+         FadeOutStartTime=3.000000
+         FadeOut=True
+         FadeInEndTime=1.400000
+         FadeIn=True
+         MaxParticles=1
+         WeatherSoundCheck=True
+         RespawnDeadParticles=False
+         Name="magic"
+         StartLocationOffset=(Z=2.000000)
+         SpinParticles=True
+         SpinCCWorCW=(Y=0.500000,Z=0.500000)
+         SpinsPerSecondRange=(X=(Min=0.200000,Max=0.200000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseRegularSizeScale=False
+         StartSizeRange=(X=(Min=18.000000,Max=18.000000),Y=(Min=18.000000,Max=18.000000),Z=(Min=18.000000,Max=18.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=10.000000
+         AutomaticInitialSpawning=False
+         DrawStyle=PTDS_Brighten
+         Texture=Texture'LineageEffectsTextures.Particles3.fx_m_t6000'
+     End Object
+     Emitters(0)=SpriteEmitter'SpriteEmitter6'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter10
+         UseDirectionAs=PTDU_Normal
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         Opacity=0.290000
+         FadeOutStartTime=1.920000
+         FadeOut=True
+         FadeInEndTime=1.720000
+         FadeIn=True
+         MaxParticles=1
+         WeatherSoundCheck=True
+         RespawnDeadParticles=False
+         Name="Glow"
+         StartSizeRange=(X=(Min=20.000000,Max=20.000000),Y=(Min=20.000000,Max=20.000000),Z=(Min=20.000000,Max=20.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=10.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Particles2.fx_m_t1016'
+         TextureUSubdivisions=2
+         TextureVSubdivisions=1
+         SubdivisionEnd=1
+     End Object
+     Emitters(1)=SpriteEmitter'SpriteEmitter10'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter11
+         Acceleration=(Z=100.000000)
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=0,G=0,R=0,A=255))
+         ColorScale(1)=(RelativeTime=0.121429,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=0,G=0,R=0,A=255))
+         ColorScale(3)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=0))
+         ColorScale(4)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=0))
+         FadeOutStartTime=0.306000
+         FadeOut=True
+         MaxParticles=64
+         ResetAfterChange=True
+         WeatherSoundCheck=True
+         ForcedMaxParticles=True
+         RespawnDeadParticles=False
+         Name="heart_particle"
+         StartLocationOffset=(Z=1.200000)
+         StartLocationRange=(X=(Min=-10.000000,Max=10.000000),Y=(Min=-10.000000,Max=10.000000),Z=(Min=-10.000000,Max=10.000000))
+         StartLocationShape=PTLS_Polar
+         StartLocationPolarRange=(X=(Min=0.000000,Max=360.000000),Y=(Min=75.000000,Max=105.000000),Z=(Min=10.000000,Max=10.000000))
+         SpinParticles=True
+         SpinCCWorCW=(Y=0.500000,Z=0.500000)
+         UseRegularSizeScale=False
+         SizeScaleRepeats=1.000000
+         StartSizeRange=(X=(Min=3.000000,Max=3.000000),Y=(Min=3.000000,Max=3.000000),Z=(Min=3.000000,Max=3.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=18.000000
+         AutomaticInitialSpawning=False
+         DrawStyle=PTDS_Brighten
+         Texture=Texture'LineageEffectsTextures.Particles3.fx_m_t6002'
+         TextureUSubdivisions=4
+         TextureVSubdivisions=4
+         SubdivisionStart=6
+         SubdivisionEnd=10
+         UseRandomSubdivision=True
+         LifetimeRange=(Min=0.600000,Max=0.600000)
+         InitialDelayRange=(Min=0.000000,Max=0.200000)
+         StartVelocityRange=(X=(Min=30.000000,Max=30.000000),Y=(Min=30.000000,Max=30.000000),Z=(Min=0.000000,Max=0.000000))
+         GetVelocityDirectionFrom=PTVD_StartPositionAndOwner
+     End Object
+     Emitters(2)=SpriteEmitter'SpriteEmitter11'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter13
+         UseDirectionAs=PTDU_Normal
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         FadeOutStartTime=3.000000
+         FadeOut=True
+         FadeInEndTime=1.400000
+         FadeIn=True
+         MaxParticles=1
+         WeatherSoundCheck=True
+         RespawnDeadParticles=False
+         Name="magic heart"
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=0.945000)
+         SizeScale(1)=(RelativeTime=0.500000,RelativeSize=1.000000)
+         SizeScale(2)=(RelativeTime=1.000000,RelativeSize=0.945000)
+         SizeScaleRepeats=25.000000
+         StartSizeRange=(X=(Min=9.000000,Max=9.000000),Y=(Min=9.000000,Max=9.000000),Z=(Min=9.000000,Max=9.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=10.000000
+         AutomaticInitialSpawning=False
+         DrawStyle=PTDS_Brighten
+         Texture=Texture'LineageEffectsTextures.Particles3.fx_m_t6001'
+     End Object
+     Emitters(3)=SpriteEmitter'SpriteEmitter13'
+     Physics=10
+     bLightChanged=True
+     bNoDelete=False
+     bTrailerPrePivot=True
+     bSunAffect=True
+     DrawScale=0.120000
+}

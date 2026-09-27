@@ -1,0 +1,90 @@
+class mb_frintessa_ghost_clamp_to extends Emitter;
+
+defaultproperties
+{
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter185
+         Acceleration=(X=-15.000000,Z=3.000000)
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=6,G=6,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=45,G=86,R=196,A=255))
+         ColorMultiplierRange=(X=(Min=1.000000,Max=1.000000),Y=(Min=0.382000,Max=0.382000),Z=(Min=0.207000,Max=0.207000))
+         Opacity=0.500000
+         FadeOutStartTime=0.456000
+         FadeOut=True
+         FadeInEndTime=0.084000
+         FadeIn=True
+         MaxParticles=16
+         RespawnDeadParticles=False
+         Name="smoke"
+         StartLocationOffset=(Z=1.000000)
+         StartLocationRange=(X=(Min=-5.000000,Max=5.000000),Y=(Min=-5.000000,Max=5.000000),Z=(Min=0.000000,Max=0.000000))
+         StartLocationShape=PTLS_Polar
+         StartLocationPolarRange=(X=(Min=0.000000,Max=360.000000),Y=(Min=90.000000,Max=90.000000),Z=(Min=0.500000,Max=0.500000))
+         SpinParticles=True
+         SpinsPerSecondRange=(X=(Min=0.000000,Max=0.125000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         StartSpinRange=(X=(Min=-1.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=0.300000)
+         SizeScale(1)=(RelativeTime=0.200000,RelativeSize=1.000000)
+         SizeScale(2)=(RelativeTime=1.000000,RelativeSize=2.500000)
+         StartSizeRange=(X=(Min=10.000000,Max=15.000000),Y=(Min=10.000000,Max=15.000000),Z=(Min=10.000000,Max=15.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=500.000000
+         AutomaticInitialSpawning=False
+         DrawStyle=PTDS_AlphaBlend
+         Texture=Texture'LineageEffectsTextures2.balakas.fx_m_t2011'
+         TextureUSubdivisions=2
+         TextureVSubdivisions=2
+         SubdivisionStart=1
+         SubdivisionEnd=3
+         UseRandomSubdivision=True
+         LifetimeRange=(Min=1.000000,Max=1.200000)
+         StartVelocityRange=(X=(Min=120.000000,Max=150.000000),Y=(Min=120.000000,Max=150.000000),Z=(Min=5.000000,Max=80.000000))
+         VelocityLossRange=(X=(Min=4.500000,Max=5.000000),Y=(Min=4.500000,Max=5.000000),Z=(Min=4.500000,Max=5.000000))
+         GetVelocityDirectionFrom=PTVD_OwnerAndStartPosition
+     End Object
+     Emitters(0)=SpriteEmitter'SpriteEmitter185'
+     Begin Object Class=MeshEmitter Name=MeshEmitter10
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.Etc.etc_levelup01'
+         UseMeshBlendMode=False
+         RenderTwoSided=True
+         Acceleration=(Z=-5.000000)
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=53,G=53,R=183,A=255))
+         ColorScale(1)=(RelativeTime=0.364286,Color=(B=53,G=188,R=247,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=15,G=134,R=221,A=255))
+         ColorMultiplierRange=(X=(Min=1.000000,Max=1.000000),Y=(Min=0.400000,Max=0.400000),Z=(Min=0.400000,Max=0.400000))
+         Opacity=0.600000
+         FadeOutStartTime=0.030000
+         FadeOut=True
+         MaxParticles=3
+         WeatherSoundCheck=True
+         RespawnDeadParticles=False
+         Name="tie"
+         SpinParticles=True
+         SpinCCWorCW=(X=1.000000,Y=1.000000,Z=1.000000)
+         SpinsPerSecondRange=(X=(Min=1.250000,Max=1.250000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         StartSpinRange=(X=(Min=-1.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=0.100000)
+         SizeScale(1)=(RelativeTime=0.160000,RelativeSize=0.400000)
+         SizeScale(2)=(RelativeTime=1.000000,RelativeSize=0.900000)
+         StartSizeRange=(X=(Min=0.300000,Max=0.300000),Y=(Min=0.300000,Max=0.300000),Z=(Min=4.000000,Max=4.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=500.000000
+         AutomaticInitialSpawning=False
+         DrawStyle=PTDS_Brighten
+         LifetimeRange=(Min=0.600000,Max=0.600000)
+         StartVelocityRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=1.000000,Max=1.000000))
+         VelocityLossRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=1.000000,Max=1.000000))
+     End Object
+     Emitters(1)=MeshEmitter'MeshEmitter10'
+     bDynamicActorFilterState=True
+     bLightChanged=True
+     bNoDelete=False
+     DrawScale=0.500000
+     SwayRotationOrig=(Pitch=0,Yaw=16384,Roll=0)
+     bDirectional=True
+}

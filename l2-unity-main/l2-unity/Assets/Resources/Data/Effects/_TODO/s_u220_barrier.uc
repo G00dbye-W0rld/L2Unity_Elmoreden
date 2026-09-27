@@ -1,0 +1,123 @@
+class s_u220_barrier extends Emitter;
+
+defaultproperties
+{
+     Begin Object Class=VertMeshEmitter Name=VertMeshEmitter13
+         VertexMesh=VertMesh'LineageEffectMeshes.sh_hsize04'
+         UseMeshBlendMode=False
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=0,G=128,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorMultiplierRange=(X=(Min=0.700000,Max=1.000000),Y=(Min=0.700000,Max=1.000000),Z=(Min=0.700000,Max=1.000000))
+         Opacity=0.850000
+         FadeOutStartTime=0.198000
+         FadeOut=True
+         WeatherSoundCheck=True
+         RespawnDeadParticles=False
+         Name="VertMeshEmitter0"
+         StartLocationOffset=(Z=2.000000)
+         StartLocationShape=PTLS_Polar
+         StartLocationPolarRange=(X=(Min=0.000000,Max=360.000000),Y=(Min=90.000000,Max=90.000000),Z=(Min=0.000000,Max=0.000000))
+         SpinParticles=True
+         SpinCCWorCW=()
+         StartSpinRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.780000,Max=0.780000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=1.000000)
+         SizeScale(1)=(RelativeTime=1.000000,RelativeSize=1.100000)
+         StartSizeRange=(X=(Min=0.140000,Max=0.150000),Y=(Min=0.220000,Max=0.220000),Z=(Min=0.140000,Max=0.150000))
+         InitialParticlesPerSecond=200.000000
+         AutomaticInitialSpawning=False
+         LifetimeRange=(Min=0.650000,Max=0.650000)
+         InitialDelayRange=(Min=0.100000,Max=0.100000)
+     End Object
+     Emitters(0)=VertMeshEmitter'VertMeshEmitter13'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter7
+         UseDirectionAs=PTDU_Up
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=64,G=79,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.321429,Color=(B=64,G=128,R=255,A=255))
+         ColorScale(2)=(RelativeTime=0.660714,Color=(B=128,G=255,R=255,A=255))
+         ColorScale(3)=(RelativeTime=1.000000,Color=(B=118,G=183,R=254,A=255))
+         Opacity=0.450000
+         FadeOutStartTime=0.294000
+         FadeOut=True
+         FadeInEndTime=0.156000
+         FadeIn=True
+         MaxParticles=3
+         WeatherSoundCheck=True
+         RespawnDeadParticles=False
+         Name="Ring"
+         StartLocationOffset=(Z=-2.000000)
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=1.000000)
+         SizeScale(1)=(RelativeTime=1.000000,RelativeSize=1.100000)
+         StartSizeRange=(X=(Min=20.000000,Max=20.000000),Y=(Min=50.000000,Max=50.000000),Z=(Min=20.000000,Max=20.000000))
+         InitialParticlesPerSecond=25.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Particles4.fx_m_t8023'
+         LifetimeRange=(Min=0.750000,Max=0.750000)
+         StartVelocityRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=300.000000,Max=300.000000))
+         VelocityLossRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=10.000000,Max=10.000000))
+     End Object
+     Emitters(1)=SpriteEmitter'SpriteEmitter7'
+     Begin Object Class=MeshEmitter Name=MeshEmitter46
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.wooh02.grey_circle'
+         UseMeshBlendMode=False
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=92,G=220,R=252,A=255))
+         ColorScale(1)=(RelativeTime=0.489286,Color=(B=64,G=128,R=255,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=87,G=233,R=253,A=255))
+         ColorScaleRepeats=10.000000
+         FadeOutStartTime=0.390000
+         FadeOut=True
+         FadeInEndTime=0.195000
+         FadeIn=True
+         MaxParticles=2
+         WeatherSoundCheck=True
+         RespawnDeadParticles=False
+         Name="Gr1_darken"
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=1.000000)
+         SizeScale(1)=(RelativeTime=1.000000,RelativeSize=1.200000)
+         StartSizeRange=(X=(Min=1.150000,Max=1.150000),Y=(Min=1.150000,Max=1.150000),Z=(Min=1.150000,Max=1.150000))
+         InitialParticlesPerSecond=10000.000000
+         AutomaticInitialSpawning=False
+         DrawStyle=PTDS_Darken
+         LifetimeRange=(Min=0.750000,Max=0.750000)
+     End Object
+     Emitters(2)=MeshEmitter'MeshEmitter46'
+     Begin Object Class=MeshEmitter Name=MeshEmitter47
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.wooh02.grey_circle'
+         UseMeshBlendMode=False
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=92,G=220,R=252,A=255))
+         ColorScale(1)=(RelativeTime=0.489286,Color=(B=64,G=128,R=255,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=87,G=233,R=253,A=255))
+         ColorScaleRepeats=10.000000
+         Opacity=0.850000
+         FadeOutStartTime=0.502500
+         FadeOut=True
+         FadeInEndTime=0.195000
+         FadeIn=True
+         MaxParticles=2
+         WeatherSoundCheck=True
+         RespawnDeadParticles=False
+         Name="Gr1_add"
+         StartLocationOffset=(Z=1.000000)
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=1.000000)
+         SizeScale(1)=(RelativeTime=1.000000,RelativeSize=1.200000)
+         StartSizeRange=(X=(Min=0.800000,Max=0.800000),Y=(Min=0.800000,Max=0.800000),Z=(Min=0.800000,Max=0.800000))
+         InitialParticlesPerSecond=10000.000000
+         AutomaticInitialSpawning=False
+         LifetimeRange=(Min=0.750000,Max=0.750000)
+     End Object
+     Emitters(3)=MeshEmitter'MeshEmitter47'
+     bLightChanged=True
+     bNoDelete=False
+     bSunAffect=True
+     DrawScale=0.200000
+}

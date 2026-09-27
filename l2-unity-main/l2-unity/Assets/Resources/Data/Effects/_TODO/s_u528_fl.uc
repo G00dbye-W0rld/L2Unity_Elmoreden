@@ -1,0 +1,91 @@
+class s_u528_fl extends Emitter;
+
+defaultproperties
+{
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter8
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         FadeOutStartTime=0.255000
+         FadeOut=True
+         MaxParticles=8
+         ResetAfterChange=True
+         Name="SpriteEmitter2"
+         StartLocationPolarRange=(X=(Min=0.000000,Max=360.000000),Y=(Min=90.000000,Max=90.000000),Z=(Min=10.000000,Max=10.000000))
+         UseRotationFrom=1
+         SpinParticles=True
+         StartSpinRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseRegularSizeScale=False
+         UniformSize=True
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=1.500000)
+         SizeScale(1)=(RelativeTime=0.070000,RelativeSize=1.200000)
+         StartSizeRange=(X=(Min=2.000000,Max=2.000000),Y=(Min=10.000000,Max=10.000000),Z=(Min=10.000000,Max=10.000000))
+         InitialParticlesPerSecond=12.000000
+         AutomaticInitialSpawning=False
+         DrawStyle=PTDS_Brighten
+         Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0000'
+         TextureUSubdivisions=4
+         TextureVSubdivisions=4
+         UseRandomSubdivision=True
+         SubdivisionStart=14
+         SubdivisionEnd=16
+         LifetimeRange=(Min=0.500000,Max=0.500000)
+         StartVelocityRange=(X=(Min=50.000000,Max=50.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+     End Object
+     Emitters(0)=SpriteEmitter'SpriteEmitter8'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter9
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=5,G=54,R=250,A=255))
+         ColorScale(1)=(RelativeTime=0.550000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=0,G=82,R=251,A=255))
+         ColorScaleRepeats=100.000000
+         FadeOutStartTime=5.000000
+         MaxParticles=2
+         ResetAfterChange=True
+         WeatherSoundCheck=True
+         Name="SpriteEmitter5"
+         StartLocationPolarRange=(X=(Min=0.000000,Max=360.000000),Y=(Min=90.000000,Max=90.000000),Z=(Min=10.000000,Max=10.000000))
+         SpinParticles=True
+         SpinCCWorCW=(X=1.000000,Y=0.500000,Z=0.500000)
+         StartSpinRange=(X=(Min=-1.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseRegularSizeScale=False
+         UniformSize=True
+         StartSizeRange=(X=(Min=15.000000,Max=15.000000),Y=(Min=15.000000,Max=15.000000),Z=(Min=15.000000,Max=15.000000))
+         InitialParticlesPerSecond=3000.000000
+         AutomaticInitialSpawning=False
+         DrawStyle=PTDS_Brighten
+         Texture=Texture'LineageEffectsTextures.Particles3.fx_m_t5004'
+         TextureUSubdivisions=2
+         TextureVSubdivisions=2
+         UseRandomSubdivision=True
+         SubdivisionEnd=1
+         LifetimeRange=(Min=0.010000,Max=0.010000)
+     End Object
+     Emitters(1)=SpriteEmitter'SpriteEmitter9'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter11
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         Opacity=0.100000
+         FadeOutStartTime=0.325000
+         FadeOut=True
+         MaxParticles=5
+         Name="Aura"
+         SpinParticles=True
+         SpinCCWorCW=(Y=0.500000,Z=0.500000)
+         SpinsPerSecondRange=(X=(Min=1.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         StartSpinRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UniformSize=True
+         StartSizeRange=(X=(Min=6.000000,Max=6.000000),Y=(Min=6.000000,Max=6.000000),Z=(Min=6.000000,Max=6.000000))
+         InitialParticlesPerSecond=10.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Particles3.fx_m_t5022'
+         LifetimeRange=(Min=0.500000,Max=0.500000)
+     End Object
+     Emitters(2)=SpriteEmitter'SpriteEmitter11'
+     bUseDynamicLights=False
+     bLightChanged=True
+     bAcceptsProjectors=False
+     bSunAffect=True
+     bUnlit=False
+     bDirectional=True
+     DrawScale=0.050000
+}

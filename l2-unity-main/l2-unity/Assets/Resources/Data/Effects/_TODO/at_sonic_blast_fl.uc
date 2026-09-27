@@ -1,0 +1,120 @@
+class at_sonic_blast_fl extends Emitter;
+
+defaultproperties
+{
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter9
+         UseDirectionAs=PTDU_Up
+         Acceleration=(X=-960.000000)
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=142,R=213,A=255))
+         ColorScale(1)=(RelativeTime=0.453571,Color=(B=0,G=121,R=255,A=255))
+         ColorScale(2)=(RelativeTime=0.771429,Color=(B=40,G=57,R=215,A=255))
+         ColorScale(3)=(RelativeTime=1.000000,Color=(B=0,G=0,R=0,A=255))
+         Opacity=0.600000
+         FadeOutStartTime=0.300000
+         FadeOut=True
+         FadeInEndTime=0.040000
+         FadeIn=True
+         MaxParticles=80
+         RespawnDeadParticles=False
+         Name="Tail"
+         StartLocationOffset=(X=-20.000000)
+         StartLocationRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=-24.000000,Max=24.000000))
+         StartLocationShape=PTLS_Polar
+         StartLocationPolarRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=45.000000,Max=135.000000),Z=(Min=20.000000,Max=40.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=2.000000)
+         SizeScale(1)=(RelativeTime=0.270000,RelativeSize=1.800000)
+         SizeScale(2)=(RelativeTime=0.610000,RelativeSize=1.400000)
+         SizeScale(3)=(RelativeTime=1.000000,RelativeSize=1.000000)
+         StartSizeRange=(X=(Min=3.600000,Max=6.000000),Y=(Min=24.000000,Max=48.000000),Z=(Min=3.600000,Max=6.000000))
+         InitialParticlesPerSecond=40.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0101'
+         TextureUSubdivisions=8
+         TextureVSubdivisions=1
+         BlendBetweenSubdivisions=True
+         SubdivisionEnd=8
+         LifetimeRange=(Min=0.200000,Max=0.300000)
+         StartVelocityRange=(X=(Min=-180.000000,Max=-180.000000),Y=(Min=-36.000000,Max=36.000000),Z=(Min=0.000000,Max=0.000000))
+         VelocityLossRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=2.000000,Max=2.000000),Z=(Min=0.000000,Max=0.000000))
+         WarmupTicksPerSecond=10.000000
+         RelativeWarmupTime=0.300000
+     End Object
+     Emitters(0)=SpriteEmitter'SpriteEmitter9'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter10
+         UseDirectionAs=PTDU_Up
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.475000,Color=(B=0,G=0,R=0,A=255))
+         ColorScale(2)=(RelativeTime=0.685714,Color=(B=0,G=0,R=0,A=255))
+         ColorScale(3)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScaleRepeats=10.000000
+         ColorMultiplierRange=(X=(Min=0.550000,Max=1.000000),Y=(Min=0.550000,Max=1.000000),Z=(Min=0.550000,Max=1.000000))
+         Opacity=0.400000
+         FadeOutStartTime=0.120000
+         FadeOut=True
+         FadeInEndTime=0.024000
+         FadeIn=True
+         MaxParticles=80
+         RespawnDeadParticles=False
+         Name="Ticks"
+         StartLocationOffset=(X=40.000000)
+         StartLocationRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=-24.000000,Max=24.000000))
+         SpinsPerSecondRange=(X=(Min=0.500000,Max=0.500000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         StartSpinRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.370000,RelativeSize=0.900000)
+         SizeScale(1)=(RelativeTime=1.000000,RelativeSize=0.200000)
+         StartSizeRange=(X=(Min=0.480000,Max=0.960000),Y=(Min=36.000000,Max=60.000000),Z=(Min=0.480000,Max=0.960000))
+         InitialParticlesPerSecond=40.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0061'
+         TextureUSubdivisions=8
+         TextureVSubdivisions=8
+         SubdivisionStart=17
+         SubdivisionEnd=20
+         UseRandomSubdivision=True
+         LifetimeRange=(Min=0.300000,Max=0.300000)
+         StartVelocityRange=(X=(Min=-480.000000,Max=-480.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         VelocityLossRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=3.000000,Max=3.000000),Z=(Min=3.000000,Max=3.000000))
+         WarmupTicksPerSecond=10.000000
+         RelativeWarmupTime=0.300000
+     End Object
+     Emitters(1)=SpriteEmitter'SpriteEmitter10'
+     Begin Object Class=MeshEmitter Name=MeshEmitter4
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.Skill_Power.skill_power02'
+         UseMeshBlendMode=False
+         RenderTwoSided=True
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.514286,Color=(B=128,G=128,R=128,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScaleRepeats=20.000000
+         ColorMultiplierRange=(X=(Min=1.000000,Max=1.000000),Y=(Min=0.749000,Max=0.749000),Z=(Min=1.000000,Max=1.000000))
+         Opacity=0.600000
+         FadeOutStartTime=2.000000
+         MaxParticles=1
+         RespawnDeadParticles=False
+         Name="MeshBlade"
+         StartLocationOffset=(X=-20.000000)
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.790000,RelativeSize=0.970000)
+         SizeScale(1)=(RelativeTime=1.000000,RelativeSize=1.000000)
+         SizeScaleRepeats=20.000000
+         StartSizeRange=(X=(Min=0.576000,Max=0.576000),Y=(Min=0.480000,Max=0.480000),Z=(Min=0.384000,Max=0.384000))
+         InitialParticlesPerSecond=10000.000000
+         AutomaticInitialSpawning=False
+         LifetimeRange=(Min=2.000000,Max=2.000000)
+     End Object
+     Emitters(2)=MeshEmitter'MeshEmitter4'
+     bRotEmitter=True
+     RotPerSecond=(Pitch=0,Yaw=0,Roll=20000)
+     bLightChanged=True
+     bSelfRotation=True
+     bSunAffect=True
+     DrawScale=0.100000
+     bDirectional=True
+}

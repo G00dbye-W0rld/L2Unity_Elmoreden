@@ -7,7 +7,7 @@ defaultproperties
          UseMeshBlendMode=False
          RenderTwoSided=True
          UseColorScale=True
-         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
          ColorScale(1)=(RelativeTime=0.317857,Color=(B=209,G=209,R=231,A=255))
          ColorScale(2)=(RelativeTime=0.589286,Color=(B=197,G=197,R=197,A=255))
          ColorScale(3)=(RelativeTime=0.828571,Color=(B=216,G=230,R=231,A=255))
@@ -21,17 +21,17 @@ defaultproperties
          RespawnDeadParticles=False
          Name="shield"
          SpinParticles=True
-         SpinCCWorCW=(X=0.000000,Y=0.000000,Z=0.000000)
-         SpinsPerSecondRange=(X=(Min=0.100000,Max=0.100000))
-         StartSpinRange=(X=(Min=0.255000,Max=0.255000))
+         SpinCCWorCW=()
+         SpinsPerSecondRange=(X=(Min=0.100000,Max=0.100000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         StartSpinRange=(X=(Min=0.255000,Max=0.255000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
          UseSizeScale=True
          UseRegularSizeScale=False
-         UniformSize=True
-         SizeScale(0)=(RelativeSize=1.000000)
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=1.000000)
          SizeScale(1)=(RelativeTime=0.090000,RelativeSize=1.080000)
          SizeScale(2)=(RelativeTime=0.200000,RelativeSize=1.020000)
          SizeScale(3)=(RelativeTime=1.000000,RelativeSize=1.000000)
          StartSizeRange=(X=(Min=0.100000,Max=0.100000),Y=(Min=0.100000,Max=0.100000),Z=(Min=0.100000,Max=0.100000))
+         UniformSize=True
          InitialParticlesPerSecond=10000.000000
          AutomaticInitialSpawning=False
          DrawStyle=PTDS_Brighten
@@ -41,7 +41,7 @@ defaultproperties
      Emitters(0)=MeshEmitter'MeshEmitter2'
      Begin Object Class=SpriteEmitter Name=SpriteEmitter6
          UseColorScale=True
-         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
          ColorScale(1)=(RelativeTime=0.521429,Color=(B=128,G=128,R=128,A=255))
          ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
          ColorScaleRepeats=10.000000
@@ -53,26 +53,26 @@ defaultproperties
          RespawnDeadParticles=False
          Name="AngelDust"
          StartLocationShape=PTLS_Polar
-         StartLocationPolarRange=(X=(Max=360.000000),Y=(Min=90.000000,Max=90.000000),Z=(Min=15.000000,Max=15.000000))
+         StartLocationPolarRange=(X=(Min=0.000000,Max=360.000000),Y=(Min=90.000000,Max=90.000000),Z=(Min=15.000000,Max=15.000000))
          SpinParticles=True
-         SpinsPerSecondRange=(X=(Min=0.300000,Max=0.500000))
-         StartSpinRange=(X=(Max=1.000000))
+         SpinsPerSecondRange=(X=(Min=0.300000,Max=0.500000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         StartSpinRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
          UseSizeScale=True
          UseRegularSizeScale=False
-         UniformSize=True
          SizeScale(0)=(RelativeTime=0.100000,RelativeSize=2.000000)
          SizeScale(1)=(RelativeTime=0.180000,RelativeSize=1.000000)
          SizeScale(2)=(RelativeTime=0.410000,RelativeSize=0.700000)
          SizeScale(3)=(RelativeTime=1.000000,RelativeSize=0.010000)
          StartSizeRange=(X=(Min=2.000000,Max=2.000000),Y=(Min=2.000000,Max=2.000000),Z=(Min=2.000000,Max=2.000000))
+         UniformSize=True
          InitialParticlesPerSecond=1000.000000
          AutomaticInitialSpawning=False
          Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0000'
          TextureUSubdivisions=4
          TextureVSubdivisions=4
-         UseRandomSubdivision=True
          SubdivisionStart=14
          SubdivisionEnd=16
+         UseRandomSubdivision=True
          LifetimeRange=(Min=1.300000,Max=1.800000)
          InitialDelayRange=(Min=1.350000,Max=1.350000)
          StartVelocityRange=(X=(Min=25.000000,Max=35.000000),Y=(Min=25.000000,Max=35.000000),Z=(Min=25.000000,Max=35.000000))
@@ -85,7 +85,7 @@ defaultproperties
          UseMeshBlendMode=False
          RenderTwoSided=True
          UseColorScale=True
-         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
          ColorScale(1)=(RelativeTime=0.503571,Color=(B=195,G=195,R=195,A=255))
          ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
          ColorScaleRepeats=40.000000
@@ -99,12 +99,12 @@ defaultproperties
          Name="Ring"
          StartLocationOffset=(Z=0.200000)
          SpinParticles=True
-         SpinCCWorCW=(X=0.000000)
-         SpinsPerSecondRange=(X=(Min=0.030000,Max=0.030000))
-         StartSpinRange=(X=(Max=1.000000))
+         SpinCCWorCW=(Y=0.500000,Z=0.500000)
+         SpinsPerSecondRange=(X=(Min=0.030000,Max=0.030000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         StartSpinRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
          UseSizeScale=True
          UseRegularSizeScale=False
-         SizeScale(0)=(RelativeSize=0.950000)
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=0.950000)
          SizeScale(1)=(RelativeTime=0.690000,RelativeSize=1.000000)
          SizeScale(2)=(RelativeTime=0.770000,RelativeSize=1.670000)
          SizeScale(3)=(RelativeTime=0.880000,RelativeSize=1.920000)
@@ -118,9 +118,9 @@ defaultproperties
      Emitters(2)=MeshEmitter'MeshEmitter0'
      Begin Object Class=SpriteEmitter Name=SpriteEmitter1
          UseDirectionAs=PTDU_Normal
-         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
          ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
-         ColorMultiplierRange=(Z=(Min=0.905000,Max=0.905000))
+         ColorMultiplierRange=(X=(Min=1.000000,Max=1.000000),Y=(Min=1.000000,Max=1.000000),Z=(Min=0.905000,Max=0.905000))
          Opacity=0.440000
          FadeOutStartTime=1.975000
          FadeOut=True

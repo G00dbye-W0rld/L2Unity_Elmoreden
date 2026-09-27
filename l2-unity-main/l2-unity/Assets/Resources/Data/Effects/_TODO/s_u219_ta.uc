@@ -1,0 +1,114 @@
+class s_u219_ta extends Emitter;
+
+defaultproperties
+{
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter22
+         Acceleration=(X=-300.000000)
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.489286,Color=(B=170,G=170,R=170,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScaleRepeats=15.000000
+         FadeOutStartTime=0.250000
+         FadeOut=True
+         CoordinateSystem=PTCS_Spray
+         MaxParticles=20
+         WeatherSoundCheck=True
+         RespawnDeadParticles=False
+         Name="tg_star"
+         StartLocationRange=(X=(Min=-7.000000,Max=7.000000),Y=(Min=-7.000000,Max=7.000000),Z=(Min=-12.500000,Max=12.500000))
+         SphereRadiusRange=(Min=0.000000,Max=5.000000)
+         StartLocationPolarRange=(X=(Min=0.000000,Max=360.000000),Y=(Min=80.000000,Max=95.000000),Z=(Min=15.000000,Max=18.000000))
+         SpinParticles=True
+         SpinsPerSecondRange=(X=(Min=0.500000,Max=0.500000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         StartSpinRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         UniformSize=True
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=0.200000)
+         SizeScale(1)=(RelativeTime=0.200000,RelativeSize=1.000000)
+         SizeScale(2)=(RelativeTime=1.000000,RelativeSize=0.000000)
+         StartSizeRange=(X=(Min=3.500000,Max=6.000000),Y=(Min=3.500000,Max=6.000000),Z=(Min=3.500000,Max=6.000000))
+         InitialParticlesPerSecond=25.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Particles2.fx_m_t1020'
+         TextureUSubdivisions=2
+         TextureVSubdivisions=2
+         UseRandomSubdivision=True
+         SubdivisionEnd=3
+         LifetimeRange=(Min=0.500000,Max=0.750000)
+         InitialDelayRange=(Min=0.100000,Max=0.100000)
+         StartVelocityRange=(X=(Min=30.000000,Max=30.000000),Y=(Min=-10.000000,Max=10.000000),Z=(Min=-10.000000,Max=10.000000))
+     End Object
+     Emitters(0)=SpriteEmitter'SpriteEmitter22'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter24
+         UseDirectionAs=PTDU_Up
+         Acceleration=(X=-350.000000)
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.489286,Color=(B=170,G=170,R=170,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScaleRepeats=15.000000
+         FadeOutStartTime=0.250000
+         FadeOut=True
+         CoordinateSystem=PTCS_Spray
+         WeatherSoundCheck=True
+         RespawnDeadParticles=False
+         Name="tg_circle"
+         StartLocationRange=(X=(Min=-3.000000,Max=3.000000),Y=(Min=-3.000000,Max=3.000000),Z=(Min=-3.000000,Max=3.000000))
+         SphereRadiusRange=(Min=0.000000,Max=5.000000)
+         SpinParticles=True
+         SpinsPerSecondRange=(X=(Min=1.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         StartSpinRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         UniformSize=True
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=0.300000)
+         SizeScale(1)=(RelativeTime=1.000000,RelativeSize=1.000000)
+         StartSizeRange=(X=(Min=15.000000,Max=15.000000),Y=(Min=15.000000,Max=15.000000),Z=(Min=15.000000,Max=15.000000))
+         InitialParticlesPerSecond=15.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Particles4.fx_m_t8016'
+         LifetimeRange=(Min=0.500000,Max=0.750000)
+         InitialDelayRange=(Min=0.050000,Max=0.050000)
+         StartVelocityRange=(X=(Min=75.000000,Max=75.000000),Y=(Min=-10.000000,Max=10.000000),Z=(Min=-10.000000,Max=10.000000))
+     End Object
+     Emitters(1)=SpriteEmitter'SpriteEmitter24'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter32
+         Acceleration=(X=-350.000000)
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.489286,Color=(B=170,G=170,R=170,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScaleRepeats=15.000000
+         Opacity=0.350000
+         FadeOutStartTime=0.202500
+         FadeOut=True
+         CoordinateSystem=PTCS_Spray
+         WeatherSoundCheck=True
+         RespawnDeadParticles=False
+         Name="tg_smoke"
+         StartLocationRange=(X=(Min=-3.000000,Max=3.000000),Y=(Min=-3.000000,Max=3.000000),Z=(Min=-3.000000,Max=3.000000))
+         SphereRadiusRange=(Min=0.000000,Max=5.000000)
+         SpinParticles=True
+         SpinsPerSecondRange=(X=(Min=0.200000,Max=0.400000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         StartSpinRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         UniformSize=True
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=0.300000)
+         SizeScale(1)=(RelativeTime=1.000000,RelativeSize=1.000000)
+         StartSizeRange=(X=(Min=25.000000,Max=25.000000),Y=(Min=25.000000,Max=25.000000),Z=(Min=25.000000,Max=25.000000))
+         InitialParticlesPerSecond=15.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Particles3.fx_m_t4009'
+         TextureUSubdivisions=4
+         TextureVSubdivisions=4
+         UseRandomSubdivision=True
+         SubdivisionEnd=15
+         LifetimeRange=(Min=0.500000,Max=0.750000)
+         StartVelocityRange=(X=(Min=75.000000,Max=75.000000),Y=(Min=-10.000000,Max=10.000000),Z=(Min=-10.000000,Max=10.000000))
+     End Object
+     Emitters(2)=SpriteEmitter'SpriteEmitter32'
+     bLightChanged=True
+     bNoDelete=False
+     bSunAffect=True
+     DrawScale=0.100000
+}

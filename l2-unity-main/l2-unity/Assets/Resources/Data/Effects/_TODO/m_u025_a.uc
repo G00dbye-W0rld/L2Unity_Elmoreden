@@ -4,20 +4,21 @@ defaultproperties
 {
      Begin Object Class=SpriteEmitter Name=SpriteEmitter14
          UseDirectionAs=PTDU_Up
-         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
          ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
-         ColorMultiplierRange=(X=(Min=0.571000,Max=0.571000),Y=(Min=0.260000,Max=0.260000))
+         ColorMultiplierRange=(X=(Min=0.571000,Max=0.571000),Y=(Min=0.260000,Max=0.260000),Z=(Min=1.000000,Max=1.000000))
          Opacity=0.800000
          FadeOutStartTime=2.760000
          FadeOut=True
          FadeInEndTime=0.330000
          FadeIn=True
          MaxParticles=1
+         ForcedLifeTime=True
          ForcedFade=True
          RespawnDeadParticles=False
          Name="Flame"
          StartLocationOffset=(X=0.500000,Z=12.000000)
-         StartLocationPolarRange=(X=(Max=360.000000),Y=(Min=80.000000,Max=100.000000),Z=(Min=4.000000,Max=4.000000))
+         StartLocationPolarRange=(X=(Min=0.000000,Max=360.000000),Y=(Min=80.000000,Max=100.000000),Z=(Min=4.000000,Max=4.000000))
          SpinParticles=True
          StartSizeRange=(X=(Min=10.000000,Max=10.000000),Y=(Min=20.000000,Max=20.000000),Z=(Min=10.000000,Max=10.000000))
          InitialParticlesPerSecond=1000.000000
@@ -25,26 +26,27 @@ defaultproperties
          DrawStyle=PTDS_Brighten
          Texture=Texture'FX_E_T.Flameset_a.flame_a00'
          LifetimeRange=(Min=3.500000,Max=3.500000)
-         StartVelocityRange=(Z=(Min=-0.400000,Max=-0.400000))
+         StartVelocityRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=-0.400000,Max=-0.400000))
      End Object
      Emitters(0)=SpriteEmitter'SpriteEmitter14'
      Begin Object Class=SpriteEmitter Name=SpriteEmitter5
          Acceleration=(Z=100.000000)
-         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
          ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
-         ColorMultiplierRange=(Y=(Min=0.503000,Max=0.503000),Z=(Min=0.720000,Max=0.720000))
+         ColorMultiplierRange=(X=(Min=1.000000,Max=1.000000),Y=(Min=0.503000,Max=0.503000),Z=(Min=0.720000,Max=0.720000))
          Opacity=0.530000
          FadeOutStartTime=0.350000
          FadeOut=True
          FadeInEndTime=0.133000
          FadeIn=True
          MaxParticles=12
+         ForcedMaxParticles=True
          RespawnDeadParticles=False
          Name="Blue"
          StartLocationOffset=(Z=-2.000000)
          UseSizeScale=True
-         UniformSize=True
          StartSizeRange=(X=(Min=30.000000,Max=30.000000),Y=(Min=30.000000,Max=30.000000),Z=(Min=30.000000,Max=30.000000))
+         UniformSize=True
          InitialParticlesPerSecond=5.000000
          AutomaticInitialSpawning=False
          Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0000'
@@ -59,28 +61,29 @@ defaultproperties
      Emitters(1)=SpriteEmitter'SpriteEmitter5'
      Begin Object Class=SpriteEmitter Name=SpriteEmitter15
          UseColorScale=True
-         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
          ColorScale(1)=(RelativeTime=0.625000,Color=(B=128,G=128,R=128,A=255))
          ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
          ColorScaleRepeats=30.000000
-         ColorMultiplierRange=(X=(Min=0.680000,Max=0.680000),Z=(Min=0.680000,Max=0.680000))
+         ColorMultiplierRange=(X=(Min=0.680000,Max=0.680000),Y=(Min=1.000000,Max=1.000000),Z=(Min=0.680000,Max=0.680000))
          Opacity=0.600000
          FadeOutStartTime=2.400000
          FadeOut=True
          FadeInEndTime=0.600000
          FadeIn=True
          MaxParticles=1
+         ForcedLifeTime=True
          ForcedFade=True
          RespawnDeadParticles=False
          Name="Core"
          StartLocationOffset=(X=0.500000)
          UseSizeScale=True
          UseRegularSizeScale=False
-         UniformSize=True
          SizeScale(0)=(RelativeTime=0.510000,RelativeSize=0.950000)
          SizeScale(1)=(RelativeTime=1.000000,RelativeSize=1.000000)
          SizeScaleRepeats=30.000000
          StartSizeRange=(X=(Min=8.000000,Max=8.000000),Y=(Min=8.000000,Max=8.000000),Z=(Min=8.000000,Max=8.000000))
+         UniformSize=True
          InitialParticlesPerSecond=1000.000000
          AutomaticInitialSpawning=False
          DrawStyle=PTDS_Darken
@@ -92,23 +95,24 @@ defaultproperties
      End Object
      Emitters(2)=SpriteEmitter'SpriteEmitter15'
      Begin Object Class=SpriteEmitter Name=SpriteEmitter16
-         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
          ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
-         ColorMultiplierRange=(X=(Min=0.503000,Max=0.503000),Y=(Min=0.503000,Max=0.503000))
+         ColorMultiplierRange=(X=(Min=0.503000,Max=0.503000),Y=(Min=0.503000,Max=0.503000),Z=(Min=1.000000,Max=1.000000))
          Opacity=0.400000
          FadeOutStartTime=2.400000
          FadeOut=True
          FadeInEndTime=0.600000
          FadeIn=True
          MaxParticles=1
+         ForcedLifeTime=True
          ForcedFade=True
          RespawnDeadParticles=False
          Name="Char"
          StartLocationOffset=(X=0.500000,Z=-0.500000)
          SpinParticles=True
-         StartSpinRange=(X=(Min=0.500000,Max=0.500000))
-         UniformSize=True
+         StartSpinRange=(X=(Min=0.500000,Max=0.500000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
          StartSizeRange=(X=(Min=4.000000,Max=4.000000),Y=(Min=4.000000,Max=4.000000),Z=(Min=4.000000,Max=4.000000))
+         UniformSize=True
          InitialParticlesPerSecond=1000.000000
          AutomaticInitialSpawning=False
          Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0080'
@@ -121,8 +125,8 @@ defaultproperties
      Emitters(3)=SpriteEmitter'SpriteEmitter16'
      AutoReplay=True
      bRotEmitter=True
-     RotPerSecond=(Yaw=100000)
-     Physics=PHYS_Trailer
+     RotPerSecond=(Pitch=0,Yaw=100000,Roll=0)
+     Physics=10
      bUseDynamicLights=False
      bNoDelete=False
      bTrailerPrePivot=True

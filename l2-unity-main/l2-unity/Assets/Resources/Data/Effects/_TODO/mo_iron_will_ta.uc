@@ -1,0 +1,114 @@
+class mo_iron_will_ta extends Emitter;
+
+defaultproperties
+{
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter6
+         UseDirectionAs=PTDU_Forward
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=0,G=0,R=0,A=255))
+         ColorScale(1)=(RelativeTime=0.064286,Color=(B=119,G=184,R=255,A=255))
+         ColorScale(2)=(RelativeTime=0.171429,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(3)=(RelativeTime=0.414286,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(4)=(RelativeTime=0.607143,Color=(B=46,G=46,R=109,A=255))
+         ColorScale(5)=(RelativeTime=1.000000,Color=(B=0,G=0,R=0,A=255))
+         Opacity=0.400000
+         FadeOutStartTime=0.700000
+         MaxParticles=5
+         RespawnDeadParticles=False
+         Name="EndFlowIn"
+         StartLocationOffset=(Z=30.000000)
+         StartLocationRange=(X=(Min=-5.000000,Max=5.000000),Y=(Min=-5.000000,Max=5.000000),Z=(Min=0.000000,Max=0.000000))
+         SpinParticles=True
+         SpinCCWorCW=(Y=0.500000,Z=0.500000)
+         SpinsPerSecondRange=(X=(Min=3.000000,Max=4.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         StartSpinRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=1.000000,RelativeSize=1.200000)
+         StartSizeRange=(X=(Min=25.000000,Max=35.000000),Y=(Min=25.000000,Max=35.000000),Z=(Min=25.000000,Max=35.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=30.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0063'
+         TextureUSubdivisions=4
+         TextureVSubdivisions=4
+         SubdivisionStart=12
+         SubdivisionEnd=13
+         UseRandomSubdivision=True
+         LifetimeRange=(Min=0.400000,Max=0.700000)
+         StartVelocityRange=(X=(Min=-0.150000,Max=0.150000),Y=(Min=-0.150000,Max=0.150000),Z=(Min=1.000000,Max=1.000000))
+     End Object
+     Emitters(0)=SpriteEmitter'SpriteEmitter6'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter10
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.596429,Color=(B=128,G=128,R=128,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScaleRepeats=8.000000
+         Opacity=0.600000
+         FadeOutStartTime=0.140000
+         FadeOut=True
+         MaxParticles=12
+         WeatherSoundCheck=True
+         RespawnDeadParticles=False
+         Name="EndTick"
+         StartLocationOffset=(Z=25.000000)
+         StartLocationShape=PTLS_Polar
+         StartLocationPolarRange=(X=(Min=0.000000,Max=360.000000),Y=(Min=90.000000,Max=90.000000),Z=(Min=14.000000,Max=14.000000))
+         SpinParticles=True
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=1.000000,RelativeSize=0.100000)
+         StartSizeRange=(X=(Min=1.000000,Max=3.000000),Y=(Min=1.000000,Max=3.000000),Z=(Min=1.000000,Max=3.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=10000.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0063'
+         TextureUSubdivisions=4
+         TextureVSubdivisions=4
+         SubdivisionEnd=1
+         UseRandomSubdivision=True
+         LifetimeRange=(Min=0.500000,Max=1.000000)
+         StartVelocityRange=(X=(Min=350.000000,Max=350.000000),Y=(Min=350.000000,Max=350.000000),Z=(Min=-50.000000,Max=50.000000))
+         VelocityLossRange=(X=(Min=4.000000,Max=4.000000),Y=(Min=4.000000,Max=4.000000),Z=(Min=4.000000,Max=4.000000))
+         GetVelocityDirectionFrom=PTVD_OwnerAndStartPosition
+     End Object
+     Emitters(1)=SpriteEmitter'SpriteEmitter10'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter11
+         UseDirectionAs=PTDU_Normal
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorMultiplierRange=(X=(Min=0.700000,Max=0.700000),Y=(Min=0.700000,Max=0.700000),Z=(Min=1.000000,Max=1.000000))
+         FadeOutStartTime=0.060000
+         FadeOut=True
+         MaxParticles=2
+         WeatherSoundCheck=True
+         RespawnDeadParticles=False
+         Name="EndRing"
+         StartLocationOffset=(Z=25.000000)
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.090000,RelativeSize=1.700000)
+         SizeScale(1)=(RelativeTime=0.220000,RelativeSize=2.000000)
+         SizeScale(2)=(RelativeTime=0.550000,RelativeSize=2.300000)
+         SizeScale(3)=(RelativeTime=1.000000,RelativeSize=2.500000)
+         StartSizeRange=(X=(Min=20.000000,Max=20.000000),Y=(Min=20.000000,Max=20.000000),Z=(Min=20.000000,Max=20.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=1000.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0063'
+         TextureUSubdivisions=4
+         TextureVSubdivisions=4
+         BlendBetweenSubdivisions=True
+         SubdivisionStart=5
+         SubdivisionEnd=6
+         LifetimeRange=(Min=0.300000,Max=0.300000)
+     End Object
+     Emitters(2)=SpriteEmitter'SpriteEmitter11'
+     bDynamicActorFilterState=True
+     bLightChanged=True
+     bNoDelete=False
+     bSunAffect=True
+     DrawScale=0.200000
+     bDirectional=True
+}

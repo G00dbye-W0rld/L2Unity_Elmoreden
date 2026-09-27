@@ -1,0 +1,165 @@
+class su_concentration_ta extends Emitter;
+
+defaultproperties
+{
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter23
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.532143,Color=(B=128,G=128,R=128,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScaleRepeats=16.000000
+         ColorMultiplierRange=(X=(Min=0.200000,Max=0.200000),Y=(Min=0.400000,Max=0.400000),Z=(Min=1.000000,Max=1.000000))
+         FadeOutStartTime=2.500000
+         FadeInEndTime=1.875000
+         FadeIn=True
+         MaxParticles=1
+         RespawnDeadParticles=False
+         Name="Base"
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.700000,RelativeSize=1.500000)
+         SizeScale(1)=(RelativeTime=0.800000,RelativeSize=4.000000)
+         SizeScale(2)=(RelativeTime=0.810000,RelativeSize=1.000000)
+         SizeScale(3)=(RelativeTime=1.000000,RelativeSize=0.010000)
+         StartSizeRange=(X=(Min=20.000000,Max=20.000000),Y=(Min=20.000000,Max=20.000000),Z=(Min=20.000000,Max=20.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=1000.000000
+         AutomaticInitialSpawning=False
+         DrawStyle=PTDS_Brighten
+         Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0000'
+         TextureUSubdivisions=4
+         TextureVSubdivisions=4
+         SubdivisionStart=7
+         SubdivisionEnd=8
+         UseRandomSubdivision=True
+         LifetimeRange=(Min=1.500000,Max=1.500000)
+     End Object
+     Emitters(0)=SpriteEmitter'SpriteEmitter23'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter24
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.128571,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(2)=(RelativeTime=0.346429,Color=(B=128,G=128,R=128,A=255))
+         ColorScale(3)=(RelativeTime=1.000000,Color=(B=0,G=0,R=0,A=255))
+         ColorMultiplierRange=(X=(Min=0.680000,Max=0.680000),Y=(Min=0.790000,Max=0.790000),Z=(Min=1.000000,Max=1.000000))
+         FadeOutStartTime=0.042000
+         FadeOut=True
+         FadeInEndTime=0.012000
+         FadeIn=True
+         MaxParticles=1
+         RespawnDeadParticles=False
+         Name="Flash"
+         StartSpinRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.070000,RelativeSize=1.500000)
+         SizeScale(1)=(RelativeTime=0.320000,RelativeSize=1.800000)
+         SizeScale(2)=(RelativeTime=1.000000,RelativeSize=2.000000)
+         StartSizeRange=(X=(Min=25.000000,Max=25.000000),Y=(Min=25.000000,Max=25.000000),Z=(Min=25.000000,Max=25.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=1000.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0133'
+         TextureUSubdivisions=2
+         TextureVSubdivisions=2
+         SubdivisionEnd=1
+         UseRandomSubdivision=True
+         LifetimeRange=(Min=0.250000,Max=0.250000)
+         InitialDelayRange=(Min=1.200000,Max=1.200000)
+     End Object
+     Emitters(1)=SpriteEmitter'SpriteEmitter24'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter25
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.128571,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(2)=(RelativeTime=0.346429,Color=(B=128,G=128,R=128,A=255))
+         ColorScale(3)=(RelativeTime=1.000000,Color=(B=0,G=0,R=0,A=255))
+         Opacity=0.800000
+         FadeOutStartTime=0.300000
+         FadeInEndTime=0.240000
+         FadeIn=True
+         RespawnDeadParticles=False
+         Name="Needle"
+         SpinParticles=True
+         StartSpinRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=1.000000,RelativeSize=0.300000)
+         StartSizeRange=(X=(Min=40.000000,Max=40.000000),Y=(Min=40.000000,Max=40.000000),Z=(Min=40.000000,Max=40.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=10.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0133'
+         TextureUSubdivisions=2
+         TextureVSubdivisions=2
+         SubdivisionStart=3
+         SubdivisionEnd=4
+         UseRandomSubdivision=True
+         LifetimeRange=(Min=0.300000,Max=0.300000)
+     End Object
+     Emitters(2)=SpriteEmitter'SpriteEmitter25'
+     Begin Object Class=MeshEmitter Name=MeshEmitter6
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.Monster.wispray00'
+         UseMeshBlendMode=False
+         RenderTwoSided=True
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.482143,Color=(B=176,G=176,R=176,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScaleRepeats=24.000000
+         ColorMultiplierRange=(X=(Min=0.300000,Max=0.300000),Y=(Min=0.600000,Max=0.600000),Z=(Min=1.000000,Max=1.000000))
+         Opacity=0.200000
+         FadeOutStartTime=1.128000
+         FadeOut=True
+         FadeInEndTime=0.720000
+         FadeIn=True
+         RespawnDeadParticles=False
+         Name="RayMesh"
+         SpinParticles=True
+         SpinsPerSecondRange=(X=(Min=-0.200000,Max=0.200000),Y=(Min=-0.200000,Max=0.200000),Z=(Min=-0.200000,Max=0.200000))
+         StartSpinRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=1.000000),Z=(Min=0.000000,Max=1.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.890000,RelativeSize=1.300000)
+         SizeScale(1)=(RelativeTime=1.000000,RelativeSize=1.800000)
+         StartSizeRange=(X=(Min=0.250000,Max=0.250000),Y=(Min=0.250000,Max=0.250000),Z=(Min=0.250000,Max=0.250000))
+         InitialParticlesPerSecond=200.000000
+         AutomaticInitialSpawning=False
+         LifetimeRange=(Min=1.200000,Max=1.200000)
+     End Object
+     Emitters(3)=MeshEmitter'MeshEmitter6'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter26
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.521429,Color=(B=170,G=170,R=170,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScaleRepeats=8.000000
+         FadeOutStartTime=0.100000
+         FadeOut=True
+         MaxParticles=20
+         RespawnDeadParticles=False
+         Name="Ticks"
+         StartLocationShape=PTLS_Sphere
+         SphereRadiusRange=(Min=10.000000,Max=10.000000)
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=1.000000,RelativeSize=1.200000)
+         StartSizeRange=(X=(Min=3.000000,Max=5.000000),Y=(Min=3.000000,Max=5.000000),Z=(Min=3.000000,Max=5.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=1000.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0005'
+         TextureUSubdivisions=4
+         TextureVSubdivisions=4
+         SubdivisionStart=6
+         SubdivisionEnd=10
+         UseRandomSubdivision=True
+         LifetimeRange=(Min=0.500000,Max=0.800000)
+         InitialDelayRange=(Min=1.200000,Max=1.200000)
+         StartVelocityRange=(X=(Min=250.000000,Max=250.000000),Y=(Min=250.000000,Max=250.000000),Z=(Min=250.000000,Max=250.000000))
+         VelocityLossRange=(X=(Min=10.000000,Max=10.000000),Y=(Min=10.000000,Max=10.000000),Z=(Min=10.000000,Max=10.000000))
+         GetVelocityDirectionFrom=PTVD_OwnerAndStartPosition
+     End Object
+     Emitters(4)=SpriteEmitter'SpriteEmitter26'
+     bNoDelete=False
+     Rotation=(Pitch=0,Yaw=-65576,Roll=0)
+     DrawScale=0.100000
+     bDirectional=True
+}

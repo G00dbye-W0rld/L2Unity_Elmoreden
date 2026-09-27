@@ -1,0 +1,146 @@
+class el_ice_dagger_pr extends Emitter;
+
+defaultproperties
+{
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter4
+         Acceleration=(Z=30.000000)
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         FadeOutStartTime=0.490000
+         FadeOut=True
+         FadeInEndTime=0.160000
+         FadeIn=True
+         CoordinateSystem=PTCS_Independent
+         MaxParticles=19
+         ForcedMaxParticles=True
+         RespawnDeadParticles=False
+         Name="Steam"
+         StartLocationOffset=(X=5.000000)
+         StartLocationRange=(X=(Min=-10.000000,Max=10.000000),Y=(Min=-2.000000,Max=2.000000),Z=(Min=-2.000000,Max=2.000000))
+         StartLocationPolarRange=(X=(Min=0.000000,Max=360.000000),Y=(Min=90.000000,Max=90.000000),Z=(Min=18.000000,Max=18.000000))
+         SpinParticles=True
+         SpinsPerSecondRange=(X=(Min=0.000000,Max=0.200000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         StartSpinRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=1.000000,RelativeSize=1.500000)
+         StartSizeRange=(X=(Min=8.000000,Max=10.000000),Y=(Min=8.000000,Max=10.000000),Z=(Min=8.000000,Max=10.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=6.000000
+         AutomaticInitialSpawning=False
+         DrawStyle=PTDS_AlphaBlend
+         Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0071'
+         TextureUSubdivisions=4
+         TextureVSubdivisions=4
+         SubdivisionStart=12
+         SubdivisionEnd=15
+         UseRandomSubdivision=True
+         LifetimeRange=(Min=1.000000,Max=1.200000)
+         StartVelocityRange=(X=(Min=-10.000000,Max=10.000000),Y=(Min=-10.000000,Max=10.000000),Z=(Min=-10.000000,Max=10.000000))
+     End Object
+     Emitters(0)=SpriteEmitter'SpriteEmitter4'
+     Begin Object Class=MeshEmitter Name=MeshEmitter3
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.water.watericedagger00'
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         FadeOutStartTime=3.400000
+         MaxParticles=1
+         ForcedLifeTime=True
+         ForcedFade=True
+         RespawnDeadParticles=False
+         Name="Icedagger"
+         SpinParticles=True
+         SpinCCWorCW=(X=0.500000)
+         SpinsPerSecondRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.010000,Max=0.010000))
+         StartSpinRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.500000,Max=0.500000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=0.050000)
+         SizeScale(1)=(RelativeTime=0.260000,RelativeSize=0.200000)
+         SizeScale(2)=(RelativeTime=0.270000,RelativeSize=0.350000)
+         SizeScale(3)=(RelativeTime=0.310000,RelativeSize=0.400000)
+         SizeScale(4)=(RelativeTime=0.320000,RelativeSize=0.550000)
+         SizeScale(5)=(RelativeTime=0.640000,RelativeSize=0.600000)
+         SizeScale(6)=(RelativeTime=0.650000,RelativeSize=0.820000)
+         SizeScale(7)=(RelativeTime=0.680000,RelativeSize=0.850000)
+         SizeScale(8)=(RelativeTime=0.690000,RelativeSize=1.000000)
+         SizeScale(9)=(RelativeTime=0.790000,RelativeSize=1.100000)
+         SizeScale(10)=(RelativeTime=0.800000,RelativeSize=1.300000)
+         SizeScale(11)=(RelativeTime=1.000000,RelativeSize=1.350000)
+         StartSizeRange=(X=(Min=0.120000,Max=0.120000),Y=(Min=0.120000,Max=0.120000),Z=(Min=0.120000,Max=0.120000))
+         InitialParticlesPerSecond=1000.000000
+         AutomaticInitialSpawning=False
+         DrawStyle=PTDS_Regular
+         LifetimeRange=(Min=3.400000,Max=3.400000)
+     End Object
+     Emitters(1)=MeshEmitter'MeshEmitter3'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter5
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorMultiplierRange=(X=(Min=0.500000,Max=1.000000),Y=(Min=0.500000,Max=1.000000),Z=(Min=0.600000,Max=1.000000))
+         FadeOutStartTime=0.910000
+         FadeOut=True
+         CoordinateSystem=PTCS_Independent
+         MaxParticles=30
+         ForcedMaxParticles=True
+         RespawnDeadParticles=False
+         Name="Kira"
+         StartLocationOffset=(X=5.000000)
+         StartLocationRange=(X=(Min=-18.000000,Max=18.000000),Y=(Min=-7.000000,Max=7.000000),Z=(Min=-7.000000,Max=7.000000))
+         SpinParticles=True
+         StartSpinRange=(X=(Min=0.030000,Max=0.030000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.120000,RelativeSize=3.000000)
+         SizeScale(1)=(RelativeTime=0.500000,RelativeSize=1.000000)
+         SizeScale(2)=(RelativeTime=0.790000,RelativeSize=0.100000)
+         SizeScale(3)=(RelativeTime=1.000000,RelativeSize=0.010000)
+         SizeScaleRepeats=1.000000
+         StartSizeRange=(X=(Min=1.500000,Max=2.500000),Y=(Min=1.500000,Max=2.500000),Z=(Min=1.500000,Max=2.500000))
+         UniformSize=True
+         InitialParticlesPerSecond=17.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0085'
+         TextureUSubdivisions=2
+         TextureVSubdivisions=2
+         BlendBetweenSubdivisions=True
+         SubdivisionEnd=2
+         LifetimeRange=(Min=0.600000,Max=0.600000)
+         InitialDelayRange=(Min=0.900000,Max=0.900000)
+     End Object
+     Emitters(2)=SpriteEmitter'SpriteEmitter5'
+     Begin Object Class=MeshEmitter Name=MeshEmitter4
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.Skill_Power.skill_power04'
+         UseMeshBlendMode=False
+         RenderTwoSided=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorMultiplierRange=(X=(Min=0.600000,Max=0.600000),Y=(Min=0.800000,Max=0.800000),Z=(Min=1.000000,Max=1.000000))
+         Opacity=0.380000
+         FadeOutStartTime=0.120000
+         FadeOut=True
+         FadeInEndTime=0.078000
+         FadeIn=True
+         MaxParticles=15
+         ForcedMaxParticles=True
+         RespawnDeadParticles=False
+         Name="Ring"
+         StartLocationOffset=(X=5.000000)
+         StartLocationRange=(X=(Min=-10.000000,Max=10.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         SpinParticles=True
+         SpinCCWorCW=(X=0.500000,Y=0.500000)
+         SpinsPerSecondRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=3.000000,Max=3.000000))
+         UseSizeScale=True
+         StartSizeRange=(X=(Min=0.070000,Max=0.100000),Y=(Min=0.070000,Max=0.100000),Z=(Min=0.070000,Max=0.100000))
+         UniformSize=True
+         InitialParticlesPerSecond=5.000000
+         AutomaticInitialSpawning=False
+         LifetimeRange=(Min=0.700000,Max=0.700000)
+     End Object
+     Emitters(3)=MeshEmitter'MeshEmitter4'
+     bRotEmitter=True
+     RotPerSecond=(Pitch=0,Yaw=0,Roll=30000)
+     bNoDelete=False
+     DrawScale=0.020000
+     bDirectional=True
+}

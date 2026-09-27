@@ -1,0 +1,187 @@
+class s_u513_a extends Emitter;
+
+defaultproperties
+{
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter14
+         Acceleration=(X=5.000000)
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorMultiplierRange=(X=(Min=0.880000,Max=0.880000),Y=(Min=1.000000,Max=1.000000),Z=(Min=1.000000,Max=1.000000))
+         FadeOutStartTime=0.352000
+         FadeOut=True
+         FadeInEndTime=0.328000
+         FadeIn=True
+         MaxParticles=40
+         ForcedMaxParticles=True
+         RespawnDeadParticles=False
+         Name="black_smoke"
+         StartLocationOffset=(X=-3.000000)
+         StartLocationRange=(X=(Min=0.000000,Max=10.000000),Y=(Min=-1.000000,Max=1.000000),Z=(Min=-1.000000,Max=1.000000))
+         SpinParticles=True
+         StartSpinRange=(X=(Min=-1.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=1.000000)
+         SizeScale(1)=(RelativeTime=1.000000,RelativeSize=0.700000)
+         StartSizeRange=(X=(Min=5.000000,Max=10.000000),Y=(Min=5.000000,Max=10.000000),Z=(Min=5.000000,Max=10.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=20.000000
+         AutomaticInitialSpawning=False
+         DrawStyle=PTDS_Darken
+         Texture=Texture'LineageEffectsTextures2.balakas.fx_m_t2011'
+         TextureUSubdivisions=2
+         TextureVSubdivisions=2
+         SubdivisionEnd=3
+         UseRandomSubdivision=True
+         LifetimeRange=(Min=0.800000,Max=0.800000)
+         StartVelocityRange=(X=(Min=2.000000,Max=5.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+     End Object
+     Emitters(0)=SpriteEmitter'SpriteEmitter14'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter15
+         Acceleration=(X=5.000000)
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorMultiplierRange=(X=(Min=1.000000,Max=1.000000),Y=(Min=0.578000,Max=0.578000),Z=(Min=0.397000,Max=0.397000))
+         Opacity=0.190000
+         FadeOutStartTime=0.352000
+         FadeOut=True
+         FadeInEndTime=0.328000
+         FadeIn=True
+         MaxParticles=30
+         ForcedMaxParticles=True
+         RespawnDeadParticles=False
+         Name="red_smoke"
+         StartLocationOffset=(X=-3.000000)
+         StartLocationRange=(X=(Min=0.000000,Max=10.000000),Y=(Min=-1.000000,Max=1.000000),Z=(Min=-1.000000,Max=1.000000))
+         SpinParticles=True
+         StartSpinRange=(X=(Min=-1.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=1.000000)
+         SizeScale(1)=(RelativeTime=1.000000,RelativeSize=0.700000)
+         StartSizeRange=(X=(Min=6.000000,Max=14.000000),Y=(Min=6.000000,Max=14.000000),Z=(Min=6.000000,Max=14.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=20.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures2.balakas.fx_m_t2011'
+         TextureUSubdivisions=2
+         TextureVSubdivisions=2
+         SubdivisionEnd=3
+         UseRandomSubdivision=True
+         LifetimeRange=(Min=0.800000,Max=0.800000)
+         StartVelocityRange=(X=(Min=2.000000,Max=5.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+     End Object
+     Emitters(1)=SpriteEmitter'SpriteEmitter15'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter18
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         Opacity=0.600000
+         FadeOutStartTime=0.200000
+         FadeOut=True
+         FadeInEndTime=0.100000
+         FadeIn=True
+         MaxParticles=12
+         ForcedLifeTime=True
+         ForcedFade=True
+         RespawnDeadParticles=False
+         Name="Dust"
+         StartLocationRange=(X=(Min=-3.000000,Max=3.000000),Y=(Min=-3.000000,Max=3.000000),Z=(Min=-3.000000,Max=3.000000))
+         SpinParticles=True
+         SpinsPerSecondRange=(X=(Min=0.050000,Max=0.200000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         StartSpinRange=(X=(Min=-1.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         StartSizeRange=(X=(Min=2.000000,Max=4.000000),Y=(Min=2.000000,Max=4.000000),Z=(Min=2.000000,Max=4.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=15.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures2.balakas.fx_m_t1037'
+         TextureUSubdivisions=2
+         TextureVSubdivisions=2
+         SubdivisionEnd=3
+         UseRandomSubdivision=True
+         LifetimeRange=(Min=2.000000,Max=2.000000)
+         StartVelocityRange=(X=(Min=1.000000,Max=2.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+     End Object
+     Emitters(2)=SpriteEmitter'SpriteEmitter18'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter19
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.482143,Color=(B=178,G=178,R=178,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScaleRepeats=20.000000
+         Opacity=0.400000
+         FadeOutStartTime=2.000000
+         FadeInEndTime=1.600000
+         FadeIn=True
+         MaxParticles=2
+         ForcedLifeTime=True
+         ForcedFade=True
+         RespawnDeadParticles=False
+         Name="Light"
+         SpinParticles=True
+         SpinsPerSecondRange=(X=(Min=0.010000,Max=0.050000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         StartSpinRange=(X=(Min=-1.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=0.200000)
+         SizeScale(1)=(RelativeTime=1.000000,RelativeSize=1.500000)
+         StartSizeRange=(X=(Min=8.000000,Max=8.000000),Y=(Min=8.000000,Max=8.000000),Z=(Min=8.000000,Max=8.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=10000.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0105'
+         LifetimeRange=(Min=2.000000,Max=2.000000)
+     End Object
+     Emitters(3)=SpriteEmitter'SpriteEmitter19'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter20
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         FadeOutStartTime=0.300000
+         FadeInEndTime=0.120000
+         FadeIn=True
+         MaxParticles=18
+         ForcedMaxParticles=True
+         RespawnDeadParticles=False
+         Name="in"
+         SpinParticles=True
+         StartSpinRange=(X=(Min=-1.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=1.000000)
+         SizeScale(1)=(RelativeTime=1.000000,RelativeSize=0.000000)
+         StartSizeRange=(X=(Min=15.000000,Max=15.000000),Y=(Min=15.000000,Max=15.000000),Z=(Min=15.000000,Max=15.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=10.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0064'
+         LifetimeRange=(Min=0.300000,Max=0.300000)
+     End Object
+     Emitters(4)=SpriteEmitter'SpriteEmitter20'
+     Begin Object Class=MeshEmitter Name=MeshEmitter8
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.Monster.wispray00'
+         UseMeshBlendMode=False
+         RenderTwoSided=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         Opacity=0.100000
+         FadeOutStartTime=2.000000
+         FadeInEndTime=1.740000
+         FadeIn=True
+         MaxParticles=5
+         ForcedLifeTime=True
+         ForcedFade=True
+         RespawnDeadParticles=False
+         Name="Beam"
+         SpinParticles=True
+         SpinsPerSecondRange=(X=(Min=-0.020000,Max=0.020000),Y=(Min=-0.020000,Max=0.020000),Z=(Min=-0.020000,Max=0.020000))
+         StartSpinRange=(X=(Min=-1.000000,Max=1.000000),Y=(Min=-1.000000,Max=1.000000),Z=(Min=-1.000000,Max=1.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=0.200000)
+         SizeScale(1)=(RelativeTime=1.000000,RelativeSize=1.000000)
+         StartSizeRange=(X=(Min=0.200000,Max=0.200000),Y=(Min=0.200000,Max=0.200000),Z=(Min=0.200000,Max=0.200000))
+         InitialParticlesPerSecond=10000.000000
+         AutomaticInitialSpawning=False
+         LifetimeRange=(Min=2.000000,Max=2.000000)
+     End Object
+     Emitters(5)=MeshEmitter'MeshEmitter8'
+     bNoDelete=False
+     bDirectional=True
+}

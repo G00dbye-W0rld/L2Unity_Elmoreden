@@ -36,3 +36,26 @@ une enumeration du client.
 - `ChannelingAction`, `UnionTargetAction` et les `*CameraEffectInfoClass` sont
   reconnues mais pas versees dans les trois phases que lit le client. Le
   programme les compte, il ne les perd pas.
+
+## Recettes d'emetteurs
+
+`GenRecipes` ecrit une recette `.uc` par classe d'effet, dans la syntaxe que lit
+`L2ParticleEmitterParser`. Meme invocation, avec le paquet d'effets en entree :
+
+    java -cp ".;D:/Jeux/MAP_L2Unity/tools/L2pe-bin/L2pe.jar" GenRecipes \
+         "<client>/system/lineageeffect.u" <dossier de sortie> <liste de classes|->
+
+**Interlude d'abord, Orfen en complement.** Des 464 classes que reclament les
+definitions, 344 sont dans le client Interlude et 446 dans Orfen (les 344 sont un
+sous-ensemble). Les 26 recettes faites a la main venaient d'Interlude : preuve
+par les noms d'objets de `el_ice_bolt_ca`, que seule la version Interlude
+reproduit. On genere donc depuis Interlude, puis on complete depuis Orfen.
+
+**Les recettes generees sont plus justes que celles faites a la main.** Le
+producteur d'origine omettait les valeurs par defaut, or `Range` vaut zero par
+defaut cote parseur : un `ColorMultiplierRange` sans sa composante Z eteint le
+canal bleu. 28 des 42 lignes des anciennes recettes etaient dans ce cas. Les
+recettes generees portent toutes les composantes, telles que le paquet les donne.
+
+Outils de diagnostic ajoutes : `Types` (types d'emetteurs par classe),
+`VmRefs` (maillages animes references), `Cls2` (proprietes d'une classe).

@@ -1,0 +1,117 @@
+class mb_valakas_breath_ta extends Emitter;
+
+defaultproperties
+{
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter26
+         UseDirectionAs=PTDU_Up
+         Acceleration=(Z=5.468161)
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.992857,Color=(B=128,G=128,R=128,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=0,G=0,R=0,A=255))
+         FadeOutStartTime=0.396000
+         FadeOut=True
+         FadeInEndTime=0.252000
+         FadeIn=True
+         MaxParticles=30
+         RespawnDeadParticles=False
+         Name="Fire"
+         StartLocationOffset=(Z=30.000000)
+         StartLocationRange=(X=(Min=-6.000000,Max=6.000000),Y=(Min=-6.000000,Max=6.000000),Z=(Min=-10.000000,Max=10.000000))
+         SpinParticles=True
+         StartSpinRange=(X=(Min=-0.020000,Max=0.020000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=1.700000)
+         SizeScale(1)=(RelativeTime=0.440000,RelativeSize=1.400000)
+         SizeScale(2)=(RelativeTime=1.000000,RelativeSize=0.800000)
+         StartSizeRange=(X=(Min=10.000000,Max=21.664000),Y=(Min=18.254999,Max=26.778000),Z=(Min=10.000000,Max=21.664000))
+         InitialParticlesPerSecond=5.000000
+         AutomaticInitialSpawning=False
+         DrawStyle=PTDS_AlphaBlend
+         Texture=Texture'LineageEffectsTextures.Fire.fx_m_t1045'
+         TextureUSubdivisions=1
+         TextureVSubdivisions=1
+         LifetimeRange=(Min=0.700000,Max=1.000000)
+         StartVelocityRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=7.680000,Max=10.022000))
+         MaxAbsVelocity=(X=6400.000000,Y=10000.000000,Z=8000.000000)
+         VelocityLossRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.400000,Max=0.400000))
+         WarmupTicksPerSecond=3.000000
+         RelativeWarmupTime=1.000000
+     End Object
+     Emitters(0)=SpriteEmitter'SpriteEmitter26'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter10
+         UseDirectionAs=PTDU_Up
+         Acceleration=(Z=10.000000)
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=199,G=118,R=80,A=255))
+         ColorMultiplierRange=(X=(Min=1.000000,Max=1.000000),Y=(Min=0.573000,Max=0.573000),Z=(Min=0.224000,Max=0.224000))
+         Opacity=0.800000
+         FadeOutStartTime=0.880000
+         FadeOut=True
+         FadeInEndTime=0.660000
+         FadeIn=True
+         MaxParticles=18
+         RespawnDeadParticles=False
+         Name="Fire2"
+         StartLocationOffset=(Z=30.000000)
+         StartLocationRange=(X=(Min=-8.000000,Max=8.000000),Y=(Min=-8.000000,Max=8.000000),Z=(Min=-9.792000,Max=9.792000))
+         SpinParticles=True
+         StartSpinRange=(X=(Min=-0.020000,Max=0.020000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=1.700000)
+         SizeScale(1)=(RelativeTime=0.440000,RelativeSize=1.400000)
+         SizeScale(2)=(RelativeTime=1.000000,RelativeSize=0.800000)
+         StartSizeRange=(X=(Min=32.175999,Max=32.175999),Y=(Min=32.175999,Max=32.175999),Z=(Min=32.175999,Max=32.175999))
+         InitialParticlesPerSecond=3.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Particles2.fx_m_t1002'
+         TextureUSubdivisions=2
+         TextureVSubdivisions=4
+         BlendBetweenSubdivisions=True
+         SubdivisionEnd=4
+         LifetimeRange=(Min=1.000000,Max=2.000000)
+         StartVelocityRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=7.680000,Max=10.022000))
+         MaxAbsVelocity=(X=6400.000000,Y=10000.000000,Z=8000.000000)
+         VelocityLossRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.400000,Max=0.400000))
+         WarmupTicksPerSecond=3.000000
+         RelativeWarmupTime=1.000000
+     End Object
+     Emitters(1)=SpriteEmitter'SpriteEmitter10'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter24
+         Acceleration=(Z=20.000000)
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=199,G=118,R=80,A=255))
+         FadeOutStartTime=0.200000
+         FadeOut=True
+         CoordinateSystem=PTCS_Spray
+         MaxParticles=30
+         RespawnDeadParticles=False
+         Name="Fire3"
+         StartLocationOffset=(Z=30.000000)
+         StartLocationRange=(X=(Min=-3.041000,Max=3.041000),Y=(Min=-3.041000,Max=3.041000),Z=(Min=-9.792000,Max=9.792000))
+         SpinParticles=True
+         SpinsPerSecondRange=(X=(Min=0.100000,Max=0.300000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         StartSpinRange=(X=(Min=-0.020000,Max=0.020000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=1.700000)
+         SizeScale(1)=(RelativeTime=0.440000,RelativeSize=1.400000)
+         SizeScale(2)=(RelativeTime=1.000000,RelativeSize=0.800000)
+         StartSizeRange=(X=(Min=10.000000,Max=18.000000),Y=(Min=10.000000,Max=18.000000),Z=(Min=10.000000,Max=18.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=5.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures2.balakas.fx_m_t1037'
+         TextureUSubdivisions=2
+         TextureVSubdivisions=2
+         SubdivisionEnd=4
+         UseRandomSubdivision=True
+         LifetimeRange=(Min=0.701000,Max=1.000000)
+         StartVelocityRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=50.000000,Max=80.000000))
+         MaxAbsVelocity=(X=6400.000000,Y=10000.000000,Z=8000.000000)
+         VelocityLossRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=1.000000,Max=1.000000))
+         WarmupTicksPerSecond=3.000000
+         RelativeWarmupTime=1.000000
+     End Object
+     Emitters(2)=SpriteEmitter'SpriteEmitter24'
+     bNoDelete=False
+}

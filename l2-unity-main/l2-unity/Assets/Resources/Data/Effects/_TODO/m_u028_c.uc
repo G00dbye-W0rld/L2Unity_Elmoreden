@@ -3,7 +3,7 @@ class m_u028_c extends Emitter;
 defaultproperties
 {
      Begin Object Class=SpriteEmitter Name=SpriteEmitter21
-         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
          ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
          Opacity=0.600000
          FadeOutStartTime=0.280000
@@ -14,18 +14,18 @@ defaultproperties
          RespawnDeadParticles=False
          Name="Base"
          StartLocationOffset=(Z=10.000000)
-         StartLocationRange=(X=(Min=-7.000000,Max=7.000000),Y=(Min=-7.000000,Max=7.000000))
-         StartLocationPolarRange=(X=(Max=360.000000),Y=(Min=90.000000,Max=90.000000),Z=(Min=5.000000,Max=5.000000))
+         StartLocationRange=(X=(Min=-7.000000,Max=7.000000),Y=(Min=-7.000000,Max=7.000000),Z=(Min=0.000000,Max=0.000000))
+         StartLocationPolarRange=(X=(Min=0.000000,Max=360.000000),Y=(Min=90.000000,Max=90.000000),Z=(Min=5.000000,Max=5.000000))
          SpinParticles=True
-         SpinsPerSecondRange=(X=(Min=2.000000,Max=2.000000))
-         StartSpinRange=(X=(Max=1.000000))
+         SpinsPerSecondRange=(X=(Min=2.000000,Max=2.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         StartSpinRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
          UseSizeScale=True
          UseRegularSizeScale=False
-         UniformSize=True
          SizeScale(0)=(RelativeTime=0.100000,RelativeSize=1.000000)
          SizeScale(1)=(RelativeTime=0.410000,RelativeSize=0.950000)
          SizeScale(2)=(RelativeTime=1.000000,RelativeSize=0.300000)
          StartSizeRange=(X=(Min=15.000000,Max=15.000000),Y=(Min=15.000000,Max=15.000000),Z=(Min=15.000000,Max=15.000000))
+         UniformSize=True
          InitialParticlesPerSecond=30.000000
          AutomaticInitialSpawning=False
          DrawStyle=PTDS_AlphaBlend
@@ -37,9 +37,9 @@ defaultproperties
      Begin Object Class=SpriteEmitter Name=SpriteEmitter8
          UseDirectionAs=PTDU_Up
          Acceleration=(Z=-28.000000)
-         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
          ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
-         ColorMultiplierRange=(X=(Min=0.900000,Max=0.900000),Y=(Min=0.900000,Max=0.900000))
+         ColorMultiplierRange=(X=(Min=0.900000,Max=0.900000),Y=(Min=0.900000,Max=0.900000),Z=(Min=1.000000,Max=1.000000))
          Opacity=0.670000
          FadeOutStartTime=0.795000
          FadeOut=True
@@ -49,7 +49,7 @@ defaultproperties
          StartLocationOffset=(Z=30.000000)
          StartLocationRange=(X=(Min=-20.000000,Max=20.000000),Y=(Min=-20.000000,Max=20.000000),Z=(Min=-20.000000,Max=20.000000))
          StartLocationShape=PTLS_Polar
-         StartLocationPolarRange=(X=(Min=90.000000,Max=90.000000),Y=(Max=360.000000),Z=(Min=15.000000,Max=15.000000))
+         StartLocationPolarRange=(X=(Min=90.000000,Max=90.000000),Y=(Min=0.000000,Max=360.000000),Z=(Min=15.000000,Max=15.000000))
          SpinParticles=True
          UseSizeScale=True
          UseRegularSizeScale=False
@@ -62,12 +62,12 @@ defaultproperties
          DrawStyle=PTDS_AlphaBlend
          Texture=Texture'FX_E_T.Flameset_a.flame_a00'
          LifetimeRange=(Min=0.300000,Max=0.900000)
-         StartVelocityRange=(Z=(Min=-0.100000,Max=-0.100000))
+         StartVelocityRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=-0.100000,Max=-0.100000))
      End Object
      Emitters(1)=SpriteEmitter'SpriteEmitter8'
      Begin Object Class=SpriteEmitter Name=SpriteEmitter27
          Acceleration=(Z=500.000000)
-         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
          ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
          Opacity=0.200000
          FadeOutStartTime=0.200000
@@ -75,36 +75,36 @@ defaultproperties
          RespawnDeadParticles=False
          Name="smoke"
          StartLocationOffset=(Z=5.000000)
-         StartLocationRange=(X=(Min=-30.000000,Max=30.000000),Y=(Min=-30.000000,Max=30.000000))
+         StartLocationRange=(X=(Min=-30.000000,Max=30.000000),Y=(Min=-30.000000,Max=30.000000),Z=(Min=0.000000,Max=0.000000))
          StartLocationShape=PTLS_Sphere
          SphereRadiusRange=(Min=8.000000,Max=8.000000)
          StartLocationPolarRange=(X=(Min=90.000000,Max=90.000000),Y=(Min=90.000000,Max=150.000000),Z=(Min=20.000000,Max=20.000000))
          SpinParticles=True
-         SpinsPerSecondRange=(X=(Max=0.100000),Y=(Min=0.050000,Max=0.100000),Z=(Min=0.050000,Max=0.100000))
-         StartSpinRange=(X=(Max=1.000000))
+         SpinsPerSecondRange=(X=(Min=0.000000,Max=0.100000),Y=(Min=0.050000,Max=0.100000),Z=(Min=0.050000,Max=0.100000))
+         StartSpinRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
          UseSizeScale=True
          UseRegularSizeScale=False
-         UniformSize=True
          SizeScale(0)=(RelativeTime=0.200000,RelativeSize=1.000000)
          SizeScale(1)=(RelativeTime=1.000000,RelativeSize=0.300000)
          StartSizeRange=(X=(Min=40.000000,Max=40.000000),Y=(Min=40.000000,Max=40.000000),Z=(Min=40.000000,Max=40.000000))
+         UniformSize=True
          InitialParticlesPerSecond=30.000000
          AutomaticInitialSpawning=False
          Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0083'
          LifetimeRange=(Min=0.500000,Max=0.500000)
          StartVelocityRange=(X=(Min=-6.000000,Max=6.000000),Y=(Min=-6.000000,Max=6.000000),Z=(Min=100.000000,Max=100.000000))
-         VelocityLossRange=(Z=(Min=5.000000,Max=5.000000))
+         VelocityLossRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=5.000000,Max=5.000000))
      End Object
      Emitters(2)=SpriteEmitter'SpriteEmitter27'
      AutoReset=True
-     Physics=PHYS_Trailer
+     Physics=10
      bUseDynamicLights=False
      bNoDelete=False
      bTrailerPrePivot=True
      bAcceptsProjectors=False
-     Tag="Emitter"
+     Tag=Emitter
      DrawScale=0.200000
      bUnlit=False
      bDirectional=True
-     TexModifyInfo=(Color=(B=255,G=255,R=255,A=255),AlphaOp=1,ColorOp=1)
+     TexModifyInfo=(bUseModify=False,bTwoSide=False,bAlphaBlend=False,bDummy=False,Color=(B=255,G=255,R=255,A=255),AlphaOp=1,ColorOp=1)
 }

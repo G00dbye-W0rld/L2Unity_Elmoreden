@@ -1,0 +1,98 @@
+class m_u052_recharge_ca extends Emitter;
+
+defaultproperties
+{
+     Begin Object Class=MeshEmitter Name=MeshEmitter4
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.magiccircle.magiccirclewhite00'
+         UseMeshBlendMode=False
+         RenderTwoSided=True
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=197,G=197,R=197,A=0))
+         ColorScale(1)=(RelativeTime=0.500000,Color=(B=255,G=255,R=255,A=0))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=195,G=195,R=195,A=0))
+         ColorScaleRepeats=40.000000
+         ColorMultiplierRange=(X=(Min=0.300000,Max=0.300000),Y=(Min=0.500000,Max=0.500000),Z=(Min=1.000000,Max=1.000000))
+         Opacity=0.600000
+         FadeOutStartTime=2.960000
+         FadeOut=True
+         FadeInEndTime=0.600000
+         FadeIn=True
+         MaxParticles=2
+         RespawnDeadParticles=False
+         Name="MeshEmitter1"
+         SpinParticles=True
+         SpinCCWorCW=()
+         SpinsPerSecondRange=(X=(Min=0.018000,Max=0.018000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         StartSizeRange=(X=(Min=0.100000,Max=0.100000),Y=(Min=0.100000,Max=0.100000),Z=(Min=0.200000,Max=0.200000))
+         InitialParticlesPerSecond=1000.000000
+         AutomaticInitialSpawning=False
+         DrawStyle=PTDS_Brighten
+     End Object
+     Emitters(0)=MeshEmitter'MeshEmitter4'
+     Begin Object Class=MeshEmitter Name=MeshEmitter6
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.magiccircle.magiccirclewhite01'
+         UseMeshBlendMode=False
+         RenderTwoSided=True
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=120,G=100,R=100,A=0))
+         ColorScale(1)=(RelativeTime=0.500000,Color=(B=210,G=185,R=185,A=0))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=120,G=100,R=100,A=0))
+         ColorScaleRepeats=20.000000
+         ColorMultiplierRange=(X=(Min=0.500000,Max=0.500000),Y=(Min=0.800000,Max=0.800000),Z=(Min=1.000000,Max=1.000000))
+         Opacity=0.600000
+         FadeOutStartTime=2.280000
+         FadeOut=True
+         FadeInEndTime=1.020000
+         FadeIn=True
+         MaxParticles=2
+         RespawnDeadParticles=False
+         Name="MeshEmitter3"
+         StartLocationOffset=(Z=10.000000)
+         SpinParticles=True
+         SpinCCWorCW=()
+         SpinsPerSecondRange=(X=(Min=0.070000,Max=0.070000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         StartSizeRange=(X=(Min=0.110000,Max=0.110000),Y=(Min=0.110000,Max=0.110000),Z=(Min=0.200000,Max=0.200000))
+         InitialParticlesPerSecond=1000.000000
+         AutomaticInitialSpawning=False
+         LifetimeRange=(Min=3.000000,Max=3.000000)
+         InitialDelayRange=(Min=0.200000,Max=0.200000)
+     End Object
+     Emitters(1)=MeshEmitter'MeshEmitter6'
+     Begin Object Class=MeshEmitter Name=MeshEmitter9
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.magiccircle.magiccirclewhite01'
+         UseMeshBlendMode=False
+         RenderTwoSided=True
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=180,G=180,R=180,A=0))
+         ColorScale(1)=(RelativeTime=0.500000,Color=(B=255,G=255,R=255,A=0))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=183,G=183,R=183,A=0))
+         ColorScaleRepeats=40.000000
+         ColorMultiplierRange=(X=(Min=0.400000,Max=0.400000),Y=(Min=0.700000,Max=0.700000),Z=(Min=1.000000,Max=1.000000))
+         Opacity=0.600000
+         FadeOutStartTime=1.980000
+         FadeOut=True
+         FadeInEndTime=0.900000
+         FadeIn=True
+         MaxParticles=2
+         RespawnDeadParticles=False
+         Name="MeshEmitter0"
+         StartLocationOffset=(Z=12.000000)
+         SpinParticles=True
+         SpinCCWorCW=(X=1.000000)
+         SpinsPerSecondRange=(X=(Min=0.040000,Max=0.040000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         StartSizeRange=(X=(Min=0.085000,Max=0.085000),Y=(Min=0.085000,Max=0.085000),Z=(Min=0.300000,Max=0.300000))
+         InitialParticlesPerSecond=1000.000000
+         AutomaticInitialSpawning=False
+         DrawStyle=PTDS_Brighten
+         LifetimeRange=(Min=3.000000,Max=3.000000)
+         InitialDelayRange=(Min=0.500000,Max=0.500000)
+     End Object
+     Emitters(2)=MeshEmitter'MeshEmitter9'
+     bNoDelete=False
+}

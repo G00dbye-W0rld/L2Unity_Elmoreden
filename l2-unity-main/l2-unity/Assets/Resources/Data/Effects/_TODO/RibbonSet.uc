@@ -1,18 +1,14 @@
-//=============================================================================
-// KFTATTRibbon.
-//=============================================================================
-class RibbonSet extends Emitter
-	placeable;
+class RibbonSet extends Emitter;
 
 defaultproperties
 {
      Begin Object Class=RibbonEmitter Name=RibbonEmitter0
          SampleRate=0.002000
          NumPoints=80
-         AccDrop=ADRP_BYTIME_DUAL
+         AccDrop=3
          PointsDropRate=5
          MinPoints=20
-         GetPointAxisFrom=PAXIS_BoneNormal
+         GetPointAxisFrom=3
          bUseInterpolation=True
          ScaleRatio=1.500000
          bDecayPointsWhenStopped=True

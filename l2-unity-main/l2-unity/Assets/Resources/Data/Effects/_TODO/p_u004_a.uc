@@ -4,10 +4,10 @@ defaultproperties
 {
      Begin Object Class=SpriteEmitter Name=SpriteEmitter9
          UseDirectionAs=PTDU_Up
-         ProjectionNormal=(X=1.000000,Z=0.000000)
-         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ProjectionNormal=(X=1.000000)
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
          ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
-         ColorMultiplierRange=(X=(Min=0.900000,Max=0.900000),Y=(Min=0.900000,Max=0.900000))
+         ColorMultiplierRange=(X=(Min=0.900000,Max=0.900000),Y=(Min=0.900000,Max=0.900000),Z=(Min=1.000000,Max=1.000000))
          FadeOutStartTime=0.084000
          FadeOut=True
          MaxParticles=8
@@ -16,7 +16,7 @@ defaultproperties
          StartLocationOffset=(X=2.000000)
          StartLocationShape=PTLS_Polar
          SphereRadiusRange=(Min=15.000000,Max=25.000000)
-         StartLocationPolarRange=(X=(Min=90.000000,Max=90.000000),Y=(Max=360.000000),Z=(Min=10.000000,Max=15.000000))
+         StartLocationPolarRange=(X=(Min=90.000000,Max=90.000000),Y=(Min=0.000000,Max=360.000000),Z=(Min=10.000000,Max=15.000000))
          UseSizeScale=True
          UseRegularSizeScale=False
          SizeScale(0)=(RelativeTime=0.460000,RelativeSize=1.500000)
@@ -39,7 +39,7 @@ defaultproperties
          StaticMesh=StaticMesh'LineageEffectsStaticmeshes.Impact.shockwave00'
          UseMeshBlendMode=False
          RenderTwoSided=True
-         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
          ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
          Opacity=0.490000
          FadeOutStartTime=0.037500
@@ -48,7 +48,7 @@ defaultproperties
          RespawnDeadParticles=False
          Name="ShockWave"
          SpinParticles=True
-         StartSpinRange=(Z=(Max=1.000000))
+         StartSpinRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=1.000000))
          UseSizeScale=True
          UseRegularSizeScale=False
          SizeScale(0)=(RelativeTime=0.090000,RelativeSize=1.400000)
@@ -59,14 +59,14 @@ defaultproperties
          InitialParticlesPerSecond=1000.000000
          AutomaticInitialSpawning=False
          LifetimeRange=(Min=0.200000,Max=0.200000)
-         StartVelocityRange=(X=(Min=4.000000,Max=4.000000))
+         StartVelocityRange=(X=(Min=4.000000,Max=4.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
      End Object
      Emitters(1)=MeshEmitter'MeshEmitter15'
      Begin Object Class=MeshEmitter Name=MeshEmitter16
          StaticMesh=StaticMesh'LineageEffectsStaticmeshes.Impact.sparkredcone00'
          UseMeshBlendMode=False
          RenderTwoSided=True
-         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
          ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
          Opacity=0.400000
          FadeOutStartTime=0.039000
@@ -76,16 +76,15 @@ defaultproperties
          Name="SparkCone"
          StartLocationOffset=(X=-3.000000)
          SpinParticles=True
-         SpinsPerSecondRange=(Z=(Max=0.200000))
-         StartSpinRange=(Z=(Max=1.000000))
+         SpinsPerSecondRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.200000))
+         StartSpinRange=(X=(Min=0.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=1.000000))
          InitialParticlesPerSecond=10000.000000
          AutomaticInitialSpawning=False
          LifetimeRange=(Min=0.300000,Max=0.300000)
-         StartVelocityRange=(X=(Min=10.000000,Max=10.000000))
+         StartVelocityRange=(X=(Min=10.000000,Max=10.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
      End Object
      Emitters(2)=MeshEmitter'MeshEmitter16'
      AutoReplay=True
-     bSetSizeScale=False
      bUseDynamicLights=False
      bLightChanged=True
      bNoDelete=False

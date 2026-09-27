@@ -1,0 +1,119 @@
+class s_u219_ca extends Emitter;
+
+defaultproperties
+{
+     Begin Object Class=MeshEmitter Name=MeshEmitter2
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.Monster.wispray00'
+         UseMeshBlendMode=False
+         RenderTwoSided=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=181,G=181,R=255,A=255))
+         ColorScale(1)=(RelativeTime=0.507143,Color=(B=83,G=83,R=255,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=0,G=0,R=255,A=255))
+         ColorMultiplierRange=(X=(Min=0.880000,Max=1.000000),Y=(Min=0.880000,Max=1.000000),Z=(Min=0.880000,Max=1.000000))
+         Opacity=0.800000
+         FadeOutStartTime=0.164500
+         FadeOut=True
+         FadeInEndTime=0.164500
+         FadeIn=True
+         MaxParticles=2
+         WeatherSoundCheck=True
+         RespawnDeadParticles=False
+         Name="cast_mesh01"
+         SpinParticles=True
+         SpinsPerSecondRange=(X=(Min=0.040000,Max=0.040000),Y=(Min=0.040000,Max=0.040000),Z=(Min=0.040000,Max=0.040000))
+         StartSpinRange=(X=(Min=-1.000000,Max=1.000000),Y=(Min=-1.000000,Max=1.000000),Z=(Min=-1.000000,Max=1.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=1.000000)
+         SizeScale(1)=(RelativeTime=0.500000,RelativeSize=0.700000)
+         SizeScale(2)=(RelativeTime=1.000000,RelativeSize=0.000000)
+         StartSizeRange=(X=(Min=0.500000,Max=0.500000),Y=(Min=0.500000,Max=0.500000),Z=(Min=0.500000,Max=0.500000))
+         InitialParticlesPerSecond=10000.000000
+         AutomaticInitialSpawning=False
+         LifetimeRange=(Min=0.400000,Max=0.400000)
+     End Object
+     Emitters(0)=MeshEmitter'MeshEmitter2'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter20
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         Opacity=0.700000
+         FadeOutStartTime=0.495000
+         FadeOut=True
+         MaxParticles=1
+         WeatherSoundCheck=True
+         RespawnDeadParticles=False
+         Name="cast_spriteRing01"
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         UniformSize=True
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=0.300000)
+         SizeScale(1)=(RelativeTime=0.090000,RelativeSize=0.900000)
+         SizeScale(2)=(RelativeTime=1.000000,RelativeSize=1.000000)
+         StartSizeRange=(X=(Min=25.000000,Max=25.000000),Y=(Min=25.000000,Max=25.000000),Z=(Min=25.000000,Max=25.000000))
+         InitialParticlesPerSecond=10000.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Particles5.fx_m_t8150'
+         LifetimeRange=(Min=0.750000,Max=0.750000)
+         InitialDelayRange=(Min=0.350000,Max=0.350000)
+     End Object
+     Emitters(1)=SpriteEmitter'SpriteEmitter20'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter21
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         Opacity=0.600000
+         FadeOutStartTime=0.024000
+         FadeOut=True
+         MaxParticles=1
+         WeatherSoundCheck=True
+         RespawnDeadParticles=False
+         Name="cast_spriteRing01"
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         UniformSize=True
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=0.300000)
+         SizeScale(1)=(RelativeTime=0.090000,RelativeSize=0.900000)
+         SizeScale(2)=(RelativeTime=1.000000,RelativeSize=1.100000)
+         StartSizeRange=(X=(Min=27.500000,Max=27.500000),Y=(Min=27.500000,Max=27.500000),Z=(Min=27.500000,Max=27.500000))
+         InitialParticlesPerSecond=10000.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0068'
+         LifetimeRange=(Min=0.400000,Max=0.400000)
+         InitialDelayRange=(Min=0.350000,Max=0.350000)
+     End Object
+     Emitters(2)=SpriteEmitter'SpriteEmitter21'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter27
+         UseDirectionAs=PTDU_Up
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=223,G=151,R=136,A=255))
+         ColorScale(1)=(RelativeTime=0.242857,Color=(B=0,G=0,R=255,A=255))
+         ColorScale(2)=(RelativeTime=0.492857,Color=(B=0,G=255,R=0,A=255))
+         ColorScale(3)=(RelativeTime=0.728571,Color=(B=128,G=0,R=128,A=255))
+         ColorScale(4)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorMultiplierRange=(X=(Min=0.992000,Max=0.992000),Y=(Min=1.000000,Max=1.000000),Z=(Min=0.640000,Max=0.640000))
+         Opacity=0.500000
+         FadeOutStartTime=0.150000
+         FadeOut=True
+         MaxParticles=15
+         WeatherSoundCheck=True
+         RespawnDeadParticles=False
+         Name="cast_points_ice"
+         StartLocationShape=PTLS_Sphere
+         SphereRadiusRange=(Min=15.000000,Max=15.000000)
+         StartLocationPolarRange=(X=(Min=0.000000,Max=360.000000),Y=(Min=0.000000,Max=360.000000),Z=(Min=15.000000,Max=15.000000))
+         SpinsPerSecondRange=(X=(Min=0.020000,Max=0.050000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=0.800000)
+         SizeScale(1)=(RelativeTime=1.000000,RelativeSize=0.000000)
+         StartSizeRange=(X=(Min=1.500000,Max=1.500000),Y=(Min=20.000000,Max=20.000000),Z=(Min=1.500000,Max=1.500000))
+         InitialParticlesPerSecond=50.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Particles4.fx_m_t8062'
+         LifetimeRange=(Min=0.200000,Max=0.200000)
+         StartVelocityRange=(X=(Min=50.000000,Max=50.000000),Y=(Min=50.000000,Max=50.000000),Z=(Min=50.000000,Max=50.000000))
+         GetVelocityDirectionFrom=PTVD_StartPositionAndOwner
+     End Object
+     Emitters(3)=SpriteEmitter'SpriteEmitter27'
+     bLightChanged=True
+     bNoDelete=False
+     bSunAffect=True
+     DrawScale=0.100000
+}

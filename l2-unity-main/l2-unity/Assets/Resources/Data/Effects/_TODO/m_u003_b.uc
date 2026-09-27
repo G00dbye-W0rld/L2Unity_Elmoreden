@@ -1,44 +1,42 @@
-class m_u003_b extends NSkillProjectile;
+class m_u003_b extends Emitter;
 
 defaultproperties
 {
-     Speed=500.000000
-     AccSpeed=1000.000000
      Begin Object Class=SpriteEmitter Name=SpriteEmitter2
          Acceleration=(Z=50.000000)
-         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
          ColorScale(1)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
          FadeOutStartTime=0.155000
          FadeOut=True
          CoordinateSystem=PTCS_Independent
          ResetAfterChange=True
          Name="SpriteEmitter2"
-         StartLocationPolarRange=(X=(Max=360.000000),Y=(Min=90.000000,Max=90.000000),Z=(Min=10.000000,Max=10.000000))
-         UseRotationFrom=PTRS_Actor
+         StartLocationPolarRange=(X=(Min=0.000000,Max=360.000000),Y=(Min=90.000000,Max=90.000000),Z=(Min=10.000000,Max=10.000000))
+         UseRotationFrom=1
          SpinParticles=True
-         StartSpinRange=(X=(Max=1.000000))
+         StartSpinRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
          UseRegularSizeScale=False
-         UniformSize=True
-         SizeScale(0)=(RelativeSize=1.500000)
+         SizeScale(0)=(RelativeTime=0.000000,RelativeSize=1.500000)
          SizeScale(1)=(RelativeTime=0.070000,RelativeSize=1.200000)
          StartSizeRange=(X=(Min=2.000000,Max=2.000000),Y=(Min=6.000000,Max=6.000000),Z=(Min=6.000000,Max=6.000000))
+         UniformSize=True
          InitialParticlesPerSecond=30.000000
          AutomaticInitialSpawning=False
          DrawStyle=PTDS_Brighten
          Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0000'
          TextureUSubdivisions=4
          TextureVSubdivisions=4
-         UseRandomSubdivision=True
          SubdivisionStart=14
          SubdivisionEnd=16
+         UseRandomSubdivision=True
          LifetimeRange=(Min=0.333000,Max=0.333000)
-         StartVelocityRange=(X=(Min=10.000000,Max=10.000000))
+         StartVelocityRange=(X=(Min=10.000000,Max=10.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
      End Object
      Emitters(0)=SpriteEmitter'SpriteEmitter2'
      Begin Object Class=SpriteEmitter Name=SpriteEmitter5
          UseDirectionAs=PTDU_Up
          UseColorScale=True
-         ColorScale(0)=(Color=(B=255,G=255,R=255,A=255))
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
          ColorScale(1)=(RelativeTime=0.550000,Color=(B=255,G=255,R=255,A=255))
          ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
          ColorScaleRepeats=100.000000
@@ -47,10 +45,10 @@ defaultproperties
          MaxParticles=3
          ResetAfterChange=True
          Name="SpriteEmitter5"
-         StartLocationPolarRange=(X=(Max=360.000000),Y=(Min=90.000000,Max=90.000000),Z=(Min=10.000000,Max=10.000000))
-         UseRotationFrom=PTRS_Actor
-         SpinCCWorCW=(X=1.000000)
-         StartSpinRange=(X=(Min=-1.000000))
+         StartLocationPolarRange=(X=(Min=0.000000,Max=360.000000),Y=(Min=90.000000,Max=90.000000),Z=(Min=10.000000,Max=10.000000))
+         UseRotationFrom=1
+         SpinCCWorCW=(X=1.000000,Y=0.500000,Z=0.500000)
+         StartSpinRange=(X=(Min=-1.000000,Max=0.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
          UseRegularSizeScale=False
          StartSizeRange=(X=(Min=5.000000,Max=5.000000),Y=(Min=10.000000,Max=10.000000),Z=(Min=10.000000,Max=10.000000))
          InitialParticlesPerSecond=3000.000000
@@ -59,18 +57,18 @@ defaultproperties
          Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0006'
          TextureUSubdivisions=4
          TextureVSubdivisions=2
-         UseRandomSubdivision=True
          SubdivisionStart=4
          SubdivisionEnd=5
+         UseRandomSubdivision=True
          LifetimeRange=(Min=0.010000,Max=0.010000)
-         StartVelocityRange=(X=(Max=1.000000),Y=(Max=1.000000),Z=(Max=1.000000))
+         StartVelocityRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=1.000000),Z=(Min=0.000000,Max=1.000000))
      End Object
      Emitters(1)=SpriteEmitter'SpriteEmitter5'
      AutoReplay=True
      bUseDynamicLights=False
      bLightChanged=True
      bAcceptsProjectors=False
-     Tag="Emitter"
+     Tag=Emitter
      bSunAffect=True
      Location=(X=90.870850,Y=11.287155,Z=-479.626526)
      DrawScale=0.050000

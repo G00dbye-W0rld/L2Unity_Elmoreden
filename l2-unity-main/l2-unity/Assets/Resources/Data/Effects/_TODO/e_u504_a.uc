@@ -1,0 +1,102 @@
+class e_u504_a extends Emitter;
+
+defaultproperties
+{
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter26
+         Acceleration=(Z=-30.000000)
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorScale(1)=(RelativeTime=1.000000,Color=(B=31,G=218,R=64,A=255))
+         Opacity=0.600000
+         FadeOutStartTime=0.440000
+         FadeOut=True
+         FadeInEndTime=0.090000
+         FadeIn=True
+         CoordinateSystem=PTCS_Spray
+         MaxParticles=25
+         RespawnDeadParticles=False
+         Name="Smoke_boss"
+         SpinParticles=True
+         SpinsPerSecondRange=(X=(Min=-0.100000,Max=0.100000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         StartSpinRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=1.000000,RelativeSize=2.000000)
+         StartSizeRange=(X=(Min=30.000000,Max=38.000000),Y=(Min=30.000000,Max=38.000000),Z=(Min=30.000000,Max=38.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=10.000000
+         AutomaticInitialSpawning=False
+         DrawStyle=PTDS_Darken
+         Texture=Texture'LineageEffectsTextures.Particles2.fx_m_t1002'
+         TextureUSubdivisions=2
+         TextureVSubdivisions=4
+         BlendBetweenSubdivisions=True
+         SubdivisionEnd=3
+         LifetimeRange=(Min=1.000000,Max=1.000000)
+     End Object
+     Emitters(0)=SpriteEmitter'SpriteEmitter26'
+     Begin Object Class=SpriteEmitter Name=SpriteEmitter27
+         Acceleration=(Z=-30.000000)
+         UseColorScale=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=159,G=102,R=151,A=255))
+         ColorScale(1)=(RelativeTime=0.289286,Color=(B=228,G=27,R=153,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=206,G=77,R=70,A=255))
+         ColorMultiplierRange=(X=(Min=0.697000,Max=0.697000),Y=(Min=1.000000,Max=1.000000),Z=(Min=1.000000,Max=1.000000))
+         FadeOutStartTime=0.100000
+         FadeOut=True
+         FadeInEndTime=0.050000
+         FadeIn=True
+         CoordinateSystem=PTCS_Spray
+         MaxParticles=25
+         RespawnDeadParticles=False
+         Name="Smoke_boss"
+         SpinParticles=True
+         SpinsPerSecondRange=(X=(Min=-1.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         StartSpinRange=(X=(Min=0.000000,Max=1.000000),Y=(Min=0.000000,Max=0.000000),Z=(Min=0.000000,Max=0.000000))
+         UseSizeScale=True
+         UseRegularSizeScale=False
+         SizeScale(0)=(RelativeTime=1.000000,RelativeSize=2.000000)
+         StartSizeRange=(X=(Min=25.000000,Max=25.000000),Y=(Min=25.000000,Max=25.000000),Z=(Min=25.000000,Max=25.000000))
+         UniformSize=True
+         InitialParticlesPerSecond=10.000000
+         AutomaticInitialSpawning=False
+         Texture=Texture'LineageEffectsTextures.Particles.fx_m_t0126'
+         TextureUSubdivisions=2
+         TextureVSubdivisions=4
+         BlendBetweenSubdivisions=True
+         SubdivisionEnd=4
+         LifetimeRange=(Min=1.000000,Max=1.000000)
+     End Object
+     Emitters(1)=SpriteEmitter'SpriteEmitter27'
+     Begin Object Class=MeshEmitter Name=MeshEmitter8
+         StaticMesh=StaticMesh'LineageEffectsStaticmeshes.Skill_Power.skill_charge02'
+         UseMeshBlendMode=False
+         RenderTwoSided=True
+         ColorScale(0)=(RelativeTime=0.000000,Color=(B=142,G=45,R=125,A=255))
+         ColorScale(1)=(RelativeTime=0.550000,Color=(B=208,G=47,R=132,A=255))
+         ColorScale(2)=(RelativeTime=1.000000,Color=(B=255,G=255,R=255,A=255))
+         ColorMultiplierRange=(X=(Min=0.840000,Max=1.000000),Y=(Min=0.334000,Max=0.384000),Z=(Min=0.426000,Max=0.619000))
+         Opacity=0.410000
+         FadeOutStartTime=0.440000
+         FadeOut=True
+         FadeInEndTime=0.200000
+         FadeIn=True
+         CoordinateSystem=PTCS_Spray
+         MaxParticles=25
+         RespawnDeadParticles=False
+         Name="elet"
+         SpinParticles=True
+         SpinsPerSecondRange=(X=(Min=0.000000,Max=0.200000),Y=(Min=0.000000,Max=0.200000),Z=(Min=0.000000,Max=0.200000))
+         StartSpinRange=(X=(Min=-1.000000,Max=1.000000),Y=(Min=-1.000000,Max=1.000000),Z=(Min=-1.000000,Max=1.000000))
+         StartSizeRange=(X=(Min=0.300000,Max=0.800000),Y=(Min=0.300000,Max=0.800000),Z=(Min=0.300000,Max=0.800000))
+         InitialParticlesPerSecond=10.000000
+         AutomaticInitialSpawning=False
+         LifetimeRange=(Min=0.300000,Max=1.000000)
+     End Object
+     Emitters(2)=MeshEmitter'MeshEmitter8'
+     Physics=10
+     bNoDelete=False
+     bTrailerSameRotation=True
+     bTrailerPrePivot=True
+     bDirectional=True
+}
