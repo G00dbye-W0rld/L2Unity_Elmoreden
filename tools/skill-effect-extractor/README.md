@@ -1,0 +1,38 @@
+# Extracteur des definitions d'effets de skills
+
+Genere les fichiers de `StreamingAssets/Data/LineageEffects` depuis
+`LineageSkillEffect.u` du client Orfen, ou 4822 classes `l2_<id>_skill` decrivent
+quels emetteurs jouer a l'incantation, au tir et a l'explosion.
+
+Le client Interlude n'a pas ce paquet : la correspondance skill vers effet n'y
+existe pas. La source est donc Orfen, et l'adaptation se fait cote serveur.
+
+## Usage
+
+    javac -cp ".;D:/Jeux/MAP_L2Unity/tools/L2pe-bin/L2pe.jar" Dump.java GenSkillEffects.java
+    java  -cp ".;D:/Jeux/MAP_L2Unity/tools/L2pe-bin/L2pe.jar" GenSkillEffects \
+          "<client Orfen>/system/LineageSkillEffect.u" <dossier de sortie> <liste d ids|->
+
+La liste d'ids est un identifiant par ligne (les valeurs de `skill_visual_effect`
+de Skillgrp) ; `-` traite les 4822 classes.
+
+Les autres fichiers sont des outils de diagnostic : `Cls` affiche les proprietes
+d'une classe, `Dump` celles de ses emetteurs, `Enums` et `Names` servent a relire
+une enumeration du client.
+
+## Pieges
+
+- **Index compact Unreal : bit 7 = signe, bit 6 = continuation.** L'inverse passe
+  inapercu quand les deux bits valent 1, et ne se voit que sur les tableaux.
+- **L'ordre de la table de noms n'est pas celui de l'enumeration.** Six des sept
+  enumerations coincidaient, `EParticleCoordinateSystem` est inversee. Toujours
+  relire l'Enum du paquet (`Enums`), dont le bloc porte trois champs compacts
+  avant le compteur.
+- `SkillID` n'est serialise que s'il differe du defaut : beaucoup de classes ne
+  l'ont pas et l'identifiant vient du nom. Le reperage des proprietes par defaut
+  se fait donc par balayage, en n'acceptant qu'un bloc entierement connu.
+- Les structures nommees (`PawnLightParam`) portent des proprietes taguees
+  imbriquees. Seuls `Vector`, `Rotator` et `Color` sont atomiques ; `Plane` non.
+- `ChannelingAction`, `UnionTargetAction` et les `*CameraEffectInfoClass` sont
+  reconnues mais pas versees dans les trois phases que lit le client. Le
+  programme les compte, il ne les perd pas.
