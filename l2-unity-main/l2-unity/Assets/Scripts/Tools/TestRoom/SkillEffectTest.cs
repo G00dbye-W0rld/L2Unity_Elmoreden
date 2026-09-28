@@ -65,6 +65,27 @@ public class SkillEffectTest : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.RightArrow)) Step(1);
         if (Input.GetKeyDown(KeyCode.LeftArrow)) Step(-1);
         if (Input.GetKeyDown(KeyCode.L)) autoLoop = !autoLoop;
+        if (Input.GetKeyDown(KeyCode.B)) MeasureActive();
+    }
+
+    // Mesure ce qui est reellement rendu. Les bornes du maillage et l'echelle du
+    // transform ne suffisent pas : le shader peut deplacer les sommets.
+    private void MeasureActive()
+    {
+        StringBuilder sb = new StringBuilder("Objets rendus (taille monde | echelle globale) :\n");
+        foreach (Entity e in new[] { caster, target })
+        {
+            if (e == null) continue;
+            foreach (Renderer r in e.GetComponentsInChildren<Renderer>())
+            {
+                if (r is SkinnedMeshRenderer) continue;
+                Vector3 s = r.bounds.size;
+                Vector3 l = r.transform.lossyScale;
+                sb.AppendLine($"  {e.name}/{r.name} : {s.x:F2} x {s.y:F2} x {s.z:F2}"
+                    + $" | {l.x:F3}");
+            }
+        }
+        Debug.Log(sb.ToString());
     }
 
     private void Step(int dir)
@@ -150,7 +171,7 @@ public class SkillEffectTest : MonoBehaviour
     {
         GUI.Box(new Rect(10, 10, 620, 150), "");
         GUI.Label(new Rect(20, 15, 600, 20),
-            "ESPACE rejouer   FLECHE DROITE/GAUCHE changer de skill   L boucle auto : "
+            "ESPACE rejouer   FLECHES changer de skill   L boucle auto   B mesurer : "
             + (autoLoop ? "ON" : "OFF"));
         GUI.Label(new Rect(20, 40, 600, 115), _report);
     }
