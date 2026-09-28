@@ -44,7 +44,6 @@ public class L2Emitter
     public Range3D startLocationPolarRange;
     public string useDirectionAs;
     public float sizeScaleRepeats;
-    public float colorScaleRepeats;
     public Vector3 projectionNormal;
     public float drawScale;
     public Vector3 acceleration;

@@ -237,11 +237,6 @@ public class L2ParticleEmitterParser
                             Debug.Log("UseColorScale=" + emitter.useColorScale);
                         }
 
-                        if (line.StartsWith("ColorScaleRepeats"))
-                        {
-                            emitter.colorScaleRepeats = L2MetaDataUtils.ParseFloat(line);
-                        }
-
                         // Sans l'exclusion, ColorScaleRepeats est lu comme une cle de
                         // couleur et ajoute une cle noire et transparente en fin de courbe.
                         if (line.StartsWith("ColorScale") && !line.StartsWith("ColorScaleRepeats"))
@@ -640,7 +635,10 @@ public class L2ParticleEmitterParser
 
         // SizeScale
         const int MAXMIMUM_SIZESCALE_COUNT = 10;
-        material.SetFloat("_UseSizeScale", emitter.useSizeScale ? 1 : 0);
+        // UseSizeScale sans aucune cle laisserait la courbe du shader a (0,0) sur
+        // ses dix emplacements : une courbe vide ne porte rien, on ne l'active pas.
+        bool hasSizeScale = emitter.sizeScales != null && emitter.sizeScales.Count > 0;
+        material.SetFloat("_UseSizeScale", emitter.useSizeScale && hasSizeScale ? 1 : 0);
         material.SetFloat("_UniformSize", emitter.uniformSize ? 1 : 0);
         material.SetFloat("_SizeScaleRepeats", emitter.sizeScaleRepeats);
         if (emitter.sizeScales != null)
@@ -666,8 +664,10 @@ public class L2ParticleEmitterParser
 
         // ColorScale
         const int MAXMIMUM_COLORSCALE_COUNT = 10;
-        material.SetFloat("_UseColorScale", emitter.useColorScale ? 1 : 0);
-        material.SetFloat("_ColorScaleRepeats", emitter.colorScaleRepeats);
+        // Meme raison que pour SizeScale : sans cle, les dix emplacements du shader
+        // restent noirs et transparents.
+        bool hasColorScale = emitter.colorScales != null && emitter.colorScales.Count > 0;
+        material.SetFloat("_UseColorScale", emitter.useColorScale && hasColorScale ? 1 : 0);
         if (emitter.colorScales != null)
         {
             if (emitter.colorScales.Count > MAXMIMUM_COLORSCALE_COUNT)
