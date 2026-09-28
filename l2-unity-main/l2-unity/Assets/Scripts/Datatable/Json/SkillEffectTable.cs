@@ -65,11 +65,19 @@ public class SkillEffectTable
             return null;
         }
 
-        using (StreamReader reader = new StreamReader(dataPath))
+        // Un fichier fautif ne doit pas interrompre LoadTables : sans ce garde, les
+        // tables suivantes (dont ParticleEffectTable) restent nulles en silence.
+        try
         {
-            L2SkillEffect skillEffect = ParseL2SkillEffect(reader.ReadToEnd());
-
-            return skillEffect;
+            using (StreamReader reader = new StreamReader(dataPath))
+            {
+                return ParseL2SkillEffect(reader.ReadToEnd());
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Effect {id}.json illisible : {e.Message}");
+            return null;
         }
     }
 

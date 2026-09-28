@@ -116,6 +116,14 @@ public class ParticleManager : MonoBehaviour
 
     private void PrepareEffectPool()
     {
+        // Sans cette table, aucun effet ne peut apparaitre : le dire plutot que
+        // de lever une NullReference a chaque image.
+        if (ParticleEffectTable.Instance.ParticleEffects == null)
+        {
+            Debug.LogError("ParticleEffectTable non initialisee : aucun effet ne sera joue.");
+            return;
+        }
+
         foreach (KeyValuePair<string, GameObject> kvp in ParticleEffectTable.Instance.ParticleEffects)
         {
             if (EffectPool.ContainsKey(kvp.Key))
