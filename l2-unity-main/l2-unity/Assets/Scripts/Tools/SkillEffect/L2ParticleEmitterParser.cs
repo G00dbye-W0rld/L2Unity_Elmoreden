@@ -237,7 +237,14 @@ public class L2ParticleEmitterParser
                             Debug.Log("UseColorScale=" + emitter.useColorScale);
                         }
 
-                        if (line.StartsWith("ColorScale"))
+                        if (line.StartsWith("ColorScaleRepeats"))
+                        {
+                            emitter.colorScaleRepeats = L2MetaDataUtils.ParseFloat(line);
+                        }
+
+                        // Sans l'exclusion, ColorScaleRepeats est lu comme une cle de
+                        // couleur et ajoute une cle noire et transparente en fin de courbe.
+                        if (line.StartsWith("ColorScale") && !line.StartsWith("ColorScaleRepeats"))
                         {
                             if (emitter.colorScales == null)
                             {
@@ -660,6 +667,7 @@ public class L2ParticleEmitterParser
         // ColorScale
         const int MAXMIMUM_COLORSCALE_COUNT = 10;
         material.SetFloat("_UseColorScale", emitter.useColorScale ? 1 : 0);
+        material.SetFloat("_ColorScaleRepeats", emitter.colorScaleRepeats);
         if (emitter.colorScales != null)
         {
             if (emitter.colorScales.Count > MAXMIMUM_COLORSCALE_COUNT)
@@ -673,8 +681,8 @@ public class L2ParticleEmitterParser
                 material.SetColor($"_ColorScale{i}Color", new Color(
                     emitter.colorScales[i].r / 255f,
                     emitter.colorScales[i].g / 255f,
-                    emitter.colorScales[i].g / 255f,
-                    emitter.colorScales[i].a / 255f)); //TODO verify color conversions 
+                    emitter.colorScales[i].b / 255f,
+                    emitter.colorScales[i].a / 255f));
 
             }
 
@@ -687,8 +695,8 @@ public class L2ParticleEmitterParser
                     material.SetColor($"_ColorScale{i}Color", new Color(
                         emitter.colorScales[lastIndex].r / 255f,
                         emitter.colorScales[lastIndex].g / 255f,
-                        emitter.colorScales[lastIndex].g / 255f,
-                        emitter.colorScales[lastIndex].a / 255f)); //TODO verify color conversions 
+                        emitter.colorScales[lastIndex].b / 255f,
+                        emitter.colorScales[lastIndex].a / 255f));
 
                 }
             }
