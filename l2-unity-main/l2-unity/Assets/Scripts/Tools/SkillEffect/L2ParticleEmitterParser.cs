@@ -519,8 +519,10 @@ public class L2ParticleEmitterParser
             texturePath = $"Data/SysTextures/LineageEffectsTextures/{materialName}";
             //GameObject go = (GameObject)Resources.Load("Prefab/SpriteEmitter");
             go = GameObject.Instantiate(resource);
-            //go.transform.localScale = new Vector3(100 * emitter.drawScale, 100 * emitter.drawScale, 100 * emitter.drawScale);
-            go.transform.localScale = new Vector3(1, 1, 1);
+            // Le maillage sortait a sa taille brute, soit 9 unites pour un
+            // personnage de 0,9. StartSizeRange multiplie la taille du maillage :
+            // meme permutation d'axes que le materiau (X, Z, Y).
+            go.transform.localScale = MeshStartScale(emitter);
             go.transform.eulerAngles = new Vector3(0, 0, 0);
         }
         else if (emitter.texture != null && emitter.texture.Length > 0)
@@ -570,6 +572,32 @@ public class L2ParticleEmitterParser
         }
         go.transform.name = emitter.objectName;
         return go;
+    }
+
+    // 81% des MeshEmitter ont Min == Max : la moyenne rend l'intention sans
+    // perdre le cas constant, et une composante absente laisse l'axe a 1.
+    private static Vector3 MeshStartScale(L2Emitter emitter)
+    {
+        if (emitter.startSizeRange == null)
+        {
+            return Vector3.one;
+        }
+
+        return new Vector3(
+            Axis(emitter.startSizeRange.x),
+            Axis(emitter.startSizeRange.z),
+            Axis(emitter.startSizeRange.y));
+    }
+
+    private static float Axis(Range range)
+    {
+        if (range == null)
+        {
+            return 1f;
+        }
+
+        float v = range.max > range.min ? (range.min + range.max) * 0.5f : range.min;
+        return v > 0f ? v : 1f;
     }
 
     private static Material BuildMaterial(L2Emitter emitter, Texture2D effectTexture, bool spriteEmitter)
