@@ -43,13 +43,21 @@ public class L2ParticleEmitterParser
         _unsupported.Clear();
         int done = 0;
         List<string> failed = new List<string>();
+        bool cancelled = false;
 
         try
         {
             for (int i = 0; i < files.Length; i++)
             {
                 string name = Path.GetFileNameWithoutExtension(files[i]);
-                EditorUtility.DisplayProgressBar("Effets de skills", name, (float)i / files.Length);
+                // Annulable : la construction dure plusieurs minutes et il n'y
+                // avait aucun moyen de l'interrompre sans tuer l'editeur.
+                if (EditorUtility.DisplayCancelableProgressBar("Effets de skills",
+                    $"{name}  ({i + 1}/{files.Length})", (float)i / files.Length))
+                {
+                    cancelled = true;
+                    break;
+                }
 
                 try
                 {
@@ -75,7 +83,7 @@ public class L2ParticleEmitterParser
             AssetDatabase.Refresh();
         }
 
-        Debug.Log($"Effets construits : {done} / {files.Length}");
+        Debug.Log($"Effets construits : {done} / {files.Length}{(cancelled ? " (interrompu)" : "")}");
         if (failed.Count > 0)
         {
             Debug.LogWarning($"Echecs : {string.Join(", ", failed)}");
@@ -497,6 +505,7 @@ public class L2ParticleEmitterParser
         string texturePath;
 
         bool isTextureEmitter = false;
+        string[] slotMaterialNames = null;
 
         if (emitter.staticMesh != null && emitter.staticMesh.Length > 0)
         {
@@ -515,8 +524,16 @@ public class L2ParticleEmitterParser
                 resource = resource.transform.GetChild(0).gameObject;
             }
 
-            string materialName = resource.GetComponent<Renderer>().sharedMaterial.name;
-            texturePath = $"Data/SysTextures/LineageEffectsTextures/{materialName}";
+            // Un maillage peut porter plusieurs sous-materiaux : on retient leurs
+            // noms, sinon seul le premier emplacement recevrait l'effet.
+            Material[] sourceMaterials = resource.GetComponent<Renderer>().sharedMaterials;
+            slotMaterialNames = new string[sourceMaterials.Length];
+            for (int s = 0; s < sourceMaterials.Length; s++)
+            {
+                slotMaterialNames[s] = sourceMaterials[s] != null ? sourceMaterials[s].name : null;
+            }
+
+            texturePath = $"Data/SysTextures/LineageEffectsTextures/{slotMaterialNames[0]}";
             //GameObject go = (GameObject)Resources.Load("Prefab/SpriteEmitter");
             go = GameObject.Instantiate(resource);
             // Le maillage sortait a sa taille brute, soit 9 unites pour un
@@ -563,7 +580,36 @@ public class L2ParticleEmitterParser
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        go.GetComponent<Renderer>().sharedMaterial = material;
+        Renderer targetRenderer = go.GetComponent<Renderer>();
+        if (slotMaterialNames != null && slotMaterialNames.Length > 1)
+        {
+            // Les emplacements au dela du premier gardaient le materiau opaque
+            // importe du FBX, qui masquait l'effet.
+            Debug.Log($"Sous-materiaux : {emitter.staticMesh} en porte {slotMaterialNames.Length}"
+                + $" ({string.Join(", ", slotMaterialNames)})");
+            Material[] slots = new Material[slotMaterialNames.Length];
+            slots[0] = material;
+            for (int s = 1; s < slots.Length; s++)
+            {
+                string slotPath = $"Data/SysTextures/LineageEffectsTextures/{slotMaterialNames[s]}";
+                Texture2D slotTexture = (Texture2D)Resources.Load(slotPath);
+                if (slotTexture == null)
+                {
+                    Debug.LogWarning("Missing texture: " + slotPath);
+                }
+
+                slots[s] = BuildMaterial(emitter, slotTexture, false);
+                AssetDatabase.CreateAsset(slots[s],
+                    Path.Combine(saveFolder, $"{emitter.objectName}_{s}.mat"));
+            }
+            AssetDatabase.SaveAssets();
+            targetRenderer.sharedMaterials = slots;
+        }
+        else
+        {
+            targetRenderer.sharedMaterial = material;
+        }
+
         if (isTextureEmitter)
         {
             go.transform.localScale = new Vector3(1 / 52.5f, 1 / 52.5f, 1 / 52.5f);
